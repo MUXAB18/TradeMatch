@@ -1,0 +1,122 @@
+rules_version = '2';
+
+/**
+ * Firestore Security Rules for TradeMatch
+ * Per architecture.md Section 5 - Authentication & Security
+ *
+ * Key principles:
+ * - Users can only read/write their own users/{userId} document
+ * - jobPostings, certifications, and interviewPrep are read-only for authenticated users
+ * - All writes restricted to admin (managed manually via Firebase Console at MVP stage)
+ * - No sensitive financial or government-ID data is collected at MVP stage
+ */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // =====================================================================
+    // HELPER FUNCTIONS
+    // =====================================================================
+    
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if user owns the document (userId matches auth uid)
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Check if the request includes required timestamp fields
+    function hasValidTimestamps() {
+      return request.resource.data.updatedAt == request.time;
+    }
+    
+    // Check if creation includes both createdAt and updatedAt
+    function hasValidCreationTimestamps() {
+      return request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
+    }
+    
+    // =====================================================================
+    // USERS COLLECTION
+    // Per architecture.md Section 5:
+    // "Users can only read/write their own users/{userId} document"
+    // =====================================================================
+    
+    match /users/{userId} {
+      // Users can read their own profile only
+      allow read: if isOwner(userId);
+      
+      // Users can create their own profile with proper timestamps
+      allow create: if isOwner(userId) 
+                    && hasValidCreationTimestamps()
+                    && request.resource.data.keys().hasAll([
+                      'name', 'phone', 'trade', 'country', 
+                      'yearsExperience', 'skills', 'availability', 
+                      'location', 'certifications', 'createdAt', 'updatedAt'
+                    ]);
+      
+      // Users can update their own profile with updated timestamp
+      allow update: if isOwner(userId)
+                    && hasValidTimestamps()
+                    && request.resource.data.createdAt == resource.data.createdAt;
+      
+      // Users can delete their own profile
+      allow delete: if isOwner(userId);
+    }
+    
+    // =====================================================================
+    // JOB POSTINGS COLLECTION
+    // Per architecture.md Section 5:
+    // "read-only for authenticated users; writes restricted to admin"
+    // =====================================================================
+    
+    match /jobPostings/{jobId} {
+      // Any authenticated user can read job postings
+      allow read: if isAuthenticated();
+      
+      // Writes are admin-only (managed via Firebase Console at MVP stage)
+      // Set to false to prevent any client writes
+      allow write: if false;
+    }
+    
+    // =====================================================================
+    // CERTIFICATIONS COLLECTION
+    // Per architecture.md Section 5:
+    // "read-only for authenticated users; writes restricted to admin"
+    // =====================================================================
+    
+    match /certifications/{certId} {
+      // Any authenticated user can read certifications
+      allow read: if isAuthenticated();
+      
+      // Writes are admin-only (managed via Firebase Console at MVP stage)
+      allow write: if false;
+    }
+    
+    // =====================================================================
+    // INTERVIEW PREP COLLECTION
+    // Per architecture.md Section 5:
+    // "read-only for authenticated users; writes restricted to admin"
+    // =====================================================================
+    
+    match /interviewPrep/{cardId} {
+      // Any authenticated user can read interview prep cards
+      allow read: if isAuthenticated();
+      
+      // Writes are admin-only (managed via Firebase Console at MVP stage)
+      allow write: if false;
+    }
+    
+    // =====================================================================
+    // DEFAULT RULE - DENY ALL
+    // Any collection not explicitly matched above is inaccessible
+    // =====================================================================
+    
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

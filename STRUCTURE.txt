@@ -1,0 +1,101 @@
+TradeMatch Project Structure
+============================
+
+Root Directory
+├── 📄 Configuration Files
+│   ├── package.json            # Dependencies and scripts
+│   ├── tsconfig.json           # TypeScript strict config
+│   ├── app.config.js           # Expo config with env vars
+│   ├── app.json                # Expo app metadata
+│   ├── .eslintrc.js            # ESLint configuration
+│   ├── .prettierrc             # Prettier formatting
+│   ├── firestore.rules         # Firebase security rules
+│   ├── .env.example            # Environment template
+│   ├── .env                    # Firebase keys (gitignored)
+│   └── .gitignore              # Git ignore rules
+│
+├── 📚 Documentation
+│   ├── README.md               # Quick start guide
+│   ├── SETUP.md                # Detailed setup instructions
+│   ├── PROJECT-STATUS.md       # Current status summary
+│   ├── prd.md                  # Product requirements
+│   ├── architecture.md         # Technical architecture
+│   ├── rules.md                # Coding standards
+│   ├── phases.md               # Development roadmap
+│   ├── design.md               # UX/UI specifications
+│   ├── memory.md               # Project context
+│   └── ai-architecture.md      # AI integration (post-MVP)
+│
+├── 📱 App Structure (Expo Router)
+│   ├── app/
+│   │   ├── _layout.tsx         # Root layout
+│   │   ├── index.tsx           # Entry screen
+│   │   ├── (auth)/             # Authentication flow
+│   │   │   └── _layout.tsx
+│   │   └── (tabs)/             # Main app tabs
+│   │       └── _layout.tsx     # Tab navigation
+│   │           ├── home        # (to be created)
+│   │           ├── profile     # (to be created)
+│   │           ├── jobs        # (to be created)
+│   │           └── prep        # (to be created)
+│
+├── 🎨 Components & UI
+│   ├── components/             # Reusable UI components
+│   │   └── .gitkeep
+│   ├── constants/              # Design system & config
+│   │   ├── theme.ts            # Colors, typography, spacing
+│   │   └── index.ts            # Exports
+│
+├── 🔧 Business Logic
+│   ├── services/               # Firebase access layer
+│   │   ├── firebase.ts         # Firebase initialization
+│   │   ├── users.ts            # User operations
+│   │   ├── jobs.ts             # Job operations
+│   │   └── certifications.ts  # Certification operations
+│   │
+│   ├── hooks/                  # Custom React hooks
+│   │   └── index.ts
+│   │
+│   ├── utils/                  # Pure helper functions
+│   │   └── index.ts
+│   │
+│   └── types/                  # TypeScript definitions
+│       └── index.ts            # Data model types
+│
+├── 🛠️ Scripts
+│   └── scripts/
+│       └── verify-setup.js     # Setup verification
+│
+└── 📦 Assets
+    └── assets/                 # Images, icons, fonts
+
+Key Principles (per rules.md)
+==============================
+✓ TypeScript only (no .js/.jsx)
+✓ No 'any' types allowed
+✓ Components never call Firestore directly
+✓ One component per file
+✓ All writes include timestamps
+✓ File names match component names
+
+Design System (per design.md)
+==============================
+Colors:
+  Primary:   #1E4D6B (deep blue)
+  Secondary: #E8A33D (warm amber)
+  Success:   #2D8A4E (green)
+  Warning:   #C4562D (orange)
+  
+Typography:
+  Minimum: 16px
+  Headers: 22-26px
+  
+Spacing:
+  Base unit: 8px
+  Min tap target: 44px
+
+Status
+======
+✅ Setup Complete
+⏳ Firebase Config Pending
+⏳ Phase 0 Validation Pending

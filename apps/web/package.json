@@ -9,14 +9,18 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.75",
     "@ai-sdk/groq": "^4.0.44",
     "@ai-sdk/openai": "^4.0.69",
+    "@types/react-datepicker": "^6.2.0",
+    "ai": "^7.0.106",
     "date-fns": "^4.4.0",
     "firebase": "^12.19.0",
     "lucide-react": "^1.46.0",
     "next": "16.3.5",
     "next-themes": "^0.4.6",
     "react": "19.2.8",
+    "react-datepicker": "^9.1.0",
     "react-dom": "19.2.8",
     "zod": "^4.6.5"
   },

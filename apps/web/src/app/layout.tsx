@@ -57,7 +57,7 @@ export default function RootLayout({
       <body
         className={`${plusJakartaSans.variable} antialiased min-h-screen bg-background text-text-primary font-sans`}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <AuthProvider>
             <ToastProvider>
               {children}

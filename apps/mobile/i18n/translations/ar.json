@@ -1,0 +1,25 @@
+{
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "languageSubtitle": "تغيير اللغة الخاصة بك",
+    "theme": "المظهر",
+    "logout": "تسجيل الخروج",
+    "selectLanguage": "اختر اللغة"
+  },
+  "home": {
+    "title": "الرئيسية",
+    "welcome": "مرحباً بعودتك"
+  },
+  "tabs": {
+    "home": "الرئيسية",
+    "certifications": "الشهادات",
+    "jobs": "الوظائف",
+    "prep": "التحضير",
+    "settings": "الإعدادات"
+  },
+  "common": {
+    "cancel": "إلغاء",
+    "done": "تم"
+  }
+}

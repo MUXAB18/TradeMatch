@@ -1,0 +1,25 @@
+{
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languageSubtitle": "Change your language",
+    "theme": "Theme",
+    "logout": "Log Out",
+    "selectLanguage": "Select Language"
+  },
+  "home": {
+    "title": "Home",
+    "welcome": "Welcome back"
+  },
+  "tabs": {
+    "home": "Home",
+    "certifications": "Certs",
+    "jobs": "Jobs",
+    "prep": "Prep",
+    "settings": "Settings"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "done": "Done"
+  }
+}

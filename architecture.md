@@ -53,6 +53,7 @@ TradeMatch is a mobile-first app built with React Native (Expo) on the frontend 
 | PDF generation | Client-side library (e.g. `expo-print` or `react-native-html-to-pdf`) | No backend needed; generates PDF from an HTML template on-device |
 | Push notifications | Expo push notification service | Built into Expo, no separate service needed at MVP scale |
 | Hosting/distribution | Expo Go (dev/testing) → TestFlight / Play Store internal track (pilot) | Fastest path to real devices without app store review delays during testing |
+| Web platform | Next.js (separate codebase from the mobile app) | Chosen over Expo Web for stronger SSR/SEO control and Next.js-native tooling; types and the matching algorithm are shared, UI is not — see `web-prompts.md` |
 
 No custom backend server is needed for MVP. If the app grows past Firestore's practical limits (complex matching logic, ML-based matching, agency dashboards), a dedicated backend (Node.js/Python) can be introduced later without a full rewrite — see Section 7.
 
@@ -68,9 +69,9 @@ users/{userId}
   - country: string
   - yearsExperience: number
   - skills: array<string>
+  - certifications: array<string>  // cert IDs the user has
   - availability: string     // e.g. "immediate", "2-weeks-notice"
   - location: geopoint
-  - certifications: array<string>  // cert IDs the user has
   - createdAt: timestamp
   - updatedAt: timestamp
 ```

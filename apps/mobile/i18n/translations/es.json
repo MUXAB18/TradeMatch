@@ -1,0 +1,25 @@
+{
+  "settings": {
+    "title": "Configuración",
+    "language": "Idioma",
+    "languageSubtitle": "Cambiar el idioma",
+    "theme": "Tema",
+    "logout": "Cerrar sesión",
+    "selectLanguage": "Seleccionar Idioma"
+  },
+  "home": {
+    "title": "Inicio",
+    "welcome": "Bienvenido de nuevo"
+  },
+  "tabs": {
+    "home": "Inicio",
+    "certifications": "Certificados",
+    "jobs": "Empleos",
+    "prep": "Práctica",
+    "settings": "Ajustes"
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "done": "Listo"
+  }
+}

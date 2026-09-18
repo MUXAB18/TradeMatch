@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+@variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-border: var(--border);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-placeholder: var(--text-placeholder);
+
+  --color-white: var(--white);
+  --color-black: var(--black);
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  --spacing-tap: var(--min-tap-target);
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-size-small: 14px;
+  --font-size-body: 16px;
+  --font-size-header: 22px;
+  --font-size-header-large: 26px;
+}
+
+:root {
+  /* Neutral */
+  --background: #F7F8FA;
+  --surface: #FFFFFF;
+  --text-primary: #1D1D1F;
+  --text-secondary: #AAAAAA;
+  --text-placeholder: #AAAAAA;
+  --border: #E8EAF0;
+
+  /* Primary */
+  --primary: #007AFF;
+  --secondary: #FF9500;
+
+  /* Status */
+  --success: #34C759;
+  --warning: #FF3B30;
+  --error: #FF3B30;
+
+  /* Utility */
+  --white: #F5F5F7;
+  --black: #1D1D1F;
+
+  /* Interaction Sizing */
+  --min-tap-target: 44px; /* 44px on mobile for fat fingers */
+}
+
+@media (min-width: 768px) {
+  :root {
+    --min-tap-target: 32px; /* tighter on desktop for mouse precision */
+  }
+}
+
+.dark {
+  /* Neutral */
+  --background: #000000;
+  --surface: #1C1C1E;
+  --text-primary: #F5F5F7;
+  --text-secondary: #8E8E93;
+  --text-placeholder: #636366;
+  --border: #38383A;
+
+  /* Primary */
+  --primary: #00E5FF;
+  --secondary: #8E8E93;
+
+  /* Status */
+  --success: #39FF14;
+  --warning: #FF9F0A;
+  --error: #FF453A;
+
+  /* Utility */
+  --white: #1C1C1E;
+  --black: #F5F5F7;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+
+/* Toast animation */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* React DatePicker Customizations */
+.react-datepicker-wrapper {
+  width: 100%;
+}
+.react-datepicker {
+  font-family: inherit !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  padding: 12px !important;
+  border-color: #f3f4f6 !important;
+  background-color: white !important;
+}
+.react-datepicker__header {
+  background-color: white !important;
+  border-bottom: none !important;
+  padding-bottom: 8px !important;
+}
+.react-datepicker__current-month,
+.react-datepicker-time__header,
+.react-datepicker-year-header {
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  color: #1D1D1F !important;
+}
+.react-datepicker__navigation {
+  top: 16px !important;
+}
+.react-datepicker__month-text:hover,
+.react-datepicker__year-text:hover {
+  background-color: #F3F4F6 !important;
+  border-radius: 8px !important;
+}
+.react-datepicker__month-text--keyboard-selected,
+.react-datepicker__month-text--selected,
+.react-datepicker__year-text--selected,
+.react-datepicker__year-text--keyboard-selected {
+  background-color: #007AFF !important;
+  color: white !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+}
+.react-datepicker__month-wrapper,
+.react-datepicker__year-wrapper {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  justify-content: center !important;
+  margin-top: 8px !important;
+}
+.react-datepicker__month-text,
+.react-datepicker__year-text {
+  flex: 0 0 calc(33.333% - 8px) !important;
+  margin: 0 !important;
+  padding: 10px 0 !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+}
+.react-datepicker__year-wrapper {
+  max-width: 240px !important;
+}

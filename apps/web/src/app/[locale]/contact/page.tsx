@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const C = {
   primary: '#2563EB',
+  primaryLight: '#EEF4FF',
   white: '#FFFFFF',
   background: '#F8FAFC',
   faint: '#F1F5F9',

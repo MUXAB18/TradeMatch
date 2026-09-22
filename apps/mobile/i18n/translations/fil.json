@@ -1,0 +1,63 @@
+{
+  "settings": {
+    "title": "Mga Setting",
+    "language": "Wika",
+    "languageSubtitle": "Baguhin ang iyong wika",
+    "theme": "Tema",
+    "logout": "Mag-logout",
+    "selectLanguage": "Pumili ng Wika"
+  },
+  "home": {
+    "title": "Home",
+    "welcome": "Maligayang pagbabalik"
+  },
+  "tabs": {
+    "home": "Home",
+    "certifications": "Mga Cert",
+    "jobs": "Mga Trabaho",
+    "prep": "Paghahanda",
+    "settings": "Mga Setting"
+  },
+  "common": {
+    "cancel": "Kanselahin",
+    "done": "Tapos na",
+    "save": "I-save ang mga Pagbabago",
+    "saving": "Nise-save...",
+    "edit": "I-edit",
+    "delete": "Burahin",
+    "signout": "Mag-sign out",
+    "coming_soon": "Malapit nang dumating"
+  },
+  "auth": {
+    "login_title": "Maligayang pagbabalik",
+    "login_subtitle": "Ilagay ang iyong mga detalye para ma-access ang iyong account",
+    "email": "Email Address",
+    "password": "Password",
+    "login_btn": "Mag-log in",
+    "no_account": "Wala kang account?",
+    "signup_link": "Mag-sign up",
+    "signup_title": "Gumawa ng Account",
+    "signup_subtitle": "Sumali sa libu-libong propesyonal na naghahanap ng trabaho.",
+    "name": "Buong Pangalan",
+    "signup_btn": "Mag-sign Up",
+    "has_account": "Mayroon ka nang account?",
+    "login_link": "Mag-log in",
+    "or_continue_with": "O magpatuloy gamit ang",
+    "google": "Google",
+    "phone_number": "Numero ng Telepono",
+    "forgot_password": "Nakalimutan ang password?",
+    "processing": "Pinoproseso...",
+    "send_code": "Magpadala ng Code"
+  },
+  "nav": {
+    "home": "Home",
+    "jobs": "Mga Trabaho",
+    "certifications": "Mga Sertipiko",
+    "prep": "Paghahanda",
+    "settings": "Mga Setting",
+    "profile": "Profile",
+    "help": "Tulong at Suporta",
+    "terms": "Mga Tuntunin at Kundisyon",
+    "privacy": "Patakaran sa Privacy"
+  }
+}

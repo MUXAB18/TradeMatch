@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ChevronRight, CheckCircle2, Circle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ProfileCompletionCardProps {
   percent: number;
@@ -15,11 +16,11 @@ interface ProfileCompletionCardProps {
   onAction?: (action: string) => void;
 }
 
-const STEPS = [
-  { key: 'name', label: 'Basic information', href: '/profile', action: 'editProfile' },
-  { key: 'experience', label: 'Add experience', href: '/profile', action: 'addExp' },
-  { key: 'skills', label: 'Add skills', href: '/profile', action: 'editSkills' },
-  { key: 'certifications', label: 'Add certifications', href: '/profile', action: 'addCert' },
+const getSteps = (t: any) => [
+  { key: 'name', label: t('basic_info'), href: '/profile', action: 'editProfile' },
+  { key: 'experience', label: t('add_experience'), href: '/profile', action: 'addExp' },
+  { key: 'skills', label: t('add_skills'), href: '/profile', action: 'editSkills' },
+  { key: 'certifications', label: t('add_certifications'), href: '/profile', action: 'addCert' },
 ];
 
 function getStepStatus(profile: ProfileCompletionCardProps['profile']): Record<string, boolean> {
@@ -32,13 +33,12 @@ function getStepStatus(profile: ProfileCompletionCardProps['profile']): Record<s
   };
 }
 
-function getNextStep(stepStatus: Record<string, boolean>): string {
-  if (!stepStatus.name) return 'Add your name to get started';
-  if (!stepStatus.experience) return 'Add your years of experience';
-  if (!stepStatus.skills) return 'Add skills to unlock job matches';
-  if (!stepStatus.certifications) return 'Add certifications to strengthen your profile';
-  if (!stepStatus.certifications) return 'Add certifications to strengthen your profile';
-  return 'Your profile is complete!';
+function getNextStep(stepStatus: Record<string, boolean>, t: any): string {
+  if (!stepStatus.name) return t('add_name_start');
+  if (!stepStatus.experience) return t('add_years_experience');
+  if (!stepStatus.skills) return t('add_skills_unlock');
+  if (!stepStatus.certifications) return t('add_certs_strengthen');
+  return t('profile_is_complete');
 }
 
 function getNextAction(stepStatus: Record<string, boolean>): string {
@@ -50,7 +50,7 @@ function getNextAction(stepStatus: Record<string, boolean>): string {
 }
 
 // SVG Circular progress ring
-function CircleRing({ percent }: { percent: number }) {
+function CircleRing({ percent, doneLabel }: { percent: number; doneLabel: string }) {
   const r = 28;
   const circ = 2 * Math.PI * r;
   const [offset, setOffset] = useState(circ);
@@ -83,18 +83,20 @@ function CircleRing({ percent }: { percent: number }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className={`font-extrabold text-[#1D1D1F] leading-none tracking-tight ${percent === 100 ? 'text-[15px]' : 'text-[16px]'}`}>{percent}%</span>
-        <span className="text-[9px] font-semibold text-[#6B7280] uppercase tracking-wide mt-0.5">Done</span>
+        <span className="text-[9px] font-semibold text-[#6B7280] uppercase tracking-wide mt-0.5">{doneLabel}</span>
       </div>
     </div>
   );
 }
 
 export default function ProfileCompletionCard({ percent, profile, onAction }: ProfileCompletionCardProps) {
+  const t = useTranslations('dashboard');
   const clampedPercent = Math.min(Math.max(percent, 0), 100);
   const stepStatus = getStepStatus(profile);
-  const nextStep = getNextStep(stepStatus);
+  const nextStep = getNextStep(stepStatus, t);
   const nextAction = getNextAction(stepStatus);
   const isComplete = clampedPercent >= 100;
+  const steps = getSteps(t);
 
   const handleContinue = (e: React.MouseEvent) => {
     if (onAction && nextAction) {
@@ -109,15 +111,15 @@ export default function ProfileCompletionCard({ percent, profile, onAction }: Pr
       <div className="flex items-start justify-between gap-4 mb-5">
         <div className="flex-1 min-w-0">
           <h2 className="text-[16px] font-bold text-[#1D1D1F] mb-1">
-            {isComplete ? 'Profile complete ✓' : 'Complete your profile'}
+            {isComplete ? t('profile_complete_check') : t('complete_your_profile')}
           </h2>
           <p className="text-[13px] text-[#6B7280] leading-relaxed">
             {isComplete
-              ? "You're all set to receive the best job matches."
+              ? t('all_set_matches')
               : nextStep}
           </p>
         </div>
-        <CircleRing percent={clampedPercent} />
+        <CircleRing percent={clampedPercent} doneLabel={t('done')} />
       </div>
 
       {/* Progress bar */}
@@ -130,7 +132,7 @@ export default function ProfileCompletionCard({ percent, profile, onAction }: Pr
 
       {/* Checklist */}
       <div className="space-y-2 mb-5">
-        {STEPS.map((step) => {
+        {steps.map((step) => {
           const done = stepStatus[step.key] === true;
           
           const content = (
@@ -152,7 +154,7 @@ export default function ProfileCompletionCard({ percent, profile, onAction }: Pr
               {!done && (
                 <ChevronRight
                   size={13}
-                  className="ml-auto text-[#D1D5DB] group-hover:text-[#007AFF] transition-colors"
+                  className="ms-auto text-[#D1D5DB] group-hover:text-[#007AFF] transition-colors"
                 />
               )}
             </>
@@ -163,7 +165,7 @@ export default function ProfileCompletionCard({ percent, profile, onAction }: Pr
               <button
                 key={step.key}
                 onClick={() => onAction(step.action)}
-                className="flex items-center gap-3 group py-1 text-left w-full"
+                className="flex items-center gap-3 group py-1 text-start w-full"
                 disabled={done}
               >
                 {content}
@@ -190,7 +192,7 @@ export default function ProfileCompletionCard({ percent, profile, onAction }: Pr
             onClick={handleContinue}
             className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#007AFF] text-white text-[14px] font-semibold rounded-[10px] hover:opacity-90 active:scale-[0.98] transition-all"
           >
-            Continue profile
+            {t('continue_profile')}
             <ChevronRight size={15} />
           </button>
         ) : (
@@ -198,7 +200,7 @@ export default function ProfileCompletionCard({ percent, profile, onAction }: Pr
             href="/profile"
             className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#007AFF] text-white text-[14px] font-semibold rounded-[10px] hover:opacity-90 active:scale-[0.98] transition-all"
           >
-            Continue profile
+            {t('continue_profile')}
             <ChevronRight size={15} />
           </Link>
         )

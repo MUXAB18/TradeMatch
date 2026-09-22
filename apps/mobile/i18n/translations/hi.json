@@ -1,0 +1,63 @@
+{
+  "settings": {
+    "title": "सेटिंग्स",
+    "language": "भाषा",
+    "languageSubtitle": "अपनी भाषा बदलें",
+    "theme": "थीम",
+    "logout": "लॉग आउट",
+    "selectLanguage": "भाषा चुनें"
+  },
+  "home": {
+    "title": "होम",
+    "welcome": "वापसी पर स्वागत है"
+  },
+  "tabs": {
+    "home": "होम",
+    "certifications": "सर्टिफिकेट",
+    "jobs": "नौकरियां",
+    "prep": "तैयारी",
+    "settings": "सेटिंग्स"
+  },
+  "common": {
+    "cancel": "रद्द करें",
+    "done": "हो गया",
+    "save": "परिवर्तन सहेजें",
+    "saving": "सहेजा जा रहा है...",
+    "edit": "संपादित करें",
+    "delete": "हटाएं",
+    "signout": "साइन आउट",
+    "coming_soon": "जल्द आ रहा है"
+  },
+  "auth": {
+    "login_title": "वापसी पर स्वागत है",
+    "login_subtitle": "अपने खाते तक पहुंचने के लिए विवरण दर्ज करें",
+    "email": "ईमेल पता",
+    "password": "पासवर्ड",
+    "login_btn": "लॉग इन",
+    "no_account": "खाता नहीं है?",
+    "signup_link": "साइन अप करें",
+    "signup_title": "खाता बनाएं",
+    "signup_subtitle": "काम खोजने वाले हजारों पेशेवरों से जुड़ें।",
+    "name": "पूरा नाम",
+    "signup_btn": "साइन अप",
+    "has_account": "पहले से खाता है?",
+    "login_link": "लॉग इन करें",
+    "or_continue_with": "या इसके साथ जारी रखें",
+    "google": "गूगल",
+    "phone_number": "फ़ोन नंबर",
+    "forgot_password": "पासवर्ड भूल गए?",
+    "processing": "प्रसंस्करण हो रहा है...",
+    "send_code": "कोड भेजें"
+  },
+  "nav": {
+    "home": "होम",
+    "jobs": "नौकरियां",
+    "certifications": "प्रमाणपत्र",
+    "prep": "तैयारी",
+    "settings": "सेटिंग्स",
+    "profile": "प्रोफ़ाइल",
+    "help": "मदद और सहायता",
+    "terms": "नियम और शर्तें",
+    "privacy": "गोपनीयता नीति"
+  }
+}

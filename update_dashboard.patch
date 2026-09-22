@@ -1,0 +1,22 @@
+--- /Users/user/Desktop/myapp/apps/web/src/app/[locale]/admin/page.tsx
++++ /Users/user/Desktop/myapp/apps/web/src/app/[locale]/admin/page.tsx
+@@ -47,15 +47,14 @@
+   const loadData = async () => {
+     setLoading(true);
+     try {
+-      if (view === 'dashboard') setStats(await getDashboardStats());
+-      if (['users', 'workers', 'agencies', 'verification'].includes(view)) {
+-        if (!users.length) setUsers(await getAllUsers(500)); // load once, cache in memory for MVP
+-      }
+-      if (view === 'jobs') setJobs(await getAllJobs(200));
++      const [newStats, newUsers, newJobs] = await Promise.all([
++        getDashboardStats(),
++        getAllUsers(500),
++        getAllJobs(200),
++      ]);
++      setStats(newStats);
++      setUsers(newUsers);
++      setJobs(newJobs);
+       if (view === 'content') {
+         setCerts(await getAllCerts());
+         setPrepCards(await getAllPrepCards());

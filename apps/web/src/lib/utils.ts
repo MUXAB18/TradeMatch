@@ -88,15 +88,20 @@ export function getInitials(name: string): string {
 /**
  * Format a Firestore Timestamp or Date for display
  */
-export function formatPostedDate(date: { toDate?: () => Date } | Date | null | undefined): string {
+export function formatPostedDate(
+  date: { toDate?: () => Date } | Date | null | undefined, 
+  t?: (key: string, values?: any) => string
+): string {
   if (!date) return '';
   const d = typeof (date as any).toDate === 'function' ? (date as any).toDate() : date as Date;
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-  return `${Math.floor(diffDays / 30)}mo ago`;
+  
+  if (diffDays === 0) return t ? t('today') : 'Today';
+  if (diffDays === 1) return t ? t('yesterday') : 'Yesterday';
+  if (diffDays < 7) return t ? t('days_ago', { count: diffDays }) : `${diffDays} days ago`;
+  if (diffDays < 30) return t ? t('weeks_ago', { count: Math.floor(diffDays / 7) }) : `${Math.floor(diffDays / 7)}w ago`;
+  return t ? t('months_ago', { count: Math.floor(diffDays / 30) }) : `${Math.floor(diffDays / 30)}mo ago`;
 }
+

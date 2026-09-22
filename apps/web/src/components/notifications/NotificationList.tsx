@@ -7,10 +7,12 @@ import { AppNotification } from '@/types/notifications';
 import { Search, BellRing, CheckCircle2 } from 'lucide-react';
 import { isToday, isYesterday } from 'date-fns';
 import { toast } from '@/components/ui/toast';
+import { useTranslations } from 'next-intl';
 
 type FilterType = 'all' | 'unread' | 'messages' | 'jobs' | 'applications';
 
 export default function NotificationList() {
+  const t = useTranslations('notifications');
   const { notifications, loading, markAllAsRead, unreadCount } = useNotifications();
   const [filter, setFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -69,32 +71,32 @@ export default function NotificationList() {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-surface md:border-r md:border-border">
+    <div className="flex-1 flex flex-col h-full bg-surface md:border-e md:border-border">
       
       {/* Header & Controls */}
       <div className="p-4 md:p-6 border-b border-border space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-black text-text-primary">Notifications</h1>
+          <h1 className="text-2xl font-black text-text-primary">{t('title')}</h1>
           {unreadCount > 0 && (
             <button 
-              onClick={() => { markAllAsRead(); toast.success('All notifications marked as read'); }}
+              onClick={() => { markAllAsRead(); toast.success(t('marked_read')); }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-bold text-primary hover:bg-primary/10 transition-colors"
             >
               <CheckCircle2 size={16} />
-              <span className="hidden sm:inline">Mark all as read</span>
+              <span className="hidden sm:inline">{t('mark_all_read')}</span>
             </button>
           )}
         </div>
 
         {/* Search */}
         <div className="relative">
-          <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-tertiary" />
+          <Search size={18} className="absolute start-3.5 top-1/2 -translate-y-1/2 text-text-tertiary" />
           <input 
             type="text" 
-            placeholder="Search notifications..."
+            placeholder={t('search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-xl text-[14px] font-semibold text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+            className="w-full ps-10 pe-4 py-2.5 bg-background border border-border rounded-xl text-[14px] font-semibold text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
           />
         </div>
 
@@ -104,25 +106,25 @@ export default function NotificationList() {
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-full text-[13px] font-bold whitespace-nowrap transition-colors ${filter === 'all' ? 'bg-primary text-white' : 'bg-background border border-border text-text-secondary hover:text-text-primary'}`}
           >
-            All
+            {t('all')}
           </button>
           <button 
             onClick={() => setFilter('unread')}
             className={`px-4 py-2 rounded-full text-[13px] font-bold whitespace-nowrap transition-colors ${filter === 'unread' ? 'bg-primary text-white' : 'bg-background border border-border text-text-secondary hover:text-text-primary'}`}
           >
-            Unread
+            {t('unread')}
           </button>
           <button 
             onClick={() => setFilter('messages')}
             className={`px-4 py-2 rounded-full text-[13px] font-bold whitespace-nowrap transition-colors ${filter === 'messages' ? 'bg-primary text-white' : 'bg-background border border-border text-text-secondary hover:text-text-primary'}`}
           >
-            Messages
+            {t('messages')}
           </button>
           <button 
             onClick={() => setFilter('jobs')}
             className={`px-4 py-2 rounded-full text-[13px] font-bold whitespace-nowrap transition-colors ${filter === 'jobs' ? 'bg-primary text-white' : 'bg-background border border-border text-text-secondary hover:text-text-primary'}`}
           >
-            Jobs
+            {t('jobs')}
           </button>
         </div>
       </div>
@@ -134,9 +136,9 @@ export default function NotificationList() {
             <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
               <BellRing size={32} />
             </div>
-            <h3 className="text-lg font-bold text-text-primary mb-2">You're all caught up!</h3>
+            <h3 className="text-lg font-bold text-text-primary mb-2">{t('caught_up')}</h3>
             <p className="text-[14px] text-text-secondary max-w-sm mx-auto">
-              {searchQuery ? "No notifications match your search." : "When you receive messages, job alerts, or updates, they'll show up here."}
+              {searchQuery ? t('no_results') : t('empty_desc')}
             </p>
           </div>
         ) : (
@@ -144,7 +146,7 @@ export default function NotificationList() {
             {groups.today.length > 0 && (
               <div className="mb-4">
                 <div className="px-4 md:px-6 py-2 bg-background/50 backdrop-blur-sm sticky top-0 z-10 border-b border-border">
-                  <h3 className="text-[12px] font-bold uppercase tracking-wider text-text-tertiary">Today</h3>
+                  <h3 className="text-[12px] font-bold uppercase tracking-wider text-text-tertiary">{t('today')}</h3>
                 </div>
                 <div>
                   {groups.today.map(n => <NotificationItem key={n.id} notification={n} />)}
@@ -155,7 +157,7 @@ export default function NotificationList() {
             {groups.yesterday.length > 0 && (
               <div className="mb-4">
                 <div className="px-4 md:px-6 py-2 bg-background/50 backdrop-blur-sm sticky top-0 z-10 border-b border-border">
-                  <h3 className="text-[12px] font-bold uppercase tracking-wider text-text-tertiary">Yesterday</h3>
+                  <h3 className="text-[12px] font-bold uppercase tracking-wider text-text-tertiary">{t('yesterday')}</h3>
                 </div>
                 <div>
                   {groups.yesterday.map(n => <NotificationItem key={n.id} notification={n} />)}
@@ -166,7 +168,7 @@ export default function NotificationList() {
             {groups.earlier.length > 0 && (
               <div>
                 <div className="px-4 md:px-6 py-2 bg-background/50 backdrop-blur-sm sticky top-0 z-10 border-b border-border">
-                  <h3 className="text-[12px] font-bold uppercase tracking-wider text-text-tertiary">Earlier</h3>
+                  <h3 className="text-[12px] font-bold uppercase tracking-wider text-text-tertiary">{t('earlier')}</h3>
                 </div>
                 <div>
                   {groups.earlier.map(n => <NotificationItem key={n.id} notification={n} />)}

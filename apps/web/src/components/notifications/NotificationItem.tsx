@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { getInitials } from '@/lib/utils';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 interface NotificationItemProps {
   notification: AppNotification;
@@ -17,6 +18,7 @@ interface NotificationItemProps {
 export default function NotificationItem({ notification }: NotificationItemProps) {
   const { markAsRead, markAsUnread, deleteNotification } = useNotifications();
   const [menuOpen, setMenuOpen] = useState(false);
+  const t = useTranslations('notifications');
 
   const getIcon = () => {
     switch (notification.type) {
@@ -55,7 +57,7 @@ export default function NotificationItem({ notification }: NotificationItemProps
       
       {/* Unread dot */}
       {!notification.isRead && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
+        <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-e-full" />
       )}
 
       {/* Avatar or Icon */}
@@ -99,7 +101,7 @@ export default function NotificationItem({ notification }: NotificationItemProps
             setMenuOpen(!menuOpen);
           }}
           className="p-1.5 rounded-full text-text-tertiary hover:text-text-primary hover:bg-black/5 transition-colors opacity-0 group-hover:opacity-100 md:opacity-100 focus:opacity-100"
-          aria-label="Options"
+          aria-label={t('options')}
         >
           <MoreVertical size={18} />
         </button>
@@ -107,31 +109,31 @@ export default function NotificationItem({ notification }: NotificationItemProps
         {menuOpen && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-            <div className="absolute right-0 top-full mt-1 w-48 bg-surface border border-border rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+            <div className="absolute end-0 top-full mt-1 w-48 bg-surface border border-border rounded-xl shadow-xl z-50 py-1 overflow-hidden">
               {!notification.isRead ? (
                 <button 
                   onClick={(e) => handleAction(e, 'read')}
-                  className="w-full text-left px-4 py-2.5 text-[14px] font-semibold text-text-primary hover:bg-black/5 flex items-center gap-2"
+                  className="w-full text-start px-4 py-2.5 text-[14px] font-semibold text-text-primary hover:bg-black/5 flex items-center gap-2"
                 >
                   <Check size={16} className="text-text-secondary" />
-                  Mark as read
+                  {t('mark_as_read')}
                 </button>
               ) : (
                 <button 
                   onClick={(e) => handleAction(e, 'unread')}
-                  className="w-full text-left px-4 py-2.5 text-[14px] font-semibold text-text-primary hover:bg-black/5 flex items-center gap-2"
+                  className="w-full text-start px-4 py-2.5 text-[14px] font-semibold text-text-primary hover:bg-black/5 flex items-center gap-2"
                 >
                   <CheckCircle2 size={16} className="text-text-secondary" />
-                  Mark as unread
+                  {t('mark_as_unread')}
                 </button>
               )}
               <div className="h-px bg-border my-1" />
               <button 
                 onClick={(e) => handleAction(e, 'delete')}
-                className="w-full text-left px-4 py-2.5 text-[14px] font-semibold text-error hover:bg-error/10 flex items-center gap-2 transition-colors"
+                className="w-full text-start px-4 py-2.5 text-[14px] font-semibold text-error hover:bg-error/10 flex items-center gap-2 transition-colors"
               >
                 <Trash2 size={16} />
-                Delete
+                {t('delete')}
               </button>
             </div>
           </>

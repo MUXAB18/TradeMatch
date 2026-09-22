@@ -20,8 +20,8 @@ export default function JobSearch({
       <div className="flex flex-col md:flex-row bg-surface border border-border md:rounded-full rounded-2xl shadow-sm overflow-hidden focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10 transition-all">
         
         {/* Keyword Search */}
-        <div className="flex-1 relative flex items-center border-b md:border-b-0 md:border-r border-border group">
-          <div className="pl-5 pr-2 text-text-secondary group-focus-within:text-primary transition-colors">
+        <div className="flex-1 relative flex items-center border-b md:border-b-0 md:border-e border-border group">
+          <div className="ps-5 pe-2 text-text-secondary group-focus-within:text-primary transition-colors">
             <Search size={20} />
           </div>
           <input
@@ -29,14 +29,14 @@ export default function JobSearch({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search jobs, skills, companies..."
-            className="w-full py-4 pr-5 bg-transparent text-[16px] text-text-primary placeholder:text-text-placeholder focus:outline-none"
+            className="w-full py-4 pe-5 bg-transparent text-[16px] text-text-primary placeholder:text-text-placeholder focus:outline-none"
             onKeyDown={(e) => e.key === 'Enter' && onSearchSubmit()}
           />
         </div>
 
         {/* Location Search */}
         <div className="flex-1 relative flex items-center group">
-          <div className="pl-5 pr-2 text-text-secondary group-focus-within:text-primary transition-colors">
+          <div className="ps-5 pe-2 text-text-secondary group-focus-within:text-primary transition-colors">
             <MapPin size={20} />
           </div>
           <input
@@ -44,7 +44,7 @@ export default function JobSearch({
             value={locationQuery}
             onChange={(e) => onLocationChange(e.target.value)}
             placeholder="City, state, or Remote"
-            className="w-full py-4 pr-5 bg-transparent text-[16px] text-text-primary placeholder:text-text-placeholder focus:outline-none"
+            className="w-full py-4 pe-5 bg-transparent text-[16px] text-text-primary placeholder:text-text-placeholder focus:outline-none"
             onKeyDown={(e) => e.key === 'Enter' && onSearchSubmit()}
           />
         </div>
@@ -62,7 +62,7 @@ export default function JobSearch({
       
       {/* Popular Searches */}
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="text-[13px] font-semibold text-text-secondary mr-2">Popular:</span>
+        <span className="text-[13px] font-semibold text-text-secondary me-2">Popular:</span>
         {['Software Engineer', 'React', 'Next.js', 'Remote', 'Intern'].map((term) => (
           <button
             key={term}

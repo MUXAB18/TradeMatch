@@ -31,7 +31,7 @@ export default function ProfileHeader({ profile, onEdit }: ProfileHeaderProps) {
   return (
     <div className="bg-white border border-[#E8EAF0] rounded-[24px] p-6 sm:p-8 relative overflow-hidden">
       {/* Decorative top band */}
-      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-r from-[#F0F5FF] to-[#F8FAFC]" />
+      <div className="absolute top-0 start-0 end-0 h-24 bg-gradient-to-r from-[#F0F5FF] to-[#F8FAFC]" />
       
       <div className="relative flex flex-col sm:flex-row sm:items-start justify-between gap-6 mt-6">
         <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">

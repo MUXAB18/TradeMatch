@@ -1,0 +1,63 @@
+{
+  "settings": {
+    "title": "सेटिङहरू",
+    "language": "भाषा",
+    "languageSubtitle": "आफ्नो भाषा परिवर्तन गर्नुहोस्",
+    "theme": "थिम",
+    "logout": "लग आउट",
+    "selectLanguage": "भाषा छान्नुहोस्"
+  },
+  "home": {
+    "title": "होम",
+    "welcome": "फेरि स्वागत छ"
+  },
+  "tabs": {
+    "home": "होम",
+    "certifications": "प्रमाणपत्र",
+    "jobs": "जागिर",
+    "prep": "तयारी",
+    "settings": "सेटिङ"
+  },
+  "common": {
+    "cancel": "रद्द गर्नुहोस्",
+    "done": "सम्पन्न",
+    "save": "परिवर्तनहरू सुरक्षित गर्नुहोस्",
+    "saving": "सुरक्षित हुँदैछ...",
+    "edit": "सम्पादन",
+    "delete": "मेटाउनुहोस्",
+    "signout": "साइन आउट",
+    "coming_soon": "चाँडै आउँदैछ"
+  },
+  "auth": {
+    "login_title": "फेरि स्वागत छ",
+    "login_subtitle": "आफ्नो खाता पहुँच गर्न विवरण प्रविष्ट गर्नुहोस्",
+    "email": "इमेल ठेगाना",
+    "password": "पासवर्ड",
+    "login_btn": "लग इन",
+    "no_account": "खाता छैन?",
+    "signup_link": "साइन अप गर्नुहोस्",
+    "signup_title": "खाता बनाउनुहोस्",
+    "signup_subtitle": "हजारौं पेशेवरहरूसँग जोडिनुहोस्।",
+    "name": "पूरा नाम",
+    "signup_btn": "साइन अप",
+    "has_account": "पहिले नै खाता छ?",
+    "login_link": "लग इन गर्नुहोस्",
+    "or_continue_with": "वा यसको साथ जारी राख्नुहोस्",
+    "google": "गुगल",
+    "phone_number": "फोन नम्बर",
+    "forgot_password": "पासवर्ड बिर्सनुभयो?",
+    "processing": "प्रशोधन हुँदैछ...",
+    "send_code": "कोड पठाउनुहोस्"
+  },
+  "nav": {
+    "home": "होम",
+    "jobs": "जागिर",
+    "certifications": "प्रमाणपत्र",
+    "prep": "तयारी",
+    "settings": "सेटिङ",
+    "profile": "प्रोफाइल",
+    "help": "मद्दत र समर्थन",
+    "terms": "नियम र सर्तहरू",
+    "privacy": "गोपनीयता नीति"
+  }
+}

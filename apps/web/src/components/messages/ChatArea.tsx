@@ -243,11 +243,11 @@ export function ChatArea({ onBack, onShowContact }: ChatAreaProps) {
       {/* Header */}
       <div className="h-[68px] shrink-0 bg-surface border-b border-border flex items-center justify-between px-4 sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="md:hidden p-2 -ml-2 text-text-secondary hover:bg-black/5 rounded-full">
+          <button onClick={onBack} className="md:hidden p-2 -ms-2 text-text-secondary hover:bg-black/5 rounded-full">
             <ArrowLeft size={20} />
           </button>
           
-          <button onClick={onShowContact} className="flex items-center gap-3 text-left group">
+          <button onClick={onShowContact} className="flex items-center gap-3 text-start group">
             <div className="relative w-10 h-10 shrink-0">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden">
                 {contact.avatar ? (
@@ -257,7 +257,7 @@ export function ChatArea({ onBack, onShowContact }: ChatAreaProps) {
                 )}
               </div>
               {contact.online && (
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#34C759] rounded-full border-[2.5px] border-surface shadow-sm"></div>
+                <div className="absolute bottom-0 end-0 w-3 h-3 bg-[#34C759] rounded-full border-[2.5px] border-surface shadow-sm"></div>
               )}
             </div>
             <div>
@@ -326,7 +326,7 @@ export function ChatArea({ onBack, onShowContact }: ChatAreaProps) {
       <div className="shrink-0 p-4 bg-surface border-t border-border">
         {isRecording ? (
           <div className="flex items-center gap-3 bg-red-500/10 dark:bg-red-500/20 border border-red-500/20 rounded-2xl p-2.5 shadow-inner">
-            <div className={`w-2.5 h-2.5 bg-red-500 rounded-full ${!isRecordingPaused ? 'animate-pulse' : ''} ml-2`} />
+            <div className={`w-2.5 h-2.5 bg-red-500 rounded-full ${!isRecordingPaused ? 'animate-pulse' : ''} ms-2`} />
             <span className="text-red-600 dark:text-red-400 font-medium text-[15px] shrink-0">
               {formatRecordingTime(recordingTime)}
             </span>
@@ -393,7 +393,7 @@ export function ChatArea({ onBack, onShowContact }: ChatAreaProps) {
                     setAttachedFile(null);
                     if (fileInputRef.current) fileInputRef.current.value = '';
                   }} 
-                  className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-full text-text-secondary hover:text-red-500 transition-colors mr-1"
+                  className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-full text-text-secondary hover:text-red-500 transition-colors me-1"
                 >
                   <X size={16} />
                 </button>
@@ -425,7 +425,7 @@ export function ChatArea({ onBack, onShowContact }: ChatAreaProps) {
 
               <div className="relative">
               {showEmojiPicker && (
-                <div className="absolute bottom-full right-0 mb-4 bg-surface border border-border rounded-xl shadow-xl p-3 flex flex-wrap gap-2 w-[240px] z-50 animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute bottom-full end-0 mb-4 bg-surface border border-border rounded-xl shadow-xl p-3 flex flex-wrap gap-2 w-[240px] z-50 animate-in fade-in zoom-in-95 duration-200">
                   <div className="w-full text-[12px] font-bold text-text-secondary mb-1">Common Emojis</div>
                   {COMMON_EMOJIS.map(emoji => (
                     <button

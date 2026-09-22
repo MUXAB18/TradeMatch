@@ -1,0 +1,63 @@
+{
+  "settings": {
+    "title": "সেটিংস",
+    "language": "ভাষা",
+    "languageSubtitle": "আপনার ভাষা পরিবর্তন করুন",
+    "theme": "থিম",
+    "logout": "লগ আউট",
+    "selectLanguage": "ভাষা নির্বাচন করুন"
+  },
+  "home": {
+    "title": "হোম",
+    "welcome": "আবার স্বাগতম"
+  },
+  "tabs": {
+    "home": "হোম",
+    "certifications": "সার্টিফিকেট",
+    "jobs": "চাকরি",
+    "prep": "প্রস্তুতি",
+    "settings": "সেটিংস"
+  },
+  "common": {
+    "cancel": "বাতিল",
+    "done": "সম্পন্ন",
+    "save": "পরিবর্তন সংরক্ষণ করুন",
+    "saving": "সংরক্ষণ হচ্ছে...",
+    "edit": "সম্পাদনা",
+    "delete": "মুছুন",
+    "signout": "সাইন আউট",
+    "coming_soon": "শীঘ্রই আসছে"
+  },
+  "auth": {
+    "login_title": "আবার স্বাগতম",
+    "login_subtitle": "আপনার অ্যাকাউন্ট অ্যাক্সেস করতে তথ্য দিন",
+    "email": "ইমেইল ঠিকানা",
+    "password": "পাসওয়ার্ড",
+    "login_btn": "লগ ইন",
+    "no_account": "অ্যাকাউন্ট নেই?",
+    "signup_link": "সাইন আপ করুন",
+    "signup_title": "অ্যাকাউন্ট তৈরি করুন",
+    "signup_subtitle": "হাজার হাজার পেশাদারের সাথে যোগ দিন।",
+    "name": "পুরো নাম",
+    "signup_btn": "সাইন আপ",
+    "has_account": "ইতিমধ্যে অ্যাকাউন্ট আছে?",
+    "login_link": "লগ ইন করুন",
+    "or_continue_with": "অথবা এর সাথে চালিয়ে যান",
+    "google": "গুগল",
+    "phone_number": "ফোন নম্বর",
+    "forgot_password": "পাসওয়ার্ড ভুলে গেছেন?",
+    "processing": "প্রক্রিয়াকরণ হচ্ছে...",
+    "send_code": "কোড পাঠান"
+  },
+  "nav": {
+    "home": "হোম",
+    "jobs": "চাকরি",
+    "certifications": "সার্টিফিকেট",
+    "prep": "প্রস্তুতি",
+    "settings": "সেটিংস",
+    "profile": "প্রোফাইল",
+    "help": "সাহায্য ও সহায়তা",
+    "terms": "শর্তাবলী",
+    "privacy": "গোপনীয়তা নীতি"
+  }
+}

@@ -63,8 +63,44 @@ export interface AuditEntry {
   detail?: string;
 }
 
+export interface SupportTicket {
+  id?: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  subject: string;
+  message: string;
+  status: 'open' | 'in_progress' | 'resolved';
+  createdAt: number;
+  assignedTo?: string;
+}
+
+export interface Promotion {
+  id?: string;
+  title: string;
+  message: string;
+  icon: string;
+  themeColor: string;
+  actionText?: string;
+  actionUrl?: string;
+  startDate: number;
+  endDate: number;
+  isActive: boolean;
+  target: 'all' | 'workers' | 'agencies';
+  createdAt: number;
+}
+
 export interface TaxonomyDocument {
   items: string[];
+}
+
+export interface GlobalSettings {
+  maintenanceMode: boolean;
+  maintenanceMessage?: string;
+  maintenanceEndTime?: number;
+  supportEmail: string;
+  platformFee: number;
+  announcementBanner: string;
 }
 
 export interface CMSBlock {
@@ -127,6 +163,22 @@ export async function removeTaxonomyItem(id: string, item: string, adminEmail: s
   return updated;
 }
 
+/* ─── Global Settings ────────────────────────────────────────── */
+
+export async function getGlobalSettings(): Promise<GlobalSettings> {
+  const snap = await getDoc(doc(db, 'platform_settings', 'global'));
+  if (snap.exists()) {
+    return snap.data() as GlobalSettings;
+  }
+  return { maintenanceMode: false, supportEmail: 'support@tradematch.com', platformFee: 5, announcementBanner: '' };
+}
+
+export async function updateGlobalSettings(settings: Partial<GlobalSettings>, adminEmail: string): Promise<void> {
+  await setDoc(doc(db, 'platform_settings', 'global'), settings, { merge: true });
+  addAudit('update_global_settings', 'platform_settings', 'global', adminEmail, `Updated global settings`);
+}
+
+
 /* ─── CMS Blocks ─────────────────────────────────────────────── */
 
 export async function getAllCMSBlocks(): Promise<CMSBlock[]> {
@@ -148,6 +200,65 @@ export async function updateCMSBlock(id: string, value: string, description: str
     updatedAt: Date.now()
   }, { merge: true });
   addAudit('update_cms_block', 'cms', id, adminEmail, `Updated CMS block "${id}"`);
+}
+
+/* ─── Support Tickets ────────────────────────────────────────────── */
+
+export async function getSupportTickets(): Promise<SupportTicket[]> {
+  try {
+    const q = query(collection(db, 'support_tickets'), orderBy('createdAt', 'desc'), limit(100));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() } as SupportTicket));
+  } catch (e) {
+    console.error('Error getting support tickets', e);
+    // fallback if no index
+    const snap = await getDocs(query(collection(db, 'support_tickets'), limit(100)));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() } as SupportTicket));
+  }
+}
+
+export async function updateSupportTicket(id: string, updates: Partial<SupportTicket>, adminEmail: string): Promise<void> {
+  await setDoc(doc(db, 'support_tickets', id), updates, { merge: true });
+  addAudit('update_support_ticket', 'support_tickets', id, adminEmail, `Updated ticket ${id}`);
+}
+
+export async function deleteSupportTicket(id: string, adminEmail: string): Promise<void> {
+  await deleteDoc(doc(db, 'support_tickets', id));
+  addAudit('delete_support_ticket', 'support_tickets', id, adminEmail, `Deleted ticket ${id}`);
+}
+
+/* ─── Promotions / Popups ──────────────────────────────────── */
+
+export async function getPromotions(): Promise<Promotion[]> {
+  try {
+    const q = query(collection(db, 'promotions'), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() } as Promotion));
+  } catch (e) {
+    console.error('Error getting promotions', e);
+    const snap = await getDocs(query(collection(db, 'promotions')));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() } as Promotion));
+  }
+}
+
+export async function savePromotion(promo: Partial<Promotion>, adminEmail: string): Promise<string> {
+  let docRef;
+  if (promo.id) {
+    docRef = doc(db, 'promotions', promo.id);
+    await setDoc(docRef, promo, { merge: true });
+    addAudit('update_promotion', 'promotions', promo.id, adminEmail, `Updated promotion ${promo.title}`);
+  } else {
+    docRef = doc(collection(db, 'promotions'));
+    const data = { ...promo, createdAt: Date.now() };
+    await setDoc(docRef, data);
+    addAudit('create_promotion', 'promotions', docRef.id, adminEmail, `Created promotion ${promo.title}`);
+  }
+  return docRef.id;
+}
+
+export async function deletePromotion(id: string, adminEmail: string): Promise<void> {
+  await deleteDoc(doc(db, 'promotions', id));
+  addAudit('delete_promotion', 'promotions', id, adminEmail, `Deleted promotion ${id}`);
 }
 
 /* ─── Dashboard ─────────────────────────────────────────────── */

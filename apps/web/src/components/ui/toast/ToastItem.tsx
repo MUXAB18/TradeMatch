@@ -83,7 +83,7 @@ export function ToastItem({ toast: t, onRemove }: ToastItemProps) {
         border border-black/[0.06] dark:border-white/10
         shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]
         rounded-full
-        pl-2 pr-3 py-2
+        ps-2 pe-3 py-2
         transition-all duration-250 ease-out will-change-transform
         ${isExiting
           ? 'opacity-0 scale-90 translate-y-2'
@@ -118,7 +118,7 @@ export function ToastItem({ toast: t, onRemove }: ToastItemProps) {
             t.action!.onClick(e);
             handleClose();
           }}
-          className="ml-1 shrink-0 px-3 py-1.5 rounded-full bg-[#6366f1]/12 dark:bg-[#6366f1]/20 text-[13px] font-bold text-[#6366f1] hover:bg-[#6366f1]/20 transition-colors whitespace-nowrap"
+          className="ms-1 shrink-0 px-3 py-1.5 rounded-full bg-[#6366f1]/12 dark:bg-[#6366f1]/20 text-[13px] font-bold text-[#6366f1] hover:bg-[#6366f1]/20 transition-colors whitespace-nowrap"
         >
           {t.action.label}
         </button>
@@ -126,7 +126,7 @@ export function ToastItem({ toast: t, onRemove }: ToastItemProps) {
         <button
           onClick={handleClose}
           aria-label="Close notification"
-          className="ml-1 shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-gray-400 dark:text-gray-500 hover:bg-black/5 dark:hover:bg-white/5 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+          className="ms-1 shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-gray-400 dark:text-gray-500 hover:bg-black/5 dark:hover:bg-white/5 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
         >
           <X size={14} strokeWidth={2.5} />
         </button>

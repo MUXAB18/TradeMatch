@@ -6,10 +6,18 @@ const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function POST(req: Request) {
   try {
-    const { question, answer, trade } = await req.json();
+    const { question, answer, trade, locale } = await req.json();
 
     if (!question || !answer) {
       return NextResponse.json({ error: 'Question and answer are required.' }, { status: 400 });
+    }
+
+    let languageInstruction = "detect the language of the candidate's input (e.g., English, Hindi, Roman Urdu, Bengali, Tagalog, etc.) and reply in the EXACT SAME LANGUAGE. If they answer in Roman Urdu or Roman Hindi (using English letters), you MUST provide your feedback and the next question in Roman Urdu/Hindi.";
+
+    if (locale === 'ur') {
+      languageInstruction = "reply EXCLUSIVELY in Roman Urdu (using English alphabet, for example: 'Aap ka jawab acha tha'). DO NOT write in English, regardless of the candidate's input language.";
+    } else if (locale === 'ar') {
+      languageInstruction = "reply EXCLUSIVELY in Arabic. DO NOT write in English, regardless of the candidate's input language.";
     }
 
     const prompt = `You are an experienced hiring manager interviewing a ${trade || 'trades'} professional.
@@ -18,7 +26,7 @@ Currently, you asked the candidate this interview question: "${question}"
 
 The candidate just said: "${answer}"
 
-CRITICAL INSTRUCTION: You MUST detect the language of the candidate's input (e.g., English, Hindi, Roman Urdu, Bengali, Tagalog, etc.) and reply in the EXACT SAME LANGUAGE. If they answer in Roman Urdu or Roman Hindi (using English letters), you MUST provide your feedback and the next question in Roman Urdu/Hindi.
+CRITICAL INSTRUCTION: You MUST ${languageInstruction}
 
 Analyze what the candidate said. There are two possibilities:
 

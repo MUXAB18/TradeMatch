@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Briefcase, Zap, Award, ArrowRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface InsightStatProps {
   value: number;
@@ -21,6 +22,7 @@ function InsightStat({
   emptyHref,
 }: InsightStatProps) {
   const isEmpty = value === 0;
+  const t = useTranslations('dashboard');
 
   return (
     <Link
@@ -54,7 +56,7 @@ function InsightStat({
           </span>
         ) : (
           <span className="text-[12px] font-medium text-[#6B7280] flex items-center gap-1">
-            {value > 0 ? `${value} active` : 'None added'}
+            {value > 0 ? `${value} ${t('active')}` : t('none_added')}
           </span>
         )}
       </div>
@@ -69,33 +71,35 @@ interface StatsRowProps {
 }
 
 export default function StatsRow({ jobCount, skillCount, certCount }: StatsRowProps) {
+  const t = useTranslations('dashboard');
+
   return (
     <div className="grid grid-cols-3 gap-4">
       <InsightStat
         value={jobCount}
-        label="Active Matches"
+        label={t('active_matches')}
         icon={<Briefcase size={18} />}
         href="/jobs"
         accentColor="#007AFF"
-        emptyAction="Browse jobs"
+        emptyAction={t('browse_jobs')}
         emptyHref="/jobs"
       />
       <InsightStat
         value={skillCount}
-        label="Skills Added"
+        label={t('skills_added')}
         icon={<Zap size={18} />}
         href="/profile"
         accentColor="#7C3AED"
-        emptyAction="Add skills"
+        emptyAction={t('add_skills')}
         emptyHref="/profile"
       />
       <InsightStat
         value={certCount}
-        label="Certifications"
+        label={t('certifications')}
         icon={<Award size={18} />}
         href="/certifications"
         accentColor="#059669"
-        emptyAction="Add certification"
+        emptyAction={t('add_certification')}
         emptyHref="/certifications"
       />
     </div>

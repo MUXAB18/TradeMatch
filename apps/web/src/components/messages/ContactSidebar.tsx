@@ -16,7 +16,7 @@ export function ContactSidebar({ conversation, onMute, onPin }: ContactSidebarPr
   const contact = conversation.otherParticipant;
 
   return (
-    <div className="h-full flex flex-col bg-surface border-l border-border overflow-y-auto hidden lg:flex w-80 shrink-0">
+    <div className="h-full flex flex-col bg-surface border-s border-border overflow-y-auto hidden lg:flex w-80 shrink-0">
       {/* Header */}
       <div className="h-[68px] shrink-0 border-b border-border flex items-center justify-center px-6 font-bold text-[15px]">
         Contact Info
@@ -33,7 +33,7 @@ export function ContactSidebar({ conversation, onMute, onPin }: ContactSidebarPr
             )}
           </div>
           {contact.online && (
-            <div className="absolute bottom-1 right-1 w-6 h-6 bg-[#34C759] rounded-full border-[3.5px] border-surface shadow-md"></div>
+            <div className="absolute bottom-1 end-1 w-6 h-6 bg-[#34C759] rounded-full border-[3.5px] border-surface shadow-md"></div>
           )}
         </div>
 

@@ -29,7 +29,7 @@ export default function JobsTabs({ activeTab, onTabChange }: JobsTabsProps) {
         >
           {tab.label}
           {activeTab === tab.id && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t-full" />
+            <div className="absolute bottom-0 start-0 end-0 h-0.5 bg-primary rounded-t-full" />
           )}
         </button>
       ))}

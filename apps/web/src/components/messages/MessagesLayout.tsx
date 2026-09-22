@@ -70,13 +70,13 @@ export function MessagesLayout() {
           {/* Search Bar */}
           <div className="p-4 border-b border-border/50 bg-surface/50 backdrop-blur-xl sticky top-0 z-10">
             <div className="relative group">
-              <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary group-focus-within:text-primary transition-colors" />
+              <Search size={18} className="absolute start-3.5 top-1/2 -translate-y-1/2 text-text-secondary group-focus-within:text-primary transition-colors" />
               <input
                 type="text"
                 placeholder="Search by name or role..."
                 value={newMessageSearch}
                 onChange={e => setNewMessageSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-surface-hover/50 hover:bg-surface-hover focus:bg-surface border border-border/50 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 rounded-xl outline-none transition-all placeholder:text-text-secondary/50 text-[15px]"
+                className="w-full ps-10 pe-4 py-2.5 bg-surface-hover/50 hover:bg-surface-hover focus:bg-surface border border-border/50 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 rounded-xl outline-none transition-all placeholder:text-text-secondary/50 text-[15px]"
                 autoFocus
               />
             </div>
@@ -94,7 +94,7 @@ export function MessagesLayout() {
                     setShowNewMessage(false);
                     setNewMessageSearch('');
                   }}
-                  className="w-full flex items-center gap-3 p-3 hover:bg-surface-hover rounded-xl transition-all duration-200 text-left group"
+                  className="w-full flex items-center gap-3 p-3 hover:bg-surface-hover rounded-xl transition-all duration-200 text-start group"
                 >
                   <div className="relative shadow-sm rounded-full">
                     {user.avatar ? (
@@ -105,7 +105,7 @@ export function MessagesLayout() {
                       </div>
                     )}
                     {user.online && (
-                      <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-[2.5px] border-surface shadow-sm" />
+                      <div className="absolute bottom-0 end-0 w-3.5 h-3.5 bg-green-500 rounded-full border-[2.5px] border-surface shadow-sm" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

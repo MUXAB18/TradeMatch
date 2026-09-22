@@ -20,6 +20,44 @@
   },
   "common": {
     "cancel": "Cancel",
-    "done": "Done"
+    "done": "Done",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "edit": "Edit",
+    "delete": "Delete",
+    "signout": "Sign Out",
+    "coming_soon": "Coming Soon"
+  },
+  "auth": {
+    "login_title": "Welcome back",
+    "login_subtitle": "Enter your details to access your account",
+    "email": "Email Address",
+    "password": "Password",
+    "login_btn": "Log In",
+    "no_account": "Don't have an account?",
+    "signup_link": "Sign up",
+    "signup_title": "Create an Account",
+    "signup_subtitle": "Join thousands of professionals finding work.",
+    "name": "Full Name",
+    "signup_btn": "Sign Up",
+    "has_account": "Already have an account?",
+    "login_link": "Log in",
+    "or_continue_with": "Or continue with",
+    "google": "Google",
+    "phone_number": "Phone Number",
+    "forgot_password": "Forgot password?",
+    "processing": "Processing...",
+    "send_code": "Send Code"
+  },
+  "nav": {
+    "home": "Home",
+    "jobs": "Jobs",
+    "certifications": "Certifications",
+    "prep": "Prep",
+    "settings": "Settings",
+    "profile": "Profile",
+    "help": "Help & Support",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy"
   }
 }

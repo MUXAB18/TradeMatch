@@ -43,7 +43,7 @@ export default function Navigation() {
   return (
     <>
       {/* Desktop Left Sidebar Navigation */}
-      <aside className="hidden md:flex fixed top-0 left-0 h-screen w-64 bg-surface border-r border-border z-50 flex-col pt-8 pb-8 px-4 shadow-sm">
+      <aside className="hidden md:flex fixed top-0 start-0 h-screen w-64 bg-surface border-e border-border z-50 flex-col pt-8 pb-8 px-4 shadow-sm">
         <div className="flex items-center px-4 mb-10">
           <Link href="/" className="flex items-center">
             <Image 
@@ -78,7 +78,7 @@ export default function Navigation() {
                 <div className="relative">
                   <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                   {isNotifications && unreadCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-error text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-surface">
+                    <span className="absolute -top-1.5 -end-1.5 w-4 h-4 bg-error text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-surface">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
@@ -91,7 +91,7 @@ export default function Navigation() {
       </aside>
 
       {/* Mobile Bottom Navigation (Fixed to bottom, no floating pill) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-border pb-safe">
+      <div className="md:hidden fixed bottom-0 start-0 end-0 z-50 bg-surface border-t border-border pb-safe">
         <div className="flex flex-row justify-around items-center h-[68px] px-2">
           {MOBILE_TABS.map((tab) => {
             const isActive =
@@ -113,7 +113,7 @@ export default function Navigation() {
                 <div className="relative">
                   <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
                   {isNotifications && unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1.5 w-3.5 h-3.5 bg-error text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-surface">
+                    <span className="absolute -top-1 -end-1.5 w-3.5 h-3.5 bg-error text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-surface">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}

@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, AccessibilityInfo, Image, StyleSheet, Text } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -167,7 +168,8 @@ function PremiumSplashScreen({ onAnimationComplete, reduceMotion }: { onAnimatio
 
 function RootLayoutNav() {
   const { colors, isDark } = useAppTheme();
-  const { loading } = useAuth();
+  const { loading, user } = useAuth();
+  const router = useRouter();
   const [reduceMotion, setReduceMotion] = useState(false);
   const [appReady, setAppReady] = useState(false);
   const [splashFinished, setSplashFinished] = useState(false);
@@ -184,12 +186,28 @@ function RootLayoutNav() {
     }
   }, [loading]);
 
-  const onSplashAnimationComplete = useCallback(() => {
+  // ── Fires exactly when splash animation ends ────────────────────────────
+  const onSplashAnimationComplete = useCallback(async () => {
     setSplashFinished(true);
-  }, []);
+    try {
+      const hasSeen = await AsyncStorage.getItem('has_seen_onboarding');
+      if (!hasSeen) {
+        // Brand new user — show onboarding first
+        router.replace('/(auth)/onboarding');
+      } else if (!user) {
+        // Returning user, not logged in
+        router.replace('/(auth)');
+      } else {
+        // Already logged in — index.tsx handles profile check
+        router.replace('/');
+      }
+    } catch {
+      router.replace('/(auth)');
+    }
+  }, [user]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={{ flex: 1, backgroundColor: colors.background, position: 'relative' }}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <Stack screenOptions={{ 
         headerShown: false,
@@ -201,10 +219,17 @@ function RootLayoutNav() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="help" options={{ headerShown: false }} />
+        <Stack.Screen name="terms" options={{ headerShown: false }} />
+        <Stack.Screen name="privacy" options={{ headerShown: false }} />
+        <Stack.Screen name="change-phone" options={{ headerShown: false }} />
+        <Stack.Screen name="change-email" options={{ headerShown: false }} />
+        <Stack.Screen name="change-password" options={{ headerShown: false }} />
       </Stack>
       {appReady && !splashFinished && (
         <PremiumSplashScreen onAnimationComplete={onSplashAnimationComplete} reduceMotion={reduceMotion} />
       )}
+
     </View>
   );
 }

@@ -35,7 +35,7 @@ module.exports = {
     web: {
       favicon: './assets/favicon.png',
     },
-    plugins: ['expo-router', 'expo-status-bar', 'expo-audio'],
+    plugins: ['expo-router', 'expo-status-bar'],
     experiments: {
       typedRoutes: true,
     },

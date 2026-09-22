@@ -124,7 +124,7 @@ export default function Flashcard({ cards, initialIndex = 0 }: FlashcardProps) {
 
         {/* Decorative circle */}
         <div
-          className={`absolute -right-10 -bottom-10 w-40 h-40 rounded-full opacity-20 ${
+          className={`absolute -end-10 -bottom-10 w-40 h-40 rounded-full opacity-20 ${
             flipped ? 'bg-white' : 'bg-primary'
           }`}
         />

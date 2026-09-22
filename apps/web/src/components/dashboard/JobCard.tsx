@@ -7,6 +7,7 @@ import { MockJob } from '@/lib/mockData';
 import { getMatchBadgeClasses, formatPostedDate } from '@/lib/utils';
 import { useSavedJob } from '@/hooks/useSavedJob';
 import { useAppliedJob } from '@/hooks/useAppliedJob';
+import { useTranslations } from 'next-intl';
 
 interface JobCardProps {
   job: MockJob;
@@ -16,6 +17,8 @@ interface JobCardProps {
 export default function JobCard({ job, showViewButton = true }: JobCardProps) {
   const { isSaved, toggleSaved } = useSavedJob(job.id);
   const { isApplied } = useAppliedJob(job.id);
+  const t = useTranslations('dashboard');
+  const tCommon = useTranslations('common');
   const score = job.matchScore;
 
   // Match quality label
@@ -104,7 +107,7 @@ export default function JobCard({ job, showViewButton = true }: JobCardProps) {
             ))}
             {job.requiredSkills.length > 4 && (
               <span className="text-[13px] font-medium text-text-secondary px-2 py-1">
-                +{job.requiredSkills.length - 4} more
+                +{job.requiredSkills.length - 4} {t('more')}
               </span>
             )}
           </div>
@@ -116,28 +119,28 @@ export default function JobCard({ job, showViewButton = true }: JobCardProps) {
             {job.postedAt && (
               <>
                 <Clock size={14} className="shrink-0" />
-                <span>Posted {formatPostedDate(job.postedAt)}</span>
+                <span>{t('posted')} {formatPostedDate(job.postedAt, tCommon)}</span>
               </>
             )}
           </div>
           {isApplied ? (
             <div className="flex items-center gap-2">
-              <span className="text-[13px] font-medium text-text-secondary">Status:</span>
+              <span className="text-[13px] font-medium text-text-secondary">{t('status')}</span>
               <span className={`text-[13px] font-bold px-2 py-1 rounded-full ${
                 job.id.length % 4 === 0 ? 'bg-blue-500/10 text-blue-600' :
                 job.id.length % 4 === 1 ? 'bg-purple-500/10 text-purple-600' :
                 job.id.length % 4 === 2 ? 'bg-orange-500/10 text-orange-600' :
                 'bg-green-500/10 text-green-600'
               }`}>
-                {job.id.length % 4 === 0 ? 'Under Review' :
-                 job.id.length % 4 === 1 ? 'Interviewing' :
-                 job.id.length % 4 === 2 ? 'Offer Extended' :
-                 'Application Received'}
+                {job.id.length % 4 === 0 ? t('under_review') :
+                 job.id.length % 4 === 1 ? t('interviewing') :
+                 job.id.length % 4 === 2 ? t('offer_extended') :
+                 t('application_received')}
               </span>
             </div>
           ) : (
             <span className="text-[14px] font-bold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-              View Job <ChevronRight size={16} />
+              {t('view_job')} <ChevronRight size={16} />
             </span>
           )}
         </div>

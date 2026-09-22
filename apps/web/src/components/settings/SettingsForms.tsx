@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useTransition } from 'react';
 import { createPortal } from 'react-dom';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,7 +15,8 @@ import {
 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from '@/routing';
+import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { profileKey } from '@/lib/utils';
 
@@ -32,6 +33,7 @@ const inputClass = "w-full px-4 py-3 bg-surface border border-border rounded-xl 
 const labelClass = "block text-[13px] font-bold text-text-secondary uppercase tracking-wider mb-2";
 
 export function ProfileSettings({ showToast }: { showToast: (t: 'success'|'error', m: string) => void }) {
+  const t = useTranslations('settings');
   const { profile, loading } = useUserProfile();
   const { user } = useAuth();
   
@@ -79,7 +81,7 @@ export function ProfileSettings({ showToast }: { showToast: (t: 'success'|'error
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        showToast('error', 'Image size must be less than 5MB');
+        showToast('error', t('photo_hint'));
         return;
       }
       const reader = new FileReader();
@@ -149,7 +151,7 @@ export function ProfileSettings({ showToast }: { showToast: (t: 'success'|'error
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4">
-      <SectionHeader title="Profile Settings" description="Manage your personal information and how others see you." />
+      <SectionHeader title={t('title_profile')} description={t('desc_profile')} />
       
       <div className="space-y-6 max-w-2xl">
         <div className="flex items-center gap-6 pb-4 border-b border-border/40">
@@ -174,13 +176,13 @@ export function ProfileSettings({ showToast }: { showToast: (t: 'success'|'error
             >
               Change photo
             </button>
-            <p className="text-[13px] text-text-secondary">JPG, GIF or PNG. Max size of 5MB.</p>
+            <p className="text-[13px] text-text-secondary">{t('photo_hint')}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className={labelClass}>First Name</label>
+            <label className={labelClass}>{t('first_name')}</label>
             <input 
               value={formData.firstName} 
               onChange={e => setFormData({...formData, firstName: e.target.value})} 
@@ -189,7 +191,7 @@ export function ProfileSettings({ showToast }: { showToast: (t: 'success'|'error
             />
           </div>
           <div>
-            <label className={labelClass}>Last Name</label>
+            <label className={labelClass}>{t('last_name')}</label>
             <input 
               value={formData.lastName} 
               onChange={e => setFormData({...formData, lastName: e.target.value})} 
@@ -200,12 +202,12 @@ export function ProfileSettings({ showToast }: { showToast: (t: 'success'|'error
         </div>
 
         <div>
-          <label className={labelClass}>Bio</label>
+          <label className={labelClass}>{t('bio')}</label>
           <textarea 
             value={formData.bio} 
             onChange={e => setFormData({...formData, bio: e.target.value})} 
             className={`${inputClass} min-h-[100px] resize-y`} 
-            placeholder="Write a short bio about your professional experience..." 
+            placeholder={t('bio_placeholder')} 
           />
         </div>
 
@@ -224,6 +226,7 @@ export function ProfileSettings({ showToast }: { showToast: (t: 'success'|'error
 }
 
 export function AccountSettings({ showToast }: { showToast?: (t: 'success'|'error', m: string) => void }) {
+  const t = useTranslations('settings');
   const { profile, loading, refetch } = useUserProfile();
   const { user } = useAuth();
   
@@ -316,7 +319,7 @@ export function AccountSettings({ showToast }: { showToast?: (t: 'success'|'erro
 
     return (
       <div className="px-6 py-5 border-b border-border/60 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0 transition-colors hover:bg-background/50">
-        <div className="flex-1 min-w-0 pr-4">
+        <div className="flex-1 min-w-0 pe-4">
           <p className="text-[15px] font-bold text-text-primary mb-1">{label}</p>
           <p className="text-[14px] text-text-secondary truncate">{value || fallback}</p>
         </div>
@@ -332,25 +335,25 @@ export function AccountSettings({ showToast }: { showToast?: (t: 'success'|'erro
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4">
-      <SectionHeader title="Account Information" description="View and manage your core account details." />
+      <SectionHeader title={t('title_account')} description={t('desc_account')} />
       
       <div className="bg-surface border border-border rounded-[20px] overflow-hidden">
-        {renderField('email', 'Email Address', profile?.email || user?.email || '', 'No email linked')}
-        {renderField('phone', 'Phone Number', profile?.phone || '', 'Not provided')}
+        {renderField('email', t('email'), profile?.email || user?.email || '', t('no_email'))}
+        {renderField('phone', t('phone'), profile?.phone || '', t('no_phone'))}
         
         <div className="px-6 py-5 bg-background/50">
-          <p className="text-[15px] font-bold text-text-primary mb-1">Account Details</p>
+          <p className="text-[15px] font-bold text-text-primary mb-1">{t('account_details')}</p>
           <div className="flex flex-col gap-1 mt-3">
             <div className="flex justify-between text-[14px]">
-              <span className="text-text-secondary">Account ID</span>
+              <span className="text-text-secondary">{t('account_id')}</span>
               <span className="font-mono text-text-primary">{user?.uid.substring(0, 12)}...</span>
             </div>
             <div className="flex justify-between text-[14px]">
-              <span className="text-text-secondary">Account Created</span>
+              <span className="text-text-secondary">{t('account_created')}</span>
               <span className="text-text-primary">{user?.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'Unknown'}</span>
             </div>
             <div className="flex justify-between text-[14px]">
-              <span className="text-text-secondary">Account Type</span>
+              <span className="text-text-secondary">{t('account_type')}</span>
               <span className="text-text-primary font-bold">{profile?.trade || 'Professional'}</span>
             </div>
           </div>
@@ -361,6 +364,7 @@ export function AccountSettings({ showToast }: { showToast?: (t: 'success'|'erro
 }
 
 export function NotificationSettings({ showToast }: { showToast: (t: 'success'|'error', m: string) => void }) {
+  const t = useTranslations('settings');
   const { profile } = useUserProfile();
   const { user } = useAuth();
   const [prefs, setPrefs] = useState({
@@ -390,27 +394,27 @@ export function NotificationSettings({ showToast }: { showToast: (t: 'success'|'
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4">
-      <SectionHeader title="Notification Preferences" description="Control what alerts you receive and how you receive them." />
+      <SectionHeader title={t('title_notifications')} description={t('desc_notifications')} />
       
       <div className="space-y-6">
         <div>
-          <h3 className="text-[14px] font-bold text-text-primary uppercase tracking-wider mb-4">Email Notifications</h3>
+          <h3 className="text-[14px] font-bold text-text-primary uppercase tracking-wider mb-4">{t('email_notifications')}</h3>
           <div className="space-y-1">
             <ToggleRow 
-              title="Job recommendations" 
-              desc="Receive notifications about jobs matching your interests." 
+              title={t('job_recs')} 
+              desc={t('job_recs_desc')} 
               value={prefs.jobMatches} 
               onChange={v => handleToggle('jobMatches', v)} 
             />
             <ToggleRow 
-              title="Certification Reminders" 
-              desc="Get alerted before your certs expire." 
+              title={t('cert_reminders')} 
+              desc={t('cert_reminders_desc')} 
               value={prefs.certReminders} 
               onChange={v => handleToggle('certReminders', v)} 
             />
             <ToggleRow 
-              title="Messages" 
-              desc="Alerts for new chat messages from employers." 
+              title={t('messages')} 
+              desc={t('messages_desc')} 
               value={prefs.messages} 
               onChange={v => handleToggle('messages', v)} 
             />
@@ -424,7 +428,7 @@ export function NotificationSettings({ showToast }: { showToast: (t: 'success'|'
 function ToggleRow({ title, desc, value, onChange }: { title: string, desc: string, value: boolean, onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-center justify-between p-4 bg-white dark:bg-surface border border-border rounded-xl mb-3 hover:border-primary/30 transition-colors">
-      <div className="flex-1 pr-4 min-w-0">
+      <div className="flex-1 pe-4 min-w-0">
         <p className="text-[15px] font-bold text-[#1D1D1F] dark:text-text-primary mb-1">{title}</p>
         <p className="text-[13px] text-[#6B7280] dark:text-text-secondary leading-relaxed">{desc}</p>
       </div>
@@ -436,6 +440,7 @@ function ToggleRow({ title, desc, value, onChange }: { title: string, desc: stri
 }
 
 export function AppearanceSettings() {
+  const t = useTranslations('settings');
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -450,14 +455,14 @@ export function AppearanceSettings() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4">
-      <SectionHeader title="Appearance" description="Customize how TradeMatch looks on this device." />
+      <SectionHeader title={t('title_appearance')} description={t('desc_appearance')} />
       
       <div>
-        <h3 className="text-[14px] font-bold text-text-primary uppercase tracking-wider mb-4">Theme</h3>
+        <h3 className="text-[14px] font-bold text-text-primary uppercase tracking-wider mb-4">{t('theme')}</h3>
         <div className="grid grid-cols-3 gap-4">
-          <ThemeCard active={theme === 'light'} onClick={() => setTheme('light')} icon={<Sun />} label="Light" />
-          <ThemeCard active={theme === 'dark'} onClick={() => setTheme('dark')} icon={<Moon />} label="Dark" />
-          <ThemeCard active={theme === 'system'} onClick={() => setTheme('system')} icon={<Laptop />} label="System" />
+          <ThemeCard active={theme === 'light'} onClick={() => setTheme('light')} icon={<Sun />} label={t('light')} />
+          <ThemeCard active={theme === 'dark'} onClick={() => setTheme('dark')} icon={<Moon />} label={t('dark')} />
+          <ThemeCard active={theme === 'system'} onClick={() => setTheme('system')} icon={<Laptop />} label={t('system')} />
         </div>
       </div>
     </div>
@@ -493,11 +498,11 @@ function Dropdown({ label, options, value, onChange }: any) {
         onBlur={() => setTimeout(() => setIsOpen(false), 200)}
       >
         <span className="truncate">{selectedOption.label}</span>
-        <ChevronDown size={18} className={`shrink-0 ml-3 text-text-secondary transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown size={18} className={`shrink-0 ms-3 text-text-secondary transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </div>
       
       {isOpen && (
-        <div className="absolute top-[calc(100%+8px)] left-0 w-full min-w-[250px] bg-surface border-2 border-border rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+        <div className="absolute top-[calc(100%+8px)] start-0 w-full min-w-[250px] bg-surface border-2 border-border rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
           <div className="max-h-[260px] overflow-y-auto p-1.5">
             {options.map((opt: any) => (
               <div 
@@ -505,7 +510,7 @@ function Dropdown({ label, options, value, onChange }: any) {
                 className={`px-4 py-3.5 text-[15px] font-bold rounded-lg cursor-pointer flex items-center justify-between transition-colors ${value === opt.value ? 'bg-[#007AFF]/10 text-[#007AFF]' : 'text-text-primary hover:bg-black/5 dark:hover:bg-white/5'}`}
                 onClick={() => { onChange(opt.value); setIsOpen(false); }}
               >
-                <span className="truncate pr-4">{opt.label}</span>
+                <span className="truncate pe-4">{opt.label}</span>
                 {value === opt.value && <CheckCircle2 size={18} className="shrink-0 text-[#007AFF]" />}
               </div>
             ))}
@@ -517,15 +522,23 @@ function Dropdown({ label, options, value, onChange }: any) {
 }
 
 export function LanguageSettings() {
-  const [lang, setLang] = useState('en');
+  const t = useTranslations('settings');
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+
   const [region, setRegion] = useState('pk');
   const [tz, setTz] = useState('pkt');
 
   const langs = [
-    { value: 'en', label: 'English (US)' },
-    { value: 'es', label: 'Español' },
-    { value: 'fr', label: 'Français' },
-    { value: 'ar', label: 'العربية' }
+    { value: 'en', label: 'English' },
+    { value: 'ur', label: 'Urdu (اردو)' },
+    { value: 'hi', label: 'Hindi (हिन्दी)' },
+    { value: 'ne', label: 'Nepali (नेपाली)' },
+    { value: 'bn', label: 'Bengali (বাংলা)' },
+    { value: 'fil', label: 'Filipino (Filipino)' },
+    { value: 'ar', label: 'Arabic (العربية)' }
   ];
   const regions = [
     { value: 'us', label: 'United States' },
@@ -544,28 +557,35 @@ export function LanguageSettings() {
     { value: 'gmt', label: '(GMT+00:00) London' }
   ];
 
+  const handleLangChange = (newLocale: string) => {
+    startTransition(() => {
+      router.replace(pathname, { locale: newLocale });
+    });
+  };
+
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4">
-      <SectionHeader title="Language & Region" description="Manage your locale settings." />
+    <div className={`animate-in fade-in slide-in-from-bottom-4 ${isPending ? 'opacity-50 pointer-events-none' : ''}`}>
+      <SectionHeader title={t('title_language')} description={t('desc_language')} />
       
       <div className="space-y-6 max-w-lg pb-32">
-        <Dropdown label="Language" options={langs} value={lang} onChange={setLang} />
-        <Dropdown label="Region" options={regions} value={region} onChange={setRegion} />
-        <Dropdown label="Timezone" options={tzs} value={tz} onChange={setTz} />
+        <Dropdown label={t('language')} options={langs} value={locale} onChange={handleLangChange} />
+        <Dropdown label={t('region')} options={regions} value={region} onChange={setRegion} />
+        <Dropdown label={t('timezone')} options={tzs} value={tz} onChange={setTz} />
       </div>
     </div>
   );
 }
 
 export function PrivacySettings() {
+  const t = useTranslations('settings');
   const [visibility, setVisibility] = useState('registered');
   
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4">
-      <SectionHeader title="Privacy" description="Control who can see your profile and job activity." />
+      <SectionHeader title={t('title_privacy')} description={t('desc_privacy')} />
       
       <div className="mb-8">
-        <label className={labelClass}>Profile Visibility</label>
+        <label className={labelClass}>{t('profile_visibility')}</label>
         <div className="space-y-2 mt-3">
           {['Everyone', 'Registered users', 'Only me'].map((opt, i) => (
             <label key={i} className="flex items-center gap-3 p-4 border border-border rounded-xl cursor-pointer hover:bg-background/50">
@@ -583,24 +603,24 @@ export function PrivacySettings() {
       </div>
 
       <div>
-        <h3 className="text-[14px] font-bold text-text-primary uppercase tracking-wider mb-4">Data Management</h3>
+        <h3 className="text-[14px] font-bold text-text-primary uppercase tracking-wider mb-4">{t('data_management')}</h3>
         <div className="space-y-3">
           <button className="w-full px-5 py-4 border border-border rounded-xl text-[15px] font-bold text-text-primary bg-surface hover:bg-background transition-colors flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-background flex items-center justify-center shrink-0">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </div>
-            <div className="text-left">
-              <p className="text-[15px] font-bold text-text-primary">Download My Data</p>
-              <p className="text-[13px] text-text-secondary font-normal mt-0.5">Export a copy of all your data</p>
+            <div className="text-start">
+              <p className="text-[15px] font-bold text-text-primary">{t('download_data')}</p>
+              <p className="text-[13px] text-text-secondary font-normal mt-0.5">{t('download_data_desc')}</p>
             </div>
           </button>
           <button className="w-full px-5 py-4 border border-red-200 dark:border-red-900/50 rounded-xl text-[15px] font-bold text-red-600 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             </div>
-            <div className="text-left">
-              <p className="text-[15px] font-bold text-red-600">Request Data Deletion</p>
-              <p className="text-[13px] text-red-400 font-normal mt-0.5">Permanently delete your account and data</p>
+            <div className="text-start">
+              <p className="text-[15px] font-bold text-red-600">{t('delete_data')}</p>
+              <p className="text-[13px] text-red-400 font-normal mt-0.5">{t('delete_data_desc')}</p>
             </div>
           </button>
         </div>
@@ -610,37 +630,35 @@ export function PrivacySettings() {
 }
 
 export function BillingSettings() {
+  const t = useTranslations('settings');
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4">
-      <SectionHeader title="Billing & Plans" description="Manage your subscription and payment methods." />
+      <SectionHeader title={t('title_billing')} description={t('desc_billing')} />
       
       <div className="bg-surface border border-border rounded-[24px] p-8 mb-6 relative overflow-hidden">
         <div className="relative z-10">
-          <span className="inline-block px-3 py-1 bg-[#F0F7FF] text-[#007AFF] text-[12px] font-bold rounded-full uppercase tracking-wider mb-3">Current Plan</span>
-          <h3 className="text-[32px] font-extrabold text-text-primary mb-1">Free Tier</h3>
-          <p className="text-[15px] text-text-secondary mb-6">You are currently on the free basic plan.</p>
+          <span className="inline-block px-3 py-1 bg-[#F0F7FF] text-[#007AFF] text-[12px] font-bold rounded-full uppercase tracking-wider mb-3">{t('current_plan')}</span>
+          <h3 className="text-[32px] font-extrabold text-text-primary mb-1">{t('free_tier')}</h3>
+          <p className="text-[15px] text-text-secondary mb-6">{t('free_tier_desc')}</p>
           
           <div className="flex items-center gap-4">
-            <button className="px-6 py-3 bg-[#007AFF] text-white rounded-xl font-bold text-[15px] hover:opacity-90 transition-opacity">
-              Upgrade Plan
-            </button>
-            <button className="px-6 py-3 border border-border bg-surface text-text-primary rounded-xl font-bold text-[15px] hover:bg-background transition-colors">
-              Compare Plans
-            </button>
+            <button className="px-6 py-3 bg-[#007AFF] text-white rounded-xl font-bold text-[15px] hover:opacity-90 transition-opacity">{t('upgrade_plan')}</button>
+            <button className="px-6 py-3 border border-border bg-surface text-text-primary rounded-xl font-bold text-[15px] hover:bg-background transition-colors">{t('compare_plans')}</button>
           </div>
         </div>
-        <div className="absolute right-0 top-0 w-64 h-64 bg-gradient-to-bl from-[#007AFF]/10 to-transparent rounded-bl-full pointer-events-none" />
+        <div className="absolute end-0 top-0 w-64 h-64 bg-gradient-to-bl from-[#007AFF]/10 to-transparent rounded-es-full pointer-events-none" />
       </div>
     </div>
   );
 }
 
 export function HelpSettings() {
+  const t = useTranslations('settings');
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4">
       <div className="mb-8">
-        <h2 className="text-[20px] font-extrabold text-text-primary tracking-tight">Help & Support</h2>
-        <p className="text-[15px] text-text-secondary mt-1">Get help with your account or report an issue.</p>
+        <h2 className="text-[20px] font-extrabold text-text-primary tracking-tight">{t('title_help')}</h2>
+        <p className="text-[15px] text-text-secondary mt-1">{t('desc_help')}</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -648,10 +666,10 @@ export function HelpSettings() {
           <div className="w-12 h-12 bg-[#F0F7FF] rounded-full flex items-center justify-center text-[#007AFF] mb-5">
             <HelpCircle size={24} />
           </div>
-          <h3 className="text-[17px] font-bold text-text-primary mb-1">Help Center</h3>
-          <p className="text-[14px] text-text-secondary leading-relaxed mb-6">Find answers to common questions and guides.</p>
+          <h3 className="text-[17px] font-bold text-text-primary mb-1">{t('help_center')}</h3>
+          <p className="text-[14px] text-text-secondary leading-relaxed mb-6">{t('help_center_desc')}</p>
           <div className="text-[14px] font-bold text-[#007AFF] flex items-center gap-1.5 group-hover:underline decoration-2 underline-offset-4">
-            Visit Help Center <ExternalLink size={15} />
+            {t('visit_help')} <ExternalLink size={15} />
           </div>
         </Link>
         
@@ -659,10 +677,10 @@ export function HelpSettings() {
           <div className="w-12 h-12 bg-[#F0F7FF] rounded-full flex items-center justify-center text-[#007AFF] mb-5">
             <MessageSquare size={24} />
           </div>
-          <h3 className="text-[17px] font-bold text-text-primary mb-1">Contact Support</h3>
-          <p className="text-[14px] text-text-secondary leading-relaxed mb-6">Need help? Contact our support team directly.</p>
+          <h3 className="text-[17px] font-bold text-text-primary mb-1">{t('contact_support')}</h3>
+          <p className="text-[14px] text-text-secondary leading-relaxed mb-6">{t('contact_support_desc')}</p>
           <div className="text-[14px] font-bold text-[#007AFF] flex items-center gap-1.5 group-hover:underline decoration-2 underline-offset-4">
-            Contact Us <ExternalLink size={15} />
+            {t('contact_us')} <ExternalLink size={15} />
           </div>
         </Link>
       </div>
@@ -671,6 +689,7 @@ export function HelpSettings() {
 }
 
 export function DangerZone({ showToast }: { showToast: (t: 'success'|'error', m: string) => void }) {
+  const t = useTranslations('settings');
   const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -695,15 +714,15 @@ export function DangerZone({ showToast }: { showToast: (t: 'success'|'error', m:
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4">
       <div className="mb-6 border-b border-border/60 pb-5">
-        <h2 className="text-[20px] font-extrabold text-text-primary tracking-tight">Danger Zone</h2>
-        <p className="text-[14px] text-text-secondary mt-1">Irreversible and destructive actions.</p>
+        <h2 className="text-[20px] font-extrabold text-text-primary tracking-tight">{t('title_danger')}</h2>
+        <p className="text-[14px] text-text-secondary mt-1">{t('desc_danger')}</p>
       </div>
       
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between p-6 border border-border bg-surface rounded-[20px]">
-          <div className="mb-4 md:mb-0 pr-4">
-            <h3 className="text-[16px] font-bold text-text-primary mb-1">Sign Out</h3>
-            <p className="text-[14px] text-text-secondary">Log out of your account on this device.</p>
+          <div className="mb-4 md:mb-0 pe-4">
+            <h3 className="text-[16px] font-bold text-text-primary mb-1">{t('sign_out_title')}</h3>
+            <p className="text-[14px] text-text-secondary">{t('sign_out_desc')}</p>
           </div>
           <button 
             onClick={handleSignOut}
@@ -714,9 +733,9 @@ export function DangerZone({ showToast }: { showToast: (t: 'success'|'error', m:
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center justify-between p-6 border border-red-200 bg-red-50/50 rounded-[20px] dark:border-red-900/50 dark:bg-red-950/20">
-          <div className="mb-4 md:mb-0 pr-4">
-            <h3 className="text-[16px] font-bold text-red-700 dark:text-red-500 mb-1">Delete Account</h3>
-            <p className="text-[14px] text-red-600/80 dark:text-red-400/80">Deleting your account is permanent. Your profile and data will be removed.</p>
+          <div className="mb-4 md:mb-0 pe-4">
+            <h3 className="text-[16px] font-bold text-red-700 dark:text-red-500 mb-1">{t('delete_account_title')}</h3>
+            <p className="text-[14px] text-red-600/80 dark:text-red-400/80">{t('delete_account_desc')}</p>
           </div>
           <button 
             onClick={() => setShowConfirm(true)}
@@ -739,20 +758,16 @@ export function DangerZone({ showToast }: { showToast: (t: 'success'|'error', m:
           <div className="relative w-full max-w-[440px] bg-white dark:bg-[#1C1C1E] rounded-[32px] p-8 md:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-white/20 dark:border-white/10 overflow-hidden animate-in zoom-in-[0.96] fade-in duration-300">
             
             {/* Subtle glow effect behind icon */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200px] h-[100px] bg-red-500/20 blur-[60px] rounded-full pointer-events-none" />
+            <div className="absolute top-0 start-1/2 -translate-x-1/2 w-[200px] h-[100px] bg-red-500/20 blur-[60px] rounded-full pointer-events-none" />
 
             <div className="relative flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center text-red-600 dark:text-red-500 mb-6 border border-red-100 dark:border-red-500/20 shadow-sm rotate-3 transform transition-transform hover:rotate-0">
                 <Trash2 size={28} strokeWidth={2.5} />
               </div>
               
-              <h3 className="text-[24px] font-extrabold text-[#1D1D1F] dark:text-white mb-3 tracking-tight">
-                Delete account?
-              </h3>
+              <h3 className="text-[24px] font-extrabold text-[#1D1D1F] dark:text-white mb-3 tracking-tight">{t('delete_confirm_title')}</h3>
               
-              <p className="text-[15px] text-[#6B7280] dark:text-[#A1A1AA] mb-8 leading-relaxed px-2">
-                This action is permanent and cannot be undone. All your data, profile information, and settings will be completely wiped from our servers.
-              </p>
+              <p className="text-[15px] text-[#6B7280] dark:text-[#A1A1AA] mb-8 leading-relaxed px-2">{t('delete_confirm_desc')}</p>
               
               <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <button 
@@ -764,9 +779,7 @@ export function DangerZone({ showToast }: { showToast: (t: 'success'|'error', m:
                 <button 
                   onClick={handleDelete} 
                   className="flex-1 py-3.5 px-4 bg-red-600 text-white font-bold text-[15px] rounded-[16px] shadow-[0_4px_14px_0_rgba(220,38,38,0.39)] hover:bg-red-700 hover:shadow-[0_6px_20px_rgba(220,38,38,0.23)] hover:-translate-y-0.5 transition-all"
-                >
-                  Yes, Delete
-                </button>
+                >{t('yes_delete')}</button>
               </div>
             </div>
           </div>

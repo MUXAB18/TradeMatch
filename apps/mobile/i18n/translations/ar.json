@@ -2,7 +2,7 @@
   "settings": {
     "title": "الإعدادات",
     "language": "اللغة",
-    "languageSubtitle": "تغيير اللغة الخاصة بك",
+    "languageSubtitle": "تغيير لغتك",
     "theme": "المظهر",
     "logout": "تسجيل الخروج",
     "selectLanguage": "اختر اللغة"
@@ -20,6 +20,44 @@
   },
   "common": {
     "cancel": "إلغاء",
-    "done": "تم"
+    "done": "تم",
+    "save": "حفظ التغييرات",
+    "saving": "جارٍ الحفظ...",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "signout": "تسجيل الخروج",
+    "coming_soon": "قريباً"
+  },
+  "auth": {
+    "login_title": "مرحباً بعودتك",
+    "login_subtitle": "أدخل بياناتك للوصول إلى حسابك",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "login_btn": "تسجيل الدخول",
+    "no_account": "ليس لديك حساب؟",
+    "signup_link": "إنشاء حساب",
+    "signup_title": "إنشاء حساب",
+    "signup_subtitle": "انضم إلى آلاف المحترفين الباحثين عن عمل.",
+    "name": "الاسم الكامل",
+    "signup_btn": "إنشاء حساب",
+    "has_account": "هل لديك حساب بالفعل؟",
+    "login_link": "تسجيل الدخول",
+    "or_continue_with": "أو تابع باستخدام",
+    "google": "جوجل",
+    "phone_number": "رقم الهاتف",
+    "forgot_password": "نسيت كلمة المرور؟",
+    "processing": "جارٍ المعالجة...",
+    "send_code": "إرسال الرمز"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "jobs": "الوظائف",
+    "certifications": "الشهادات",
+    "prep": "التحضير",
+    "settings": "الإعدادات",
+    "profile": "الملف الشخصي",
+    "help": "المساعدة والدعم",
+    "terms": "الشروط والأحكام",
+    "privacy": "سياسة الخصوصية"
   }
 }

@@ -13,27 +13,30 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useNotifications } from '@/contexts/NotificationsContext';
 import { profileKey } from '@/lib/utils';
+import LanguageSelector from '@/components/LanguageSelector';
+import { useTranslations } from 'next-intl';
 
 const WORKER_NAV = [
-  { href: '/home', label: 'Home', icon: Home },
-  { href: '/profile', label: 'Profile', icon: User },
-  { href: '/jobs', label: 'Jobs', icon: Briefcase },
-  { href: '/prep', label: 'Prep', icon: BookOpen },
-  { href: '/messages', label: 'Messages', icon: MessageSquare },
-  { href: '/notifications', label: 'Notifications', icon: Bell },
-  { href: '/settings', label: "Settings", icon: Settings },
+  { href: '/home', labelKey: 'home', icon: Home },
+  { href: '/profile', labelKey: 'profile', icon: User },
+  { href: '/jobs', labelKey: 'jobs', icon: Briefcase },
+  { href: '/prep', labelKey: 'prep', icon: BookOpen },
+  { href: '/messages', labelKey: 'messages', icon: MessageSquare },
+  { href: '/notifications', labelKey: 'notifications', icon: Bell },
+  { href: '/settings', labelKey: 'settings', icon: Settings },
 ];
 
 const AGENCY_NAV = [
-  { href: '/agency/dashboard', label: 'Dashboard', icon: Home },
-  { href: '/agency/candidates', label: 'Candidates', icon: User },
-  { href: '/agency/shortlisted', label: 'Shortlisted', icon: BookOpen },
-  { href: '/agency/jobs', label: 'Jobs', icon: Briefcase },
-  { href: '/messages', label: 'Messages', icon: MessageSquare },
-  { href: '/settings', label: 'Settings', icon: Settings },
+  { href: '/agency/dashboard', labelKey: 'dashboard', icon: Home },
+  { href: '/agency/candidates', labelKey: 'candidates', icon: User },
+  { href: '/agency/shortlisted', labelKey: 'shortlisted', icon: BookOpen },
+  { href: '/agency/jobs', labelKey: 'jobs', icon: Briefcase },
+  { href: '/messages', labelKey: 'messages', icon: MessageSquare },
+  { href: '/settings', labelKey: 'settings', icon: Settings },
 ];
 
 export default function TopNav() {
+  const t = useTranslations('sidebar');
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
@@ -68,9 +71,9 @@ export default function TopNav() {
   return (
     <>
       {/* ── Top Navigation Bar ───────────────────────────────────────── */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-surface border-b border-border h-[68px] flex items-center px-6">
+      <header className="fixed top-0 start-0 end-0 z-50 bg-surface border-b border-border h-[68px] flex items-center px-6">
         {/* Logo */}
-        <Link href="/home" className="flex items-center shrink-0 mr-8">
+        <Link href="/home" className="flex items-center shrink-0 me-8">
           <Image
             src="/logo-v3.png"
             alt="TradeMatch"
@@ -107,19 +110,20 @@ export default function TopNav() {
                 <div className="relative">
                   <Icon size={17} strokeWidth={isActive ? 2.5 : 2} className="shrink-0" />
                   {isNotifications && unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1.5 w-3.5 h-3.5 bg-error text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-surface shadow-sm">
+                    <span className="absolute -top-1 -end-1.5 w-3.5 h-3.5 bg-error text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-surface shadow-sm">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
                 </div>
-                {item.label}
+                {t(item.labelKey as any)}
               </Link>
             );
           })}
         </nav>
 
         {/* Right side — user avatar + sign out */}
-        <div className="hidden md:flex items-center gap-3 ml-auto">
+        <div className="hidden md:flex items-center gap-3 ms-auto">
+          <LanguageSelector />
           <Link
             href="/profile"
             className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold text-[14px] hover:opacity-90 transition-opacity overflow-hidden shrink-0"
@@ -146,29 +150,32 @@ export default function TopNav() {
           </div>
           <button
             onClick={handleSignOut}
-            className="ml-2 flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-bold text-text-secondary hover:text-error hover:bg-error/10 transition-all border border-transparent hover:border-error/20"
-            aria-label="Sign out"
+            className="ms-2 flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-bold text-text-secondary hover:text-error hover:bg-error/10 transition-all border border-transparent hover:border-error/20"
+            aria-label={t('signout')}
           >
             <LogOut size={15} strokeWidth={2} />
-            Sign out
+            {t('signout')}
           </button>
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden ml-auto p-2 rounded-xl text-text-secondary hover:bg-black/5 transition-colors"
-          onClick={() => setMobileOpen((o) => !o)}
-          aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={mobileOpen}
-        >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        {/* Mobile controls */}
+        <div className="md:hidden flex items-center gap-2 ms-auto">
+          <LanguageSelector />
+          <button
+            className="p-2 rounded-xl text-text-secondary hover:bg-black/5 transition-colors"
+            onClick={() => setMobileOpen((o) => !o)}
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileOpen}
+          >
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </header>
 
       {/* ── Mobile Dropdown Menu ─────────────────────────────────────── */}
       {mobileOpen && (
         <div
-          className="md:hidden fixed top-[68px] left-0 right-0 z-40 bg-surface border-b border-border shadow-lg"
+          className="md:hidden fixed top-[68px] start-0 end-0 z-40 bg-surface border-b border-border shadow-lg"
           role="navigation"
         >
           <div className="px-4 py-3 space-y-1">
@@ -191,7 +198,7 @@ export default function TopNav() {
                   `}
                 >
                   <Icon size={19} strokeWidth={isActive ? 2.5 : 2} />
-                  {item.label}
+                  {t(item.labelKey as any)}
                 </Link>
               );
             })}
@@ -222,7 +229,7 @@ export default function TopNav() {
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-bold text-error bg-error/8 border border-error/20"
             >
               <LogOut size={14} />
-              Sign out
+              {t('signout')}
             </button>
           </div>
         </div>

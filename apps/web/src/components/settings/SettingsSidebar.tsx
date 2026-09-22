@@ -12,42 +12,44 @@ interface SidebarProps {
   activeSection: SettingsSection;
   onSelect: (section: SettingsSection) => void;
 }
+import { useTranslations } from 'next-intl';
 
 export default function SettingsSidebar({ activeSection, onSelect }: SidebarProps) {
+  const t = useTranslations('settings');
   const categories = [
     {
       title: 'General',
       items: [
-        { id: 'profile', label: 'Profile', icon: <User size={18} />, desc: 'Personal information' },
-        { id: 'account', label: 'Account', icon: <Shield size={18} />, desc: 'Account details' },
+        { id: 'profile', label: t('title_profile'), icon: <User size={18} />, desc: 'Personal information' },
+        { id: 'account', label: t('title_account'), icon: <Shield size={18} />, desc: 'Account details' },
       ]
     },
     {
       title: 'Experience',
       items: [
-        { id: 'notifications', label: 'Notifications', icon: <Bell size={18} />, desc: 'Email and push' },
-        { id: 'appearance', label: 'Appearance', icon: <Palette size={18} />, desc: 'Theme preferences' },
-        { id: 'language', label: 'Language & Region', icon: <Globe size={18} />, desc: 'Locale settings' },
+        { id: 'notifications', label: t('title_notifications'), icon: <Bell size={18} />, desc: 'Email and push' },
+        { id: 'appearance', label: t('title_appearance'), icon: <Palette size={18} />, desc: 'Theme preferences' },
+        { id: 'language', label: t('title_language'), icon: <Globe size={18} />, desc: 'Locale settings' },
       ]
     },
     {
       title: 'Security & Privacy',
       items: [
         { id: 'security', label: 'Security', icon: <Lock size={18} />, desc: 'Passwords and 2FA' },
-        { id: 'privacy', label: 'Privacy', icon: <Shield size={18} />, desc: 'Data and visibility' },
+        { id: 'privacy', label: t('title_privacy'), icon: <Shield size={18} />, desc: 'Data and visibility' },
       ]
     },
     {
       title: 'Other',
       items: [
-        { id: 'billing', label: 'Billing', icon: <CreditCard size={18} />, desc: 'Plans and payments' },
-        { id: 'help', label: 'Help & Support', icon: <HelpCircle size={18} />, desc: 'FAQ and contact' },
+        { id: 'billing', label: t('title_billing'), icon: <CreditCard size={18} />, desc: 'Plans and payments' },
+        { id: 'help', label: t('title_help'), icon: <HelpCircle size={18} />, desc: 'FAQ and contact' },
       ]
     },
     {
-      title: 'Danger Zone',
+      title: t('title_danger'),
       items: [
-        { id: 'danger', label: 'Delete Account', icon: <AlertTriangle size={18} />, desc: 'Permanent removal' },
+        { id: 'danger', label: t('delete_account_title'), icon: <AlertTriangle size={18} />, desc: 'Permanent removal' },
       ]
     }
   ];
@@ -61,7 +63,7 @@ export default function SettingsSidebar({ activeSection, onSelect }: SidebarProp
             key={item.id}
             onClick={() => onSelect(item.id as SettingsSection)}
             className={`
-              flex items-center gap-2 whitespace-nowrap px-4 py-2.5 rounded-full text-[14px] font-bold snap-start mr-2
+              flex items-center gap-2 whitespace-nowrap px-4 py-2.5 rounded-full text-[14px] font-bold snap-start me-2
               ${activeSection === item.id 
                 ? 'bg-[#007AFF] text-white shadow-md' 
                 : 'bg-surface border border-border text-text-secondary hover:text-text-primary'
@@ -90,7 +92,7 @@ export default function SettingsSidebar({ activeSection, onSelect }: SidebarProp
                     key={item.id}
                     onClick={() => onSelect(item.id as SettingsSection)}
                     className={`
-                      w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left
+                      w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-start
                       ${isActive 
                         ? (isDanger ? 'bg-red-50 text-red-600' : 'bg-[#F0F7FF] text-[#007AFF]') 
                         : 'hover:bg-background/80 text-text-secondary hover:text-text-primary'

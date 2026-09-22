@@ -1,0 +1,63 @@
+{
+  "settings": {
+    "title": "ترتیبات",
+    "language": "زبان",
+    "languageSubtitle": "اپنی زبان تبدیل کریں",
+    "theme": "تھیم",
+    "logout": "لاگ آؤٹ",
+    "selectLanguage": "زبان منتخب کریں"
+  },
+  "home": {
+    "title": "ہوم",
+    "welcome": "خوش آمدید"
+  },
+  "tabs": {
+    "home": "ہوم",
+    "certifications": "سرٹیفیکیٹ",
+    "jobs": "ملازمتیں",
+    "prep": "تیاری",
+    "settings": "ترتیبات"
+  },
+  "common": {
+    "cancel": "منسوخ",
+    "done": "مکمل",
+    "save": "تبدیلیاں محفوظ کریں",
+    "saving": "محفوظ ہو رہا ہے...",
+    "edit": "ترمیم",
+    "delete": "حذف",
+    "signout": "سائن آؤٹ",
+    "coming_soon": "جلد آ رہا ہے"
+  },
+  "auth": {
+    "login_title": "خوش آمدید",
+    "login_subtitle": "اپنے اکاؤنٹ تک رسائی کے لیے تفصیلات درج کریں",
+    "email": "ای میل ایڈریس",
+    "password": "پاسورڈ",
+    "login_btn": "لاگ ان",
+    "no_account": "اکاؤنٹ نہیں ہے؟",
+    "signup_link": "سائن اپ کریں",
+    "signup_title": "اکاؤنٹ بنائیں",
+    "signup_subtitle": "ہزاروں پیشہ ور افراد کے ساتھ شامل ہوں۔",
+    "name": "پورا نام",
+    "signup_btn": "سائن اپ",
+    "has_account": "پہلے سے اکاؤنٹ ہے؟",
+    "login_link": "لاگ ان کریں",
+    "or_continue_with": "یا اس کے ساتھ جاری رکھیں",
+    "google": "گوگل",
+    "phone_number": "فون نمبر",
+    "forgot_password": "پاسورڈ بھول گئے؟",
+    "processing": "پروسیسنگ...",
+    "send_code": "کوڈ بھیجیں"
+  },
+  "nav": {
+    "home": "ہوم",
+    "jobs": "ملازمتیں",
+    "certifications": "سرٹیفیکیٹ",
+    "prep": "تیاری",
+    "settings": "ترتیبات",
+    "profile": "پروفائل",
+    "help": "مدد اور سپورٹ",
+    "terms": "شرائط و ضوابط",
+    "privacy": "پرائیویسی پالیسی"
+  }
+}

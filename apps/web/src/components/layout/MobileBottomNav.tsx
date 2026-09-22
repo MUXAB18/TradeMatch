@@ -27,7 +27,7 @@ export default function MobileBottomNav() {
   const tabs = profile?.role === 'agency' ? AGENCY_TABS : WORKER_TABS;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-border">
+    <div className="md:hidden fixed bottom-0 start-0 end-0 z-50 bg-surface border-t border-border">
       <div className="flex flex-row justify-around items-center h-[68px] px-1 safe-area-bottom">
         {tabs.map((tab) => {
           const isActive =

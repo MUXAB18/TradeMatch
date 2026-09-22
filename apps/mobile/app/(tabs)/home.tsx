@@ -37,6 +37,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import JobCard from '../../components/JobCard';
 import JobApplicationModal from '../../components/JobApplicationModal';
 import AnimatedCircleProgress from '../../components/AnimatedCircleProgress';
+import { GlobalPopup } from '../../components/GlobalPopup';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -465,6 +466,8 @@ export default function HomeScreen() {
       fadeOut={true}
       fallSpeed={3000}
     />
+    {/* Promotion popup — home screen only */}
+    <GlobalPopup />
   </View>
   );
 }

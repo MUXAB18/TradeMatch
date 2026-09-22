@@ -9,22 +9,23 @@ import {
   Modal,
   FlatList,
   TextInput,
+  ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Search, X } from 'lucide-react-native';
+import { ArrowLeft, Search, X, ChevronDown, Phone } from 'lucide-react-native';
 import { useToast } from '../../providers/ToastProvider';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import { useAppTheme, Typography, Spacing, BorderRadius } from '../../constants/theme';
 import { COUNTRIES, Country } from '../../constants/countries';
-import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
+import { FirebaseRecaptchaVerifierModal, FirebaseRecaptchaBanner } from 'expo-firebase-recaptcha';
 import { signInWithPhoneNumber } from 'firebase/auth';
 import { auth, firebaseConfig } from '../../services/firebase';
 
 export default function PhoneScreen() {
   const router = useRouter();
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState<Country>(COUNTRIES[0]); // Default to US
+  const [selectedCountry, setSelectedCountry] = useState<Country>(COUNTRIES[0]); // Default to Pakistan
   const [pickerVisible, setPickerVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -123,14 +124,18 @@ export default function PhoneScreen() {
   return (
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: colors.background }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <FirebaseRecaptchaVerifierModal
         ref={recaptchaVerifier}
         firebaseConfig={firebaseConfig}
         attemptInvisibleVerification={false}
       />
-      <View style={styles.content}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <TouchableOpacity 
           style={styles.backButton} 
           onPress={() => router.back()}
@@ -154,6 +159,7 @@ export default function PhoneScreen() {
             >
               <Text style={styles.selectorFlag}>{selectedCountry.flag}</Text>
               <Text style={[styles.selectorCode, { color: colors.textPrimary }]}>{selectedCountry.dial_code}</Text>
+              <ChevronDown size={16} color={colors.textSecondary} />
             </TouchableOpacity>
 
             <View style={{ flex: 1 }}>
@@ -166,10 +172,16 @@ export default function PhoneScreen() {
                 textContentType="telephoneNumber"
                 maxLength={15}
                 error={error}
+                icon={<Phone size={20} color={colors.textSecondary} />}
                 autoFocus
               />
             </View>
           </View>
+
+          <FirebaseRecaptchaBanner 
+            textStyle={{ color: colors.textSecondary, fontSize: Typography.small - 2, opacity: 0.8 }} 
+            linkStyle={{ color: colors.primary, fontWeight: '500' }} 
+          />
 
           <Button
             title="Send Code"
@@ -177,9 +189,10 @@ export default function PhoneScreen() {
             loading={loading}
             disabled={phoneNumber.length < 5}
             style={styles.button}
+            fullWidth
           />
         </View>
-      </View>
+      </ScrollView>
 
       {/* Country Picker Modal */}
       <Modal
@@ -228,11 +241,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xxl * 2,
-    paddingBottom: Spacing.xl,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 40,
   },
   backButton: {
     width: 40,
@@ -268,11 +281,11 @@ const styles = StyleSheet.create({
     height: Spacing.minTapTarget,
     borderWidth: 1,
     borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.md,
-    gap: Spacing.sm,
+    paddingHorizontal: Spacing.sm,
+    gap: 4,
   },
   selectorFlag: {
-    fontSize: 20,
+    fontSize: 22,
   },
   selectorCode: {
     fontSize: Typography.body,

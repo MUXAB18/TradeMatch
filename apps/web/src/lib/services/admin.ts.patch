@@ -1,0 +1,39 @@
+--- /Users/user/Desktop/myapp/apps/web/src/lib/services/admin.ts
++++ /Users/user/Desktop/myapp/apps/web/src/lib/services/admin.ts
+@@ -67,6 +67,13 @@
+   items: string[];
+ }
+ 
++export interface GlobalSettings {
++  maintenanceMode: boolean;
++  supportEmail: string;
++  platformFee: number;
++  announcementBanner: string;
++}
++
+ export interface CMSBlock {
+   id: string;
+   value: string;
+@@ -128,6 +135,22 @@
+   return updated;
+ }
+ 
++/* ─── Global Settings ────────────────────────────────────────── */
++
++export async function getGlobalSettings(): Promise<GlobalSettings> {
++  const snap = await getDoc(doc(db, 'platform_settings', 'global'));
++  if (snap.exists()) {
++    return snap.data() as GlobalSettings;
++  }
++  return { maintenanceMode: false, supportEmail: 'support@tradematch.com', platformFee: 5, announcementBanner: '' };
++}
++
++export async function updateGlobalSettings(settings: Partial<GlobalSettings>, adminEmail: string): Promise<void> {
++  await setDoc(doc(db, 'platform_settings', 'global'), settings, { merge: true });
++  addAudit('update_global_settings', 'platform_settings', 'global', adminEmail, `Updated global settings`);
++}
++
++
+ /* ─── CMS Blocks ─────────────────────────────────────────────── */
+ 
+ export async function getAllCMSBlocks(): Promise<CMSBlock[]> {

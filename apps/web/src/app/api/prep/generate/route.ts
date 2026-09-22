@@ -10,13 +10,20 @@ const groq = createGroq({
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { trade, skills, certifications, experienceLevel } = body;
+    const { trade, skills, certifications, experienceLevel, locale } = body;
 
     if (!trade) {
       return NextResponse.json(
         { error: "Trade is required to generate interview prep." },
         { status: 400 }
       );
+    }
+    
+    let languageInstruction = "English";
+    if (locale === 'ur') {
+      languageInstruction = "Roman Urdu (using English alphabet, for example: 'Aap ka is kaam mein kya tajurba hai?'). DO NOT write in English.";
+    } else if (locale === 'ar') {
+      languageInstruction = "Arabic. DO NOT write in English.";
     }
 
     const prompt = `Generate 10 highly realistic and tailored interview questions and answers for a ${trade}.
@@ -27,7 +34,9 @@ export async function POST(req: Request) {
     - Level: ${experienceLevel || 'Mid-level'}
     
     The output MUST be 10 flashcards, each containing a realistic interview question and a strong, model answer that the candidate can use to practice.
-    Categories should be distributed among: "Technical", "Safety", "Soft Skills", and "Scenario".`;
+    Categories should be distributed among: "Technical", "Safety", "Soft Skills", and "Scenario".
+    
+    CRITICAL INSTRUCTION: You MUST write ALL questions and answers entirely in ${languageInstruction}.`;
 
     const { object } = await generateObject({
       model: groq('openai/gpt-oss-20b'),

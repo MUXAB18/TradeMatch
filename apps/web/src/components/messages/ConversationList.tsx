@@ -24,7 +24,7 @@ export function ConversationList({ onNewMessage }: { onNewMessage?: () => void }
   };
 
   return (
-    <div className="h-full flex flex-col bg-surface border-r border-border w-full md:w-80 lg:w-[350px] shrink-0">
+    <div className="h-full flex flex-col bg-surface border-e border-border w-full md:w-80 lg:w-[350px] shrink-0">
       
       {/* Header */}
       <div className="p-4 border-b border-border">
@@ -37,13 +37,13 @@ export function ConversationList({ onNewMessage }: { onNewMessage?: () => void }
         
         {/* Search */}
         <div className="relative">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+          <Search size={18} className="absolute start-3 top-1/2 -translate-y-1/2 text-text-secondary" />
           <input
             type="text"
             placeholder="Search conversations..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-primary/50 focus:bg-surface rounded-xl pl-10 pr-4 py-2.5 text-[14px] font-medium text-text-primary placeholder:text-text-secondary outline-none transition-all"
+            className="w-full bg-black/5 dark:bg-white/5 border border-transparent focus:border-primary/50 focus:bg-surface rounded-xl ps-10 pe-4 py-2.5 text-[14px] font-medium text-text-primary placeholder:text-text-secondary outline-none transition-all"
           />
         </div>
       </div>
@@ -64,7 +64,7 @@ export function ConversationList({ onNewMessage }: { onNewMessage?: () => void }
               <button
                 key={conv.id}
                 onClick={() => setActiveConversationId(conv.id)}
-                className={`w-full flex items-start gap-3 p-3 rounded-2xl transition-all mb-1 text-left ${
+                className={`w-full flex items-start gap-3 p-3 rounded-2xl transition-all mb-1 text-start ${
                   isActive 
                     ? 'bg-primary/10' 
                     : 'hover:bg-black/5 dark:hover:bg-white/5'
@@ -80,14 +80,14 @@ export function ConversationList({ onNewMessage }: { onNewMessage?: () => void }
                     )}
                   </div>
                   {contact.online && (
-                    <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#34C759] rounded-full border-[3px] border-surface shadow-sm"></div>
+                    <div className="absolute bottom-0 end-0 w-3.5 h-3.5 bg-[#34C759] rounded-full border-[3px] border-surface shadow-sm"></div>
                   )}
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-0.5">
-                    <h3 className={`text-[15px] truncate pr-2 ${hasUnread ? 'font-bold text-text-primary' : 'font-semibold text-text-primary'}`}>
+                    <h3 className={`text-[15px] truncate pe-2 ${hasUnread ? 'font-bold text-text-primary' : 'font-semibold text-text-primary'}`}>
                       {contact.name}
                     </h3>
                     <div className="flex items-center gap-1.5 shrink-0">

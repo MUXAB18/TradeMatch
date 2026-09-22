@@ -29,12 +29,14 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SUPPORTED_LANGUAGES } from '../../i18n';
 import {
   Sun, Moon, Smartphone, ChevronRight, LogOut,
   User, Phone, Mail, Lock, ShieldCheck,
   Bell, MessageSquare, Clock,
   Globe, DollarSign, Trash2,
-  HelpCircle, FileText, Shield, Info, Award
+  HelpCircle, FileText, Shield, Info, Award, RefreshCw
 } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -246,6 +248,24 @@ export default function SettingsScreen() {
     Alert.alert('Clear Cache', 'Cached data has been cleared.', [{ text: 'OK' }]);
   };
 
+  const handleResetOnboarding = () => {
+    Alert.alert(
+      'Reset Onboarding',
+      'This will show the onboarding screen again on next app launch.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset',
+          style: 'destructive',
+          onPress: async () => {
+            await AsyncStorage.removeItem('has_seen_onboarding');
+            Alert.alert('Done', 'Restart the app to see the onboarding screen.');
+          },
+        },
+      ]
+    );
+  };
+
   const handleComingSoon = (feature: string) => {
     Alert.alert('Coming Soon', `${feature} will be available in a future update.`);
   };
@@ -286,19 +306,19 @@ export default function SettingsScreen() {
           icon: <Phone size={18} color={colors.primary} strokeWidth={2.5} />,
           title: 'Change Phone Number',
           subtitle: 'Update your registered number',
-          onPress: () => handleComingSoon('Change Phone Number'),
+          onPress: () => router.push('/change-phone'),
         },
         {
           icon: <Mail size={18} color={colors.primary} strokeWidth={2.5} />,
-          title: 'Email Address',
-          subtitle: 'Manage your email preferences',
-          onPress: () => handleComingSoon('Email Address'),
+          title: 'Change Email',
+          subtitle: 'Update your email address',
+          onPress: () => router.push('/change-email'),
         },
         {
           icon: <Lock size={18} color={colors.primary} strokeWidth={2.5} />,
-          title: 'Password',
-          subtitle: 'Change your password',
-          onPress: () => handleComingSoon('Password'),
+          title: 'Change Password',
+          subtitle: 'Update your security credentials',
+          onPress: () => router.push('/change-password'),
         },
         {
           icon: <ShieldCheck size={18} color={colors.primary} strokeWidth={2.5} />,
@@ -317,7 +337,7 @@ export default function SettingsScreen() {
           icon: <Globe size={18} color={colors.primary} strokeWidth={2.5} />,
           title: t('settings.language'),
           subtitle: t('settings.languageSubtitle'),
-          value: i18n.language === 'es' ? 'Español' : i18n.language === 'ar' ? 'العربية' : 'English',
+          value: SUPPORTED_LANGUAGES.find(l => l.code === i18n.language)?.nativeName ?? 'English',
           onPress: handleLanguageChange,
         },
         {
@@ -344,13 +364,7 @@ export default function SettingsScreen() {
           icon: <HelpCircle size={18} color={colors.primary} strokeWidth={2.5} />,
           title: 'Help & Support',
           subtitle: 'Get help or contact us',
-          onPress: () => handleComingSoon('Help & Support'),
-        },
-        {
-          icon: <FileText size={18} color={colors.primary} strokeWidth={2.5} />,
-          title: 'Terms & Conditions',
-          subtitle: 'Read our terms and policies',
-          onPress: () => handleComingSoon('Terms & Conditions'),
+          onPress: () => router.push('/help'),
         },
         {
           icon: <Award size={18} color={colors.primary} strokeWidth={2.5} />,
@@ -359,10 +373,22 @@ export default function SettingsScreen() {
           onPress: () => router.push('/(auth)/onboarding'),
         },
         {
+          icon: <RefreshCw size={18} color={colors.primary} strokeWidth={2.5} />,
+          title: 'Reset Onboarding',
+          subtitle: 'Show intro again on next launch',
+          onPress: handleResetOnboarding,
+        },
+        {
+          icon: <FileText size={18} color={colors.primary} strokeWidth={2.5} />,
+          title: 'Terms & Conditions',
+          subtitle: 'Read our terms and policies',
+          onPress: () => router.push('/terms'),
+        },
+        {
           icon: <Shield size={18} color={colors.primary} strokeWidth={2.5} />,
           title: 'Privacy Policy',
-          subtitle: 'Your privacy matters',
-          onPress: () => handleComingSoon('Privacy Policy'),
+          subtitle: 'How we protect your data',
+          onPress: () => router.push('/privacy'),
         },
         {
           icon: <Info size={18} color={colors.primary} strokeWidth={2.5} />,
@@ -565,35 +591,62 @@ export default function SettingsScreen() {
       {/* Language Selection Modal */}
       <Modal
         visible={isLanguageModalVisible}
-        transparent={true}
-        animationType="fade"
+        transparent
+        animationType="slide"
+        statusBarTranslucent
         onRequestClose={() => setLanguageModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
-            <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>{t('settings.selectLanguage')}</Text>
-            
-            <TouchableOpacity style={styles.modalOption} onPress={() => changeLanguage('en')}>
-              <Text style={[styles.modalOptionText, { color: i18n.language === 'en' ? colors.primary : colors.textPrimary }]}>English</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.modalOption} onPress={() => changeLanguage('es')}>
-              <Text style={[styles.modalOptionText, { color: i18n.language === 'es' ? colors.primary : colors.textPrimary }]}>Español</Text>
-            </TouchableOpacity>
+        <Pressable style={styles.modalOverlay} onPress={() => setLanguageModalVisible(false)}>
+          <Pressable style={[styles.modalContent, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF' }]} onPress={e => e.stopPropagation()}>
+            {/* Handle bar */}
+            <View style={[styles.modalHandle, { backgroundColor: isDark ? '#3A3A3C' : '#E2E8F0' }]} />
 
-            <TouchableOpacity style={styles.modalOption} onPress={() => changeLanguage('ar')}>
-              <Text style={[styles.modalOptionText, { color: i18n.language === 'ar' ? colors.primary : colors.textPrimary }]}>العربية (Arabic)</Text>
-            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+              {t('settings.selectLanguage')}
+            </Text>
 
-            <Button
-              title={t('common.cancel')}
-              variant="outline"
+            <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+              {SUPPORTED_LANGUAGES.map((lang, idx) => {
+                const isSelected = i18n.language === lang.code;
+                return (
+                  <TouchableOpacity
+                    key={lang.code}
+                    style={[
+                      styles.langOption,
+                      isSelected && { backgroundColor: colors.primary + '12' },
+                      idx === SUPPORTED_LANGUAGES.length - 1 && { borderBottomWidth: 0 },
+                      { borderBottomColor: isDark ? '#2C2C2E' : '#F1F5F9' },
+                    ]}
+                    onPress={() => changeLanguage(lang.code)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.langFlag}>{lang.flag}</Text>
+                    <View style={styles.langTextWrap}>
+                      <Text style={[styles.langNative, { color: isSelected ? colors.primary : colors.textPrimary }]}>
+                        {lang.nativeName}
+                      </Text>
+                      <Text style={[styles.langEnglish, { color: colors.textSecondary }]}>
+                        {lang.name}
+                      </Text>
+                    </View>
+                    {isSelected && (
+                      <View style={[styles.langCheck, { backgroundColor: colors.primary }]}>
+                        <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>✓</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            <TouchableOpacity
+              style={[styles.modalCancelBtn, { backgroundColor: isDark ? '#2C2C2E' : '#F1F5F9' }]}
               onPress={() => setLanguageModalVisible(false)}
-              style={{ marginTop: Spacing.md }}
-              fullWidth
-            />
-          </View>
-        </View>
+            >
+              <Text style={[styles.modalCancelText, { color: colors.textPrimary }]}>{t('common.cancel')}</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
       </Modal>
     </View>
   );
@@ -740,34 +793,73 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: Spacing.lg,
+    justifyContent: 'flex-end',
   },
   modalContent: {
     width: '100%',
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.xl,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: 12,
+    paddingBottom: 40,
+    maxHeight: '80%',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
+    shadowOffset: { width: 0, height: -10 },
     shadowOpacity: 0.1,
     shadowRadius: 20,
-    elevation: 10,
+    elevation: 20,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: Spacing.lg,
   },
   modalTitle: {
     fontSize: Typography.header,
-    fontWeight: '700',
-    marginBottom: Spacing.lg,
+    fontWeight: '800',
+    marginBottom: Spacing.xl,
     textAlign: 'center',
   },
-  modalOption: {
-    paddingVertical: Spacing.md,
+  langOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(150,150,150,0.2)',
+    borderRadius: 12,
   },
-  modalOptionText: {
-    fontSize: Typography.body,
+  langFlag: {
+    fontSize: 24,
+    marginRight: 16,
+  },
+  langTextWrap: {
+    flex: 1,
+  },
+  langNative: {
+    fontSize: 17,
     fontWeight: '600',
-    textAlign: 'center',
+    marginBottom: 2,
+  },
+  langEnglish: {
+    fontSize: 13,
+  },
+  langCheck: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCancelBtn: {
+    marginTop: Spacing.xl,
+    paddingVertical: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+  modalCancelText: {
+    fontSize: 17,
+    fontWeight: '600',
   },
 });

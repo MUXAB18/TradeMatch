@@ -191,13 +191,13 @@ export function MessageBubble({ message, onEdit, onDelete, onReact }: MessageBub
         
         {/* Message Actions Menu (shows on hover/tap) */}
         {(isHovered || showReactionPicker) && !isEditing && (
-          <div className={`action-menu absolute -top-8 ${isOutgoing ? 'right-2' : 'left-2'} flex items-center bg-surface border border-border rounded-lg shadow-sm overflow-visible z-50 transition-opacity after:content-[''] after:absolute after:-bottom-4 after:left-0 after:w-full after:h-4`}>
+          <div className={`action-menu absolute -top-8 ${isOutgoing ? 'end-2' : 'start-2'} flex items-center bg-surface border border-border rounded-lg shadow-sm overflow-visible z-50 transition-opacity after:content-[''] after:absolute after:-bottom-4 after:start-0 after:w-full after:h-4`}>
             <div className="relative flex items-center">
               <button onClick={() => setShowReactionPicker(!showReactionPicker)} className={`p-1.5 hover:bg-black/5 ${showReactionPicker ? 'text-primary bg-primary/10' : 'text-text-secondary hover:text-text-primary'}`} title="React">
                 <SmilePlus size={14} />
               </button>
               {showReactionPicker && (
-                <div className={`absolute bottom-full mb-2 ${isOutgoing ? 'right-0' : 'left-0'} bg-surface border border-border rounded-full shadow-lg p-1.5 flex gap-1 z-[60] animate-in slide-in-from-bottom-2 duration-200 after:content-[''] after:absolute after:-bottom-4 after:left-0 after:w-full after:h-4`}>
+                <div className={`absolute bottom-full mb-2 ${isOutgoing ? 'end-0' : 'start-0'} bg-surface border border-border rounded-full shadow-lg p-1.5 flex gap-1 z-[60] animate-in slide-in-from-bottom-2 duration-200 after:content-[''] after:absolute after:-bottom-4 after:start-0 after:w-full after:h-4`}>
                   {REACTION_OPTIONS.map(emoji => (
                     <button key={emoji} onClick={() => toggleReaction(emoji)} className="w-8 h-8 flex items-center justify-center text-lg hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-transform hover:scale-110">
                       {emoji}
@@ -226,8 +226,8 @@ export function MessageBubble({ message, onEdit, onDelete, onReact }: MessageBub
         <div 
           className={`relative px-4 py-2.5 rounded-2xl text-[15px] shadow-sm ${
             isOutgoing 
-              ? 'bg-primary text-white rounded-tr-sm' 
-              : 'bg-white dark:bg-black/40 border border-border text-text-primary rounded-tl-sm'
+              ? 'bg-primary text-white rounded-se-sm' 
+              : 'bg-white dark:bg-black/40 border border-border text-text-primary rounded-ss-sm'
           }`}
         >
           {isEditing ? (
@@ -261,7 +261,7 @@ export function MessageBubble({ message, onEdit, onDelete, onReact }: MessageBub
                     : 'bg-primary text-white hover:bg-primary-hover'
                 }`}
               >
-                {isPlaying ? <Pause size={18} className="fill-current" /> : <Play size={18} className="fill-current ml-1" />}
+                {isPlaying ? <Pause size={18} className="fill-current" /> : <Play size={18} className="fill-current ms-1" />}
               </button>
               <div className="flex-1 flex flex-col gap-1.5">
                 <div className="h-1.5 w-full bg-black/20 dark:bg-white/20 rounded-full overflow-hidden">
@@ -301,7 +301,7 @@ export function MessageBubble({ message, onEdit, onDelete, onReact }: MessageBub
           
           {/* Reactions */}
           {reactions.length > 0 && (
-            <div className={`absolute -bottom-3 ${isOutgoing ? 'right-4' : 'left-4'} flex gap-1 z-10 bg-surface rounded-full p-0.5 shadow-sm border border-border`}>
+            <div className={`absolute -bottom-3 ${isOutgoing ? 'end-4' : 'start-4'} flex gap-1 z-10 bg-surface rounded-full p-0.5 shadow-sm border border-border`}>
               {reactions.map((r, i) => (
                 <button 
                   key={i} 
@@ -323,13 +323,13 @@ export function MessageBubble({ message, onEdit, onDelete, onReact }: MessageBub
         {/* Metadata */}
         <div className="flex items-center gap-1 mt-1 px-1">
           {message.editedAt && (
-            <span className="text-[11px] text-text-secondary mr-1">Edited</span>
+            <span className="text-[11px] text-text-secondary me-1">Edited</span>
           )}
           <span className="text-[11px] text-text-secondary">
             {format(new Date(message.createdAt), 'h:mm a')}
           </span>
           {isOutgoing && (
-            <span className="ml-1 text-primary">
+            <span className="ms-1 text-primary">
               {message.status === 'sent' && <Check size={12} strokeWidth={3} />}
               {message.status === 'delivered' && <CheckCheck size={12} strokeWidth={3} />}
               {message.status === 'read' && <CheckCheck size={12} strokeWidth={3} className="text-success" />}

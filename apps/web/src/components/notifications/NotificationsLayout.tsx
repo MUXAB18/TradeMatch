@@ -4,8 +4,10 @@ import React from 'react';
 import NotificationList from './NotificationList';
 import { Settings, Bell } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export default function NotificationsLayout() {
+  const t = useTranslations('notifications');
   return (
     <div className="flex-1 flex justify-center bg-surface w-full h-full">
       {/* Centered container with max-width */}
@@ -24,13 +26,13 @@ export default function NotificationsLayout() {
                 <Bell size={20} />
               </div>
               <div>
-                <h2 className="text-[16px] font-bold text-text-primary">Notification Settings</h2>
-                <p className="text-[13px] text-text-secondary">Manage what you receive</p>
+                <h2 className="text-[16px] font-bold text-text-primary">{t('notif_settings')}</h2>
+                <p className="text-[13px] text-text-secondary">{t('notif_settings_desc')}</p>
               </div>
             </div>
             
             <p className="text-[14px] text-text-secondary mb-6 leading-relaxed">
-              Customize how you want to be notified about messages, job matches, and application updates.
+              {t('notif_customize')}
             </p>
             
             <Link 
@@ -38,7 +40,7 @@ export default function NotificationsLayout() {
               className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-surface border border-border hover:bg-black/5 dark:hover:bg-white/5 text-text-primary font-bold text-[14px] rounded-xl transition-colors"
             >
               <Settings size={18} />
-              Go to Settings
+              {t('go_to_settings')}
             </Link>
           </div>
           

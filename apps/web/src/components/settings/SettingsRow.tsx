@@ -30,7 +30,7 @@ export default function SettingsRow({
     <Element
       onClick={onPress}
       className={`
-        flex items-center gap-4 px-5 py-4 w-full text-left transition-colors
+        flex items-center gap-4 px-5 py-4 w-full text-start transition-colors
         ${onPress ? 'hover:bg-background/70 active:bg-background cursor-pointer' : ''}
         ${!isLast ? 'border-b border-border/60' : ''}
       `}

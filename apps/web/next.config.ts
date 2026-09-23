@@ -5,11 +5,6 @@ const withNextIntl = createNextIntlPlugin(
   './src/i18n.ts'
 );
 
-const nextConfig: NextConfig = {
-  devIndicators: {
-    appIsrStatus: false,
-    buildActivity: false,
-  }
-};
+const nextConfig: NextConfig = {};
 
 export default withNextIntl(nextConfig);

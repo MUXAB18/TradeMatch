@@ -71,15 +71,15 @@ export default function TopNav() {
   return (
     <>
       {/* ── Top Navigation Bar ───────────────────────────────────────── */}
-      <header className="fixed top-0 start-0 end-0 z-50 bg-surface border-b border-border h-[68px] flex items-center px-6">
+      <header className="fixed top-0 start-0 end-0 z-50 bg-surface border-b border-border h-[68px] flex items-center px-4 md:px-6">
         {/* Logo */}
-        <Link href="/home" className="flex items-center shrink-0 me-8">
+        <Link href="/home" className="flex items-center shrink-0 me-auto md:me-8">
           <Image
             src="/logo-v3.png"
             alt="TradeMatch"
             width={220}
             height={54}
-            className="h-11 w-auto object-contain"
+            className="h-9 md:h-11 w-auto object-contain"
             priority
             unoptimized
           />
@@ -159,7 +159,7 @@ export default function TopNav() {
         </div>
 
         {/* Mobile controls */}
-        <div className="md:hidden flex items-center gap-2 ms-auto">
+        <div className="md:hidden flex items-center gap-2 ms-4">
           <LanguageSelector />
           <button
             className="p-2 rounded-xl text-text-secondary hover:bg-black/5 transition-colors"
@@ -175,7 +175,7 @@ export default function TopNav() {
       {/* ── Mobile Dropdown Menu ─────────────────────────────────────── */}
       {mobileOpen && (
         <div
-          className="md:hidden fixed top-[68px] start-0 end-0 z-40 bg-surface border-b border-border shadow-lg"
+          className="md:hidden fixed top-[68px] start-0 end-0 z-40 bg-surface border-b border-border shadow-lg max-h-[calc(100vh-68px)] overflow-y-auto"
           role="navigation"
         >
           <div className="px-4 py-3 space-y-1">

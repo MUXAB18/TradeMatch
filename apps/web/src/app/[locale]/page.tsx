@@ -10,20 +10,20 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="px-6 md:px-12 py-6 flex justify-between items-center border-b border-border bg-surface">
-        <div className="flex items-center gap-3">
+      <header className="px-4 md:px-12 py-4 md:py-6 flex justify-between items-center border-b border-border bg-surface">
+        <div className="flex items-center gap-3 shrink-0">
           <img 
             src="/logo-v3.png" 
             alt="TradeMatch Logo" 
-            className="h-14 md:h-16 w-auto object-contain"
+            className="h-8 md:h-12 w-auto object-contain"
           />
         </div>
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-1.5 md:gap-4">
           <LanguageSelector />
-          <Link href="/login" className="px-4 md:px-6 py-2.5 font-bold text-text-primary hover:text-primary transition-colors text-sm md:text-base">
+          <Link href="/login" className="px-2 md:px-6 py-2 md:py-2.5 font-bold text-text-primary hover:text-primary transition-colors text-sm md:text-base whitespace-nowrap">
             {t('login')}
           </Link>
-          <Link href="/signup" className="px-4 md:px-6 py-2.5 bg-primary text-white font-bold rounded-full hover:bg-primary/90 transition-colors shadow-sm text-sm md:text-base">
+          <Link href="/signup" className="px-4 md:px-6 py-2 md:py-2.5 bg-primary text-white font-bold rounded-full hover:bg-primary/90 transition-colors shadow-sm text-sm md:text-base whitespace-nowrap">
             {t('signup')}
           </Link>
         </div>

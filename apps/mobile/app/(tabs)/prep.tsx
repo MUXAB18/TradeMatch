@@ -549,38 +549,48 @@ export default function PrepScreen() {
           </Text>
         </View>
 
-        {/* Suggested Modes Tags */}
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
-          contentContainerStyle={newStyles.tagsContainer}
-        >
+        {/* Suggested Modes Grid */}
+        <View style={newStyles.cardsGrid}>
           <TouchableOpacity 
-            style={[newStyles.tag, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}
+            style={[newStyles.modeCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : colors.primary }]}
             onPress={() => setMode('flashcards')}
+            activeOpacity={0.7}
           >
-            <Zap size={14} color={colors.primary} />
-            <Text style={[newStyles.tagText, { color: colors.textPrimary }]}>Flashcards</Text>
+            <View style={[newStyles.cardIconWrapper, { backgroundColor: `${colors.primary}15` }]}>
+              <Zap size={24} color={colors.primary} />
+            </View>
+            <Text style={[newStyles.cardTitle, { color: colors.textPrimary }]}>Flashcards</Text>
+            <Text style={[newStyles.cardDesc, { color: colors.textSecondary }]}>Quick technical review</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[newStyles.tag, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}
+            style={[newStyles.modeCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : colors.success }]}
             onPress={() => setMode('chat')}
+            activeOpacity={0.7}
           >
-            <MessageSquare size={14} color={colors.success} />
-            <Text style={[newStyles.tagText, { color: colors.textPrimary }]}>Text Chat</Text>
+            <View style={[newStyles.cardIconWrapper, { backgroundColor: `${colors.success}15` }]}>
+              <MessageSquare size={24} color={colors.success} />
+            </View>
+            <Text style={[newStyles.cardTitle, { color: colors.textPrimary }]}>Text Chat</Text>
+            <Text style={[newStyles.cardDesc, { color: colors.textSecondary }]}>Ask any question</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[newStyles.tag, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
-            <Headphones size={14} color={colors.warning} />
-            <Text style={[newStyles.tagText, { color: colors.textPrimary }]}>Voice Session</Text>
+          <TouchableOpacity style={[newStyles.modeCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : colors.warning }]} activeOpacity={0.7}>
+            <View style={[newStyles.cardIconWrapper, { backgroundColor: `${colors.warning}15` }]}>
+              <Headphones size={24} color={colors.warning} />
+            </View>
+            <Text style={[newStyles.cardTitle, { color: colors.textPrimary }]}>Voice Session</Text>
+            <Text style={[newStyles.cardDesc, { color: colors.textSecondary }]}>Mock interview</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[newStyles.tag, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
-            <BookOpen size={14} color="#8B5CF6" />
-            <Text style={[newStyles.tagText, { color: colors.textPrimary }]}>Trade Knowledge</Text>
+          <TouchableOpacity style={[newStyles.modeCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : '#8B5CF6' }]} activeOpacity={0.7}>
+            <View style={[newStyles.cardIconWrapper, { backgroundColor: `#8B5CF615` }]}>
+              <BookOpen size={24} color="#8B5CF6" />
+            </View>
+            <Text style={[newStyles.cardTitle, { color: colors.textPrimary }]}>Trade Knowledge</Text>
+            <Text style={[newStyles.cardDesc, { color: colors.textSecondary }]}>Code & safety</Text>
           </TouchableOpacity>
-        </ScrollView>
+        </View>
       </ScrollView>
 
       {/* Bottom Input Area */}
@@ -718,26 +728,43 @@ const newStyles = StyleSheet.create({
     lineHeight: 42,
     letterSpacing: -0.5,
   },
-  tagsContainer: {
-    paddingHorizontal: 20,
-    gap: 12,
-  },
-  tag: {
+  cardsGrid: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 20,
-    gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 1,
+    flexWrap: 'wrap',
+    paddingHorizontal: 20,
+    gap: 16,
+    justifyContent: 'space-between',
   },
-  tagText: {
-    fontSize: 14,
-    fontWeight: '600',
+  modeCard: {
+    width: (SCREEN_WIDTH - 40 - 16) / 2,
+    padding: 20,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.03)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    elevation: 6,
+    marginBottom: 4,
+  },
+  cardIconWrapper: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  cardTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    marginBottom: 6,
+    letterSpacing: -0.3,
+  },
+  cardDesc: {
+    fontSize: 13,
+    fontWeight: '500',
+    lineHeight: 18,
   },
   bottomInputContainer: {
     position: 'absolute',

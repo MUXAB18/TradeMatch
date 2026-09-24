@@ -52,47 +52,47 @@ export default function JobCard({
     return (
       <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(index * 50).duration(250)}>
         <TouchableOpacity
-          style={[styles.featuredCard, { backgroundColor: isDark ? colors.surface : '#111111' }]}
+          style={[styles.featuredCard, { backgroundColor: colors.black }]}
           onPress={onPress}
           activeOpacity={0.8}
         >
           <View style={styles.featuredHeader}>
             <View style={styles.featuredCompanyInfo}>
-              <View style={[styles.companyLogo, { backgroundColor: isDark ? '#333' : '#333' }]}>
-                <Text style={styles.companyLogoText}>{job.company ? job.company.substring(0, 2).toUpperCase() : 'CO'}</Text>
+              <View style={[styles.companyLogo, { backgroundColor: colors.surface }]}>
+                <Text style={[styles.companyLogoText, { color: colors.textPrimary }]}>{job.company ? job.company.substring(0, 2).toUpperCase() : 'CO'}</Text>
               </View>
               <View>
-                <Text style={styles.featuredCompanyName}>{job.company || 'Unknown Company'}</Text>
-                <Text style={styles.featuredLocation}>{score.breakdown?.distanceKm || '10'} km away</Text>
+                <Text style={[styles.featuredCompanyName, { color: colors.white }]}>{job.company || 'Unknown Company'}</Text>
+                <Text style={[styles.featuredLocation, { color: colors.white, opacity: 0.7 }]}>{score.breakdown?.distanceKm || '10'} km away</Text>
               </View>
             </View>
             <TouchableOpacity onPress={handleSave}>
-              <Bookmark size={20} color="#FFFFFF" fill={isSaved ? "#FFFFFF" : "transparent"} />
+              <Bookmark size={20} color={colors.white} fill={isSaved ? colors.white : "transparent"} />
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.featuredJobTitle}>{job.title}</Text>
+          <Text style={[styles.featuredJobTitle, { color: colors.white }]}>{job.title}</Text>
 
           <View style={styles.featuredTags}>
             {job.salary && (
-              <View style={styles.featuredTag}>
-                <Text style={styles.featuredTagText}>{job.salary}</Text>
+              <View style={[styles.featuredTag, { backgroundColor: colors.white, opacity: 0.15 }]}>
+                <Text style={[styles.featuredTagText, { color: colors.white }]}>{job.salary}</Text>
               </View>
             )}
-            <View style={styles.featuredTag}>
-              <Text style={styles.featuredTagText}>Full Time</Text>
+            <View style={[styles.featuredTag, { backgroundColor: colors.white, opacity: 0.15 }]}>
+              <Text style={[styles.featuredTagText, { color: colors.white }]}>Full Time</Text>
             </View>
-            <View style={styles.featuredTag}>
-              <Text style={styles.featuredTagText}>{Math.round(score.total)}% Match</Text>
+            <View style={[styles.featuredTag, { backgroundColor: colors.white, opacity: 0.15 }]}>
+              <Text style={[styles.featuredTagText, { color: colors.white }]}>{Math.round(score.total)}% Match</Text>
             </View>
           </View>
           
           {expanded && (
-             <View style={styles.expandedSectionFeatured}>
+             <View style={[styles.expandedSectionFeatured, { borderTopColor: colors.white }]}>
                 {job.description && (
                   <View style={styles.detailSection}>
-                    <Text style={[styles.detailLabel, { color: '#FFF' }]}>Role Description</Text>
-                    <Text style={[styles.detailText, { color: '#CCC' }]}>{job.description}</Text>
+                    <Text style={[styles.detailLabel, { color: colors.white }]}>Role Description</Text>
+                    <Text style={[styles.detailText, { color: colors.white, opacity: 0.8 }]}>{job.description}</Text>
                   </View>
                 )}
                 <Button
@@ -115,12 +115,12 @@ export default function JobCard({
   return (
     <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(index * 50).duration(250)}>
       <TouchableOpacity
-        style={[styles.listCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}
+        style={[styles.listCard, { backgroundColor: colors.surface }]}
         onPress={onPress}
         activeOpacity={0.7}
       >
         <View style={styles.listMain}>
-          <View style={[styles.companyLogoList, { backgroundColor: isDark ? '#333' : '#F5F5F5' }]}>
+          <View style={[styles.companyLogoList, { backgroundColor: colors.background }]}>
             <Text style={[styles.companyLogoTextList, { color: colors.textPrimary }]}>
               {job.company ? job.company.substring(0, 2).toUpperCase() : 'CO'}
             </Text>
@@ -197,22 +197,18 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   companyLogoText: {
-    color: '#FFF',
     fontSize: 16,
     fontWeight: '800',
   },
   featuredCompanyName: {
-    color: '#FFF',
     fontSize: 15,
     fontWeight: '600',
   },
   featuredLocation: {
-    color: '#A0A0A0',
     fontSize: 13,
     marginTop: 2,
   },
   featuredJobTitle: {
-    color: '#FFF',
     fontSize: 24,
     fontWeight: '800',
     letterSpacing: -0.5,
@@ -224,13 +220,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   featuredTag: {
-    backgroundColor: '#333333',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
   },
   featuredTagText: {
-    color: '#FFF',
     fontSize: 12,
     fontWeight: '600',
   },
@@ -238,7 +232,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
     paddingTop: 24,
     borderTopWidth: 1,
-    borderTopColor: '#333',
+    opacity: 0.9,
   },
 
   // LIST CARD

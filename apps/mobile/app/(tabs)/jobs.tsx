@@ -150,7 +150,7 @@ export default function JobsScreen() {
 
   if (profileLoading || jobsLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: isDark ? '#000' : '#F8F9FA' }]}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.topBar, { paddingTop: Math.max(insets.top + 10, 50) }]}>
            <Skeleton width={44} height={44} borderRadius={16} />
            <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -168,7 +168,7 @@ export default function JobsScreen() {
 
   if (error) {
     return (
-      <View style={[styles.centerContainer, { backgroundColor: isDark ? '#000' : '#F8F9FA' }]}>
+      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
         <Text style={[styles.errorTitle, { color: colors.error }]}>Error Loading Jobs</Text>
         <Text style={[styles.errorText, { color: colors.textSecondary }]}>{error}</Text>
       </View>
@@ -183,7 +183,7 @@ export default function JobsScreen() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? '#000' : '#F8F9FA' }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Animated.ScrollView
         style={styles.scrollView}
         contentContainerStyle={[styles.scrollContent, { paddingTop: Math.max(insets.top + 10, 50) }]}
@@ -194,11 +194,11 @@ export default function JobsScreen() {
       >
         {/* Top Header */}
         <View style={styles.topBar}>
-          <TouchableOpacity style={[styles.iconBtn, { backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF' }]}>
+          <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.surface }]}>
             <Grid size={22} color={colors.textPrimary} />
           </TouchableOpacity>
           <View style={styles.topBarRight}>
-            <TouchableOpacity style={[styles.iconBtn, { backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF' }]}>
+            <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.surface }]}>
               <Bell size={22} color={colors.textPrimary} />
             </TouchableOpacity>
             <Image 
@@ -215,14 +215,14 @@ export default function JobsScreen() {
 
         {/* Search Bar */}
         <View style={styles.searchRow}>
-          <View style={[styles.searchContainer, { backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF' }]}>
+          <View style={[styles.searchContainer, { backgroundColor: colors.surface }]}>
             <TextInput 
               placeholder="Search jobs..." 
               placeholderTextColor={colors.textSecondary}
               style={[styles.searchInput, { color: colors.textPrimary }]}
             />
           </View>
-          <TouchableOpacity style={[styles.filterBtn, { backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF' }]}>
+          <TouchableOpacity style={[styles.filterBtn, { backgroundColor: colors.surface }]}>
             <Sliders size={22} color={colors.textPrimary} />
           </TouchableOpacity>
         </View>
@@ -236,7 +236,7 @@ export default function JobsScreen() {
                 key={f.id}
                 style={[
                   styles.filterPill,
-                  isActive ? { backgroundColor: isDark ? '#333' : '#111' } : { backgroundColor: isDark ? '#1A1A1A' : '#FFFFFF' }
+                  isActive ? { backgroundColor: colors.primary } : { backgroundColor: colors.surface }
                 ]}
                 onPress={() => setActiveFilter(f.id as any)}
               >

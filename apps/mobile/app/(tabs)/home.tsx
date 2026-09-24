@@ -10,20 +10,16 @@ import {
   Dimensions,
   Image,
 } from 'react-native';
-import { User, Settings, Briefcase, Award, Zap, ChevronRight, CheckCircle2, ArrowRight, Flame } from 'lucide-react-native';
+import { User, Settings, Briefcase, Award, Zap, ChevronRight, ArrowRight, Flame, Sparkles, Bot, PenTool } from 'lucide-react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from '../../utils/haptics';
 import Animated, {
   FadeInUp,
-  FadeInDown,
   useReducedMotion,
   useSharedValue,
-  withRepeat,
   useAnimatedStyle,
-  withSequence,
-  withTiming,
   withSpring,
 } from 'react-native-reanimated';
 import { useNetwork } from '../../contexts/NetworkContext';
@@ -36,77 +32,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../contexts/AuthContext';
 import JobCard from '../../components/JobCard';
 import JobApplicationModal from '../../components/JobApplicationModal';
-import AnimatedCircleProgress from '../../components/AnimatedCircleProgress';
 import { GlobalPopup } from '../../components/GlobalPopup';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning 👋';
-  if (hour < 17) return 'Good afternoon 👋';
-  return 'Good evening 👋';
-}
-
-function AnimatedStat({ value, label, colors, index, onPress, icon: Icon }: any) {
-  const reducedMotion = useReducedMotion();
-  const [displayValue, setDisplayValue] = useState(reducedMotion ? value : 0);
-  const scale = useSharedValue(1);
-
-  useEffect(() => {
-    if (reducedMotion || value === 0) {
-      setDisplayValue(value);
-      return;
-    }
-    const duration = 1000;
-    const steps = 30;
-    const increment = value / steps;
-    let current = 0;
-    const interval = setInterval(() => {
-      current += increment;
-      if (current >= value) {
-        setDisplayValue(value);
-        clearInterval(interval);
-      } else {
-        setDisplayValue(Math.round(current));
-      }
-    }, duration / steps);
-    return () => clearInterval(interval);
-  }, [value, reducedMotion]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }]
-  }));
-
-  return (
-    <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(200 + index * 50).springify().damping(15)} style={styles.statCardContainer}>
-      <TouchableOpacity
-        onPress={onPress}
-        onPressIn={() => { scale.value = withSpring(0.95, { damping: 15, stiffness: 300 }); }}
-        onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 300 }); }}
-        activeOpacity={1}
-      >
-        <Animated.View style={[styles.statContent, animatedStyle]}>
-          <Text style={[styles.statValue, { color: colors.textPrimary }]}>{displayValue}</Text>
-          <View style={styles.statLabelRow}>
-            <Icon size={14} color={colors.textSecondary} style={{ marginRight: 4 }} />
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{label}</Text>
-          </View>
-        </Animated.View>
-      </TouchableOpacity>
-    </Animated.View>
-  );
-}
-
-interface QuickLinkProps {
-  title: string;
-  actionText: string;
-  onPress: () => void;
-  colors: any;
-  index: number;
-}
-
-function QuickLink({ title, actionText, onPress, colors, index }: QuickLinkProps) {
+function QuickLink({ title, actionText, onPress, colors, index, icon: Icon }: any) {
   const reducedMotion = useReducedMotion();
   const scale = useSharedValue(1);
 
@@ -122,11 +52,16 @@ function QuickLink({ title, actionText, onPress, colors, index }: QuickLinkProps
         onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 300 }); }}
         activeOpacity={1}
       >
-        <Animated.View style={[styles.quickLink, { backgroundColor: colors.surface }, animatedStyle]}>
-          <Text style={[styles.quickLinkTitle, { color: colors.textPrimary }]}>{title}</Text>
-          <View style={styles.quickLinkActionRow}>
-            <Text style={[styles.quickLinkActionText, { color: colors.primary }]}>{actionText}</Text>
-            <ChevronRight size={16} color={colors.primary} />
+        <Animated.View style={[newStyles.listCard, { backgroundColor: colors.surface }, animatedStyle]}>
+          <View style={[newStyles.listCardIcon, { backgroundColor: `${colors.primary}15` }]}>
+            <Icon size={20} color={colors.primary} />
+          </View>
+          <View style={newStyles.listCardText}>
+            <Text style={[newStyles.listCardTitle, { color: colors.textPrimary }]}>{title}</Text>
+            <Text style={[newStyles.listCardSubtitle, { color: colors.textSecondary }]}>{actionText}</Text>
+          </View>
+          <View style={newStyles.listCardArrow}>
+            <ArrowRight size={20} color={colors.textSecondary} />
           </View>
         </Animated.View>
       </TouchableOpacity>
@@ -141,15 +76,11 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const { data: profile, loading, error, refetch: refetchProfile } = useUserProfile();
   const { colors, isDark } = useAppTheme();
-  const [greeting, setGreeting] = useState('');
   
   const initials = (profile?.name || user?.displayName || 'U').substring(0, 1).toUpperCase();
+  const firstName = profile?.name ? profile.name.split(' ')[0] : 'User';
 
-  useEffect(() => {
-    setGreeting(getGreeting());
-  }, []);
-
-  const { have: userCerts, missing: missingCerts, refetch: refetchCerts } = useCertifications(
+  const { missing: missingCerts, refetch: refetchCerts } = useCertifications(
     profile?.trade || '',
     profile?.country || '',
     profile?.certifications || []
@@ -241,479 +172,471 @@ export default function HomeScreen() {
   const totalSteps = Object.keys(completionSteps).length;
   const completionPercent = Math.round((completedSteps / totalSteps) * 100);
   const isProfileComplete = completedSteps === totalSteps;
-  
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: isDark ? colors.background : '#F3F6F1' }}>
       <ScrollView
-        style={[styles.container, { backgroundColor: colors.background }]}
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingTop: Math.max(insets.top + 16, 32) }
-        ]}
+        contentContainerStyle={{ paddingBottom: Spacing.xxl + 80 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
         }
       >
         {/* Header */}
-      <View style={styles.header}>
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(100).springify().damping(15)}>
-          <View style={styles.headerTop}>
-            <View style={styles.greetingContainer}>
-              <Text style={[styles.greeting, { color: colors.textSecondary }]}>{greeting}</Text>
-              <Text style={[styles.name, { color: colors.textPrimary }]}>{profile.name}</Text>
-              <Text style={[styles.trade, { color: colors.textSecondary }]}>{profile.trade.toUpperCase()}</Text>
+        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(100).springify().damping(15)} style={[newStyles.header, { marginTop: Math.max(insets.top + 10, 50) }]}>
+          <TouchableOpacity onPress={() => router.push('/profile')} style={[newStyles.userBadge, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
+            <View style={newStyles.avatarPlaceholder}>
+               {user?.photoURL ? (
+                 <Image source={{ uri: user.photoURL }} style={{ width: '100%', height: '100%', borderRadius: 16 }} />
+               ) : (
+                 <Text style={newStyles.avatarText}>{initials}</Text>
+               )}
             </View>
-            <View style={styles.headerRight}>
-              <TouchableOpacity
-                onPress={() => router.push('/profile')}
-                style={styles.settingsButton}
-                activeOpacity={0.7}
-              >
-                <Settings size={22} color={colors.textSecondary} />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                onPress={() => router.push('/profile')}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.profileIconContainer, { backgroundColor: colors.primary }]}>
-                  {user?.photoURL ? (
-                    <Image source={{ uri: user.photoURL }} style={styles.profileImage} />
-                  ) : (
-                    <Text style={styles.avatarText}>{initials}</Text>
-                  )}
-                </View>
-              </TouchableOpacity>
-            </View>
+            <Text style={[newStyles.userBadgeText, { color: colors.textPrimary }]}>
+              Hello, {firstName}!
+            </Text>
+            <ChevronRight size={14} color={colors.textSecondary} style={{ marginLeft: 4 }} />
+          </TouchableOpacity>
+          
+          <View style={newStyles.headerActions}>
+            <TouchableOpacity style={[newStyles.iconButton, { backgroundColor: colors.primary }]}>
+              <Sparkles size={18} color="#FFF" />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFF' }]}
+              onPress={() => router.push('/(tabs)/settings')}
+            >
+              <Settings size={18} color={colors.textPrimary} />
+            </TouchableOpacity>
           </View>
-          <Text style={[styles.contextText, { color: colors.textSecondary }]}>Ready for your next opportunity?</Text>
         </Animated.View>
-      </View>
 
-      {/* Stats Overview */}
-      <View style={[styles.statsPanel, { backgroundColor: colors.surface }]}>
-        <AnimatedStat icon={Briefcase} value={jobs.length} label="Matches" colors={colors} index={0} onPress={() => router.push('/(tabs)/jobs')} />
-        <View style={[styles.statDivider, { backgroundColor: isDark ? colors.border : '#E5E5EA' }]} />
-        <AnimatedStat icon={Zap} value={profile.skills.length} label="Skills" colors={colors} index={1} onPress={() => router.push('/profile/edit/skills')} />
-        <View style={[styles.statDivider, { backgroundColor: isDark ? colors.border : '#E5E5EA' }]} />
-        <AnimatedStat icon={Award} value={userCerts.length} label="Certificates" colors={colors} index={2} onPress={() => router.push('/(tabs)/certifications')} />
-      </View>
+        {/* Hero Text */}
+        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(150).springify().damping(15)} style={newStyles.heroSection}>
+          <Text style={[newStyles.heroTextLight, { color: colors.textSecondary }]}>Ready for your next</Text>
+          <Text style={[newStyles.heroTextBold, { color: colors.textPrimary }]}>opportunity?</Text>
+        </Animated.View>
 
-      {/* Dashboard Section */}
-      <View style={styles.dashboardGrid}>
-        {/* Profile Progress */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(300).springify().damping(15)} style={styles.dashboardCardWrapper}>
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => !isProfileComplete ? router.push('/profile') : null}
-            style={[styles.dashboardCard, { backgroundColor: colors.surface, borderColor: isDark ? colors.border : '#E5E5EA' }]}
+        {/* Quick Actions Row */}
+        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(200).springify().damping(15)} style={newStyles.quickActionsRow}>
+          <TouchableOpacity 
+            style={[newStyles.quickActionPill, { backgroundColor: isDark ? colors.surface : '#FFF', borderColor: isDark ? colors.border : '#E5E5EA', borderWidth: 1 }]}
+            onPress={() => router.push('/(tabs)/jobs')}
           >
-            <View style={styles.dashboardCardHeader}>
-              <Text style={[styles.dashboardCardTitle, { color: colors.textSecondary }]}>Profile Strength</Text>
-            </View>
-            <View style={styles.dashboardCardContent}>
-              <AnimatedCircleProgress
-                progress={completionPercent}
-                size={80}
-                strokeWidth={8}
-                primaryColor={isProfileComplete ? colors.success : colors.primary}
-                secondaryColor={colors.warning}
-                successColor={colors.success}
-                backgroundColor={isDark ? '#333' : '#E5E5EA'}
-              />
-            </View>
+            <Text style={[newStyles.quickActionPillText, { color: colors.textPrimary }]}>Explore Jobs</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[newStyles.quickActionCircle, { backgroundColor: isDark ? colors.surface : '#FFF' }]}
+            onPress={() => router.push('/(tabs)/prep')}
+          >
+            <Bot size={20} color={colors.textPrimary} />
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[newStyles.quickActionCircle, { backgroundColor: isDark ? colors.surface : '#FFF' }]}
+            onPress={() => router.push('/(tabs)/certifications')}
+          >
+            <Award size={20} color={colors.textPrimary} />
           </TouchableOpacity>
         </Animated.View>
 
-        {/* Activity Goal */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(400).springify().damping(15)} style={styles.dashboardCardWrapper}>
-          <View style={[styles.dashboardCard, { backgroundColor: colors.surface, borderColor: isDark ? colors.border : '#E5E5EA' }]}>
-            <View style={[styles.dashboardCardHeader, { flexDirection: 'row', justifyContent: 'space-between', width: '100%', alignItems: 'center' }]}>
-              <Text style={[styles.dashboardCardTitle, { color: colors.textSecondary }]}>Weekly Goal</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: `${colors.warning}15`, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10 }}>
-                <Flame size={12} color={colors.warning} style={{ marginRight: 2 }} />
-                <Text style={{ fontSize: 11, fontWeight: '700', color: colors.warning }}>3 Wks</Text>
+        {/* Big Banner */}
+        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(300).springify().damping(15)}>
+          {!isProfileComplete ? (
+            <View style={[newStyles.bannerCard, { backgroundColor: colors.primary }]}>
+              <View style={newStyles.bannerHeader}>
+                <View style={[newStyles.bannerIconWrapper, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+                  <Zap size={24} color="#FFF" />
+                </View>
+                <View style={newStyles.bannerTextContainer}>
+                  <Text style={newStyles.bannerTitle}>Complete Profile</Text>
+                  <Text style={newStyles.bannerSubtitle}>Add your experience and skills to unlock premium job matches.</Text>
+                </View>
               </View>
+              <TouchableOpacity style={newStyles.bannerButton} onPress={() => router.push('/profile/edit/name')}>
+                <Text style={newStyles.bannerButtonText}>+ Add Details</Text>
+              </TouchableOpacity>
             </View>
-            <View style={styles.dashboardCardContent}>
-              <AnimatedCircleProgress
-                progress={Math.min((appliedJobs.length / 5) * 100, 100)}
-                size={80}
-                strokeWidth={8}
-                primaryColor={colors.secondary}
-                secondaryColor={colors.primary}
-                successColor={colors.success}
-                backgroundColor={isDark ? '#333' : '#E5E5EA'}
-              />
+          ) : (
+            <View style={[newStyles.bannerCard, { backgroundColor: colors.success || '#84CC16' }]}>
+              <View style={newStyles.bannerHeader}>
+                <View style={[newStyles.bannerIconWrapper, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+                  <Zap size={24} color="#FFF" />
+                </View>
+                <View style={newStyles.bannerTextContainer}>
+                  <Text style={newStyles.bannerTitle}>Profile Complete!</Text>
+                  <Text style={newStyles.bannerSubtitle}>You're ready to match with top employers in your trade.</Text>
+                </View>
+              </View>
+              <TouchableOpacity style={newStyles.bannerButton} onPress={() => router.push('/(tabs)/jobs')}>
+                <Text style={newStyles.bannerButtonText}>View Matches</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={[styles.dashboardCardSubtitle, { color: colors.textPrimary }]}>
-              {appliedJobs.length} / 5 Applied
-            </Text>
-          </View>
+          )}
         </Animated.View>
-      </View>
 
-      {/* Primary Action */}
-      <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(400).springify().damping(15)}>
-        <TouchableOpacity
-          style={[styles.primaryActionBtn, { backgroundColor: colors.primary }]}
-          onPress={() => router.push('/(tabs)/jobs')}
-          activeOpacity={0.85}
+        {/* Square Stats Row */}
+        <Animated.ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={newStyles.statsScroll}
+          entering={reducedMotion ? undefined : FadeInUp.delay(400).springify().damping(15)}
         >
-          <Text style={styles.primaryActionText}>Explore Opportunities</Text>
-          <ArrowRight size={20} color="#FFF" />
-        </TouchableOpacity>
-      </Animated.View>
+          <TouchableOpacity style={[newStyles.statSquare, { backgroundColor: isDark ? colors.surface : '#FFF' }]} onPress={() => router.push('/(tabs)/jobs')}>
+            <View style={[newStyles.statIconBadge, { backgroundColor: `${colors.primary}15` }]}>
+              <Briefcase size={20} color={colors.primary} />
+            </View>
+            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>Matches</Text>
+            <Text style={[newStyles.statSubtitle, { color: colors.textSecondary }]}>{jobs.length} found</Text>
+          </TouchableOpacity>
 
-      {/* Recent Matches */}
-      {jobs.length > 0 && (
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(500).springify().damping(15)} style={styles.sectionContainer}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Recent Matches</Text>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/jobs')} style={styles.seeAllButton}>
-              <Text style={[styles.seeAllText, { color: colors.primary }]}>See all →</Text>
+          <TouchableOpacity style={[newStyles.statSquare, { backgroundColor: isDark ? colors.surface : `${colors.primary}20` }]} onPress={() => router.push('/profile')}>
+            <View style={[newStyles.statIconBadge, { backgroundColor: isDark ? colors.background : '#FFF' }]}>
+              <User size={20} color={colors.textPrimary} />
+            </View>
+            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>Profile</Text>
+            <Text style={[newStyles.statSubtitle, { color: colors.textSecondary }]}>{completionPercent}% done</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[newStyles.statSquare, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
+            <View style={[newStyles.statIconBadge, { backgroundColor: `${colors.warning}15` }]}>
+              <Flame size={20} color={colors.warning} />
+            </View>
+            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>Goal</Text>
+            <Text style={[newStyles.statSubtitle, { color: colors.textSecondary }]}>{appliedJobs.length}/5 apps</Text>
+          </TouchableOpacity>
+        </Animated.ScrollView>
+
+        {/* Today's Tasks */}
+        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(500).springify().damping(15)} style={newStyles.listSection}>
+          <View style={newStyles.listHeader}>
+            <Text style={[newStyles.listTitle, { color: colors.textPrimary }]}>Today's Tasks</Text>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/jobs')}>
+              <Text style={[newStyles.listViewAll, { color: colors.textSecondary }]}>View All</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.feedContainer}>
-            {jobs.slice(0, 3).map(({ job, score }, idx) => (
-              <View key={idx} style={styles.feedItem}>
-                <JobCard
-                  job={job}
-                  score={score}
-                  expanded={expandedJobId === job.id}
-                  onPress={() => {
-                    setExpandedJobId(expandedJobId === job.id ? null : (job.id || null));
-                  }}
-                  colors={colors}
-                  isDark={isDark}
-                  index={idx}
-                  parallaxEnabled={false}
-                  swipeEnabled={false}
-                  isApplied={appliedJobs.includes(job.id!)}
-                  onApplyPress={() => {
-                    if (appliedJobs.includes(job.id!)) return;
-                    setApplyingJob(job);
-                    setApplyingJobScore(score);
-                  }}
-                  onApply={() => markJobApplied(job.id!)}
-                />
-              </View>
-            ))}
-          </View>
-        </Animated.View>
-      )}
 
-      {/* Empty States / Quick Actions */}
-      <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(600).springify().damping(15)} style={styles.sectionContainer}>
-        <Text style={[styles.sectionTitle, { color: colors.textPrimary, marginBottom: 16 }]}>
-          Needs Attention
-        </Text>
-        <View style={styles.quickLinksContainer}>
           {!completionSteps.name && (
-            <QuickLink
-              title="0 Profile details"
-              actionText="Complete Profile"
-              onPress={() => router.push('/profile/edit/name')}
-              colors={colors}
-              index={0}
-            />
+            <QuickLink title="0 Profile details" actionText="Complete Profile" onPress={() => router.push('/profile/edit/name')} colors={colors} index={0} icon={User} />
           )}
           {!completionSteps.skills && (
-            <QuickLink
-              title="0 Skills added"
-              actionText="Add Skills"
-              onPress={() => router.push('/profile/edit/skills')}
-              colors={colors}
-              index={1}
-            />
+            <QuickLink title="0 Skills added" actionText="Add Skills" onPress={() => router.push('/profile/edit/skills')} colors={colors} index={1} icon={PenTool} />
           )}
           {missingCerts.length > 0 && (
-            <QuickLink
-              title={`${missingCerts.length} Missing certificates`}
-              actionText="Add certificate"
-              onPress={() => router.push('/(tabs)/certifications')}
-              colors={colors}
-              index={2}
-            />
+            <QuickLink title={`${missingCerts.length} Missing certs`} actionText="Add certificate" onPress={() => router.push('/(tabs)/certifications')} colors={colors} index={2} icon={Award} />
           )}
-          <QuickLink
-            title="Interview preparation"
-            actionText="Practice now"
-            onPress={() => router.push('/(tabs)/prep')}
-            colors={colors}
-            index={3}
-          />
-        </View>
-      </Animated.View>
+          
+          <QuickLink title="Interview preparation" actionText="Practice now" onPress={() => router.push('/(tabs)/prep')} colors={colors} index={3} icon={Bot} />
+
+        </Animated.View>
+
+        {/* Recent Matches Feed */}
+        {jobs.length > 0 && (
+          <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(600).springify().damping(15)} style={[newStyles.listSection, { marginTop: 10 }]}>
+            <View style={newStyles.listHeader}>
+              <Text style={[newStyles.listTitle, { color: colors.textPrimary }]}>Recent Matches</Text>
+            </View>
+            <View style={styles.feedContainer}>
+              {jobs.slice(0, 3).map(({ job, score }, idx) => (
+                <View key={idx} style={styles.feedItem}>
+                  <JobCard
+                    job={job}
+                    score={score}
+                    expanded={expandedJobId === job.id}
+                    onPress={() => {
+                      setExpandedJobId(expandedJobId === job.id ? null : (job.id || null));
+                    }}
+                    colors={colors}
+                    isDark={isDark}
+                    index={idx}
+                    parallaxEnabled={false}
+                    swipeEnabled={false}
+                    isApplied={appliedJobs.includes(job.id!)}
+                    onApplyPress={() => {
+                      if (appliedJobs.includes(job.id!)) return;
+                      setApplyingJob(job);
+                      setApplyingJobScore(score);
+                    }}
+                    onApply={() => markJobApplied(job.id!)}
+                  />
+                </View>
+              ))}
+            </View>
+          </Animated.View>
+        )}
+
+      </ScrollView>
 
       <JobApplicationModal
         visible={!!applyingJob}
         job={applyingJob}
         score={applyingJobScore}
         onClose={() => setApplyingJob(null)}
-        onSubmit={(jobId, coverLetter) => {
+        onSubmit={(jobId) => {
           markJobApplied(jobId);
           setApplyingJob(null);
         }}
       />
-    </ScrollView>
-    <ConfettiCannon
-      ref={confettiRef}
-      count={200}
-      origin={{ x: -10, y: 0 }}
-      autoStart={false}
-      fadeOut={true}
-      fallSpeed={3000}
-    />
-    {/* Promotion popup — home screen only */}
-    <GlobalPopup />
-  </View>
+      
+      <ConfettiCannon
+        ref={confettiRef}
+        count={200}
+        origin={{ x: -10, y: 0 }}
+        autoStart={false}
+        fadeOut={true}
+        fallSpeed={3000}
+      />
+      <GlobalPopup />
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 100, // accommodate floating tab bar
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
+const newStyles = StyleSheet.create({
   header: {
-    marginBottom: 24,
-  },
-  headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 4,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 30,
   },
-  greetingContainer: {
-    flex: 1,
-  },
-  greeting: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  name: {
-    fontSize: 28,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-    marginBottom: 4,
-  },
-  trade: {
-    fontSize: 13,
-    fontWeight: '700',
-    letterSpacing: 1,
-  },
-  contextText: {
-    fontSize: 15,
-    marginTop: 8,
-  },
-  headerRight: {
+  userBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 6,
+    borderRadius: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    paddingRight: 14,
   },
-  settingsButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  avatarPlaceholder: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#8B5CF6',
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 8,
   },
-  profileIconContainer: {
+  avatarText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  userBadgeText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  iconButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'hidden',
-  },
-  profileImage: {
-    width: '100%',
-    height: '100%',
-  },
-  avatarText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFF',
-  },
-  statsPanel: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: Spacing.md,
-    borderRadius: 20,
-    marginBottom: Spacing.xl,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  statCardContainer: {
-    flex: 1,
+  heroSection: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
   },
-  statContent: {
-    alignItems: 'center',
-    paddingVertical: Spacing.xs,
+  heroTextLight: {
+    fontSize: 36,
+    fontWeight: '400',
+    letterSpacing: -0.5,
   },
-  statValue: {
-    fontSize: Typography.header,
+  heroTextBold: {
+    fontSize: 36,
     fontWeight: '800',
-    marginBottom: 4,
+    letterSpacing: -0.5,
+    marginTop: -4,
   },
-  statLabelRow: {
+  quickActionsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    paddingHorizontal: 20,
+    gap: 12,
+    marginBottom: 30,
   },
-  statLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  statDivider: {
-    width: 1,
-    height: '60%',
-    alignSelf: 'center',
-  },
-  dashboardGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.xl,
-  },
-  dashboardCardWrapper: {
-    width: '48%',
-  },
-  dashboardCard: {
-    flex: 1,
-    padding: Spacing.md,
-    borderRadius: 20,
-    borderWidth: 1,
+  quickActionPill: {
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 30,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 3,
-    alignItems: 'center',
-    minHeight: 160,
-  },
-  dashboardCardHeader: {
-    marginBottom: Spacing.md,
-  },
-  dashboardCardTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  dashboardCardContent: {
-    flex: 1,
+    shadowRadius: 8,
+    elevation: 2,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  dashboardCardSubtitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    marginTop: Spacing.sm,
-  },
-  progressHint: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  viewProfileText: {
-    fontSize: 14,
+  quickActionPillText: {
+    fontSize: 15,
     fontWeight: '600',
   },
-  primaryActionBtn: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  quickActionCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 16,
-    marginBottom: 32,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  primaryActionText: {
+  bannerCard: {
+    marginHorizontal: 20,
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 30,
+  },
+  bannerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  bannerIconWrapper: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  bannerTextContainer: {
+    flex: 1,
+  },
+  bannerTitle: {
     color: '#FFF',
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  bannerSubtitle: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  bannerButton: {
+    backgroundColor: '#FFF',
+    borderRadius: 30,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  bannerButtonText: {
+    color: '#000',
+    fontSize: 15,
     fontWeight: '700',
   },
-  sectionContainer: {
-    marginBottom: 32,
+  statsScroll: {
+    paddingHorizontal: 20,
+    gap: 12,
+    marginBottom: 30,
   },
-  sectionHeaderRow: {
+  statSquare: {
+    width: (SCREEN_WIDTH - 64) / 3,
+    height: 120,
+    borderRadius: 20,
+    padding: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  statIconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  statTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  statSubtitle: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  listSection: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  listHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.3,
+  listTitle: {
+    fontSize: 18,
+    fontWeight: '700',
   },
-  seeAllButton: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-  },
-  seeAllText: {
-    fontSize: 14,
+  listViewAll: {
+    fontSize: 13,
     fontWeight: '600',
   },
-  feedContainer: {
-    gap: 16,
-  },
-  feedItem: {
-    width: '100%',
-  },
-  quickLinksContainer: {
-    gap: 12,
-  },
-  quickLink: {
+  listCard: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'transparent', // Can add subtle border if needed
+    borderRadius: 20,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
   },
-  quickLinkTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  quickLinkActionRow: {
-    flexDirection: 'row',
+  listCardIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 4,
+    marginRight: 16,
   },
-  quickLinkActionText: {
-    fontSize: 14,
-    fontWeight: '600',
+  listCardText: {
+    flex: 1,
   },
-  errorTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  errorText: {
+  listCardTitle: {
     fontSize: 15,
-    textAlign: 'center',
+    fontWeight: '700',
+    marginBottom: 4,
   },
+  listCardSubtitle: {
+    fontSize: 13,
+  },
+  listCardArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
+
+const styles = StyleSheet.create({
+  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.lg },
+  errorTitle: { fontSize: Typography.header, fontWeight: 'bold', marginBottom: Spacing.sm },
+  errorText: { fontSize: Typography.body, textAlign: 'center', marginBottom: Spacing.lg },
+  feedContainer: { gap: 16 },
+  feedItem: { width: '100%' },
 });

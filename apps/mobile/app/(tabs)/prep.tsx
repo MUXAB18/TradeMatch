@@ -523,7 +523,7 @@ export default function PrepScreen() {
       style={[styles.container, { backgroundColor: colors.background }]} 
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 120 }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 240 }} keyboardShouldPersistTaps="handled">
         {/* Top Navigation */}
         <View style={[newStyles.topBar, { paddingTop: Math.max(insets.top + 10, 50) }]}>
           <TouchableOpacity style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>

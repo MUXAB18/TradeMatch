@@ -52,7 +52,7 @@ export default function JobCard({
     return (
       <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(index * 50).duration(250)}>
         <TouchableOpacity
-          style={[styles.featuredCard, { backgroundColor: colors.black }]}
+          style={[styles.featuredCard, { backgroundColor: colors.primary, shadowColor: colors.primary }]}
           onPress={onPress}
           activeOpacity={0.8}
         >

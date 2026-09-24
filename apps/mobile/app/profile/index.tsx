@@ -7,11 +7,12 @@ import {
   ActivityIndicator,
   Modal,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { Settings, FileText, Home } from 'lucide-react-native';
+import { Settings, FileText, Home, Sparkles, User, Briefcase, Award, Zap, ChevronRight, PenTool } from 'lucide-react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -32,18 +33,22 @@ import { useToast } from '../../providers/ToastProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme, Typography, Spacing, BorderRadius } from '../../constants/theme';
 
-interface InfoRowProps {
-  label: string;
-  value: string;
-  colors: any;
-}
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-function InfoRow({ label, value, colors }: InfoRowProps) {
+function ListCard({ icon: Icon, title, subtitle, onPress, colors }: any) {
   return (
-    <View style={[styles.infoRow, { borderBottomColor: colors.border }]}>
-      <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>{label}</Text>
-      <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{value}</Text>
-    </View>
+    <TouchableOpacity style={[newStyles.listCard, { backgroundColor: colors.surface }]} onPress={onPress}>
+      <View style={[newStyles.listCardIcon, { backgroundColor: `${colors.primary}15` }]}>
+        <Icon size={20} color={colors.primary} />
+      </View>
+      <View style={newStyles.listCardText}>
+        <Text style={[newStyles.listCardTitle, { color: colors.textPrimary }]}>{title}</Text>
+        <Text style={[newStyles.listCardSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
+      </View>
+      <View style={[newStyles.listCardArrow, { backgroundColor: colors.background }]}>
+        <ChevronRight size={16} color={colors.textSecondary} />
+      </View>
+    </TouchableOpacity>
   );
 }
 
@@ -57,7 +62,6 @@ export default function ProfileScreen() {
   const { colors, isDark } = useAppTheme();
   const insets = useSafeAreaInsets();
 
-  // Fetch user's certifications for CV
   const { have: userCerts } = useCertifications(
     data?.trade || '',
     data?.country || '',
@@ -101,7 +105,7 @@ export default function ProfileScreen() {
       ],
       position: 'absolute',
       alignSelf: 'center',
-      top: -30, // Just above the button
+      top: -30,
     };
   });
 
@@ -122,7 +126,6 @@ export default function ProfileScreen() {
 
   const handleConfirmExport = async () => {
     if (!data || !previewHTML) return;
-
     setIsExporting(true);
 
     try {
@@ -133,7 +136,6 @@ export default function ProfileScreen() {
 
       triggerExportSuccessAnim(async () => {
         setShowPreview(false);
-
         const canShare = await Sharing.isAvailableAsync();
         if (canShare) {
           await Sharing.shareAsync(uri, {
@@ -169,28 +171,6 @@ export default function ProfileScreen() {
             </View>
           ))}
         </View>
-
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
-          <Skeleton width="30%" height={Typography.body} style={{ marginBottom: Spacing.md }} />
-          {[1, 2].map(i => (
-            <View key={i} style={[styles.infoRow, { borderBottomColor: colors.border }]}>
-              <Skeleton width="40%" height={Typography.body} />
-              <Skeleton width="30%" height={Typography.body} />
-            </View>
-          ))}
-        </View>
-
-        <View style={[styles.section, { backgroundColor: colors.surface }]}>
-          <Skeleton width="20%" height={Typography.body} style={{ marginBottom: Spacing.md }} />
-          <View style={styles.skillsContainer}>
-            {[1, 2, 3, 4].map(i => (
-              <Skeleton key={i} width={80} height={32} borderRadius={16} style={{ marginRight: Spacing.sm, marginBottom: Spacing.sm }} />
-            ))}
-          </View>
-        </View>
-        
-        <Skeleton width="100%" height={Spacing.minTapTarget} style={{ marginTop: Spacing.md }} />
-        <Skeleton width="100%" height={Spacing.minTapTarget} style={{ marginTop: Spacing.md }} />
       </View>
     );
   }
@@ -225,91 +205,156 @@ export default function ProfileScreen() {
   }
 
   const isProfileComplete = data.name !== 'New User' && data.yearsExperience > 0 && data.skills.length > 0;
+  const firstName = data.name ? data.name.split(' ')[0] : 'User';
 
   return (
-    <View style={[{ flex: 1, backgroundColor: colors.background }]}>
-      <View style={[styles.headerContainer, { paddingTop: Math.max(insets.top, Spacing.lg) }]}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity
-            style={[styles.settingsIcon, { marginRight: Spacing.sm }]}
-            onPress={() => router.push('/(tabs)/home')}
-            accessibilityRole="button"
-            accessibilityLabel="Go to Home"
-          >
-            <Home size={24} color={colors.textPrimary} />
-          </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>Your Profile</Text>
-        </View>
-        <TouchableOpacity
-          style={styles.settingsIcon}
-          onPress={() => router.push('/(tabs)/settings')}
-          accessibilityRole="button"
-          accessibilityLabel="Settings"
-        >
-          <Settings size={24} color={colors.textPrimary} />
-        </TouchableOpacity>
-      </View>
-
+    <View style={{ flex: 1, backgroundColor: isDark ? colors.background : '#F3F6F1' }}>
       <ScrollView 
-        style={styles.container} 
-        contentContainerStyle={{ paddingBottom: Spacing.xxl + 40 }}
+        contentContainerStyle={{ paddingBottom: Spacing.xxl + 80 }}
         showsVerticalScrollIndicator={false}
       >
-        {!isProfileComplete && (
-          <View style={[styles.incompleteCard, { backgroundColor: isDark ? colors.surface : `${colors.warning}20`, borderLeftColor: colors.warning }]}>
-            <Text style={[styles.incompleteTitle, { color: colors.textPrimary }]}>⚠️ Complete Your Profile</Text>
-            <Text style={[styles.incompleteText, { color: colors.textSecondary }]}>
-              Add your experience and skills to get better job matches
+        {/* Header */}
+        <View style={[newStyles.header, { marginTop: Math.max(insets.top + 10, 50) }]}>
+          <View style={[newStyles.userBadge, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
+            <View style={newStyles.avatarPlaceholder}>
+               <Text style={newStyles.avatarText}>{firstName.charAt(0)}</Text>
+            </View>
+            <Text style={[newStyles.userBadgeText, { color: colors.textPrimary }]}>
+              Hello, {firstName}!
             </Text>
+            <ChevronRight size={14} color={colors.textSecondary} style={{ marginLeft: 4 }} />
+          </View>
+          
+          <View style={newStyles.headerActions}>
+            <TouchableOpacity style={[newStyles.iconButton, { backgroundColor: colors.primary }]}>
+              <Sparkles size={18} color="#FFF" />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFF' }]}
+              onPress={() => router.push('/(tabs)/settings')}
+            >
+              <Settings size={18} color={colors.textPrimary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Hero Text */}
+        <View style={newStyles.heroSection}>
+          <Text style={[newStyles.heroTextLight, { color: colors.textSecondary }]}>Ready to build</Text>
+          <Text style={[newStyles.heroTextBold, { color: colors.textPrimary }]}>your career?</Text>
+        </View>
+
+        {/* Quick Actions Row */}
+        <View style={newStyles.quickActionsRow}>
+          <TouchableOpacity 
+            style={[newStyles.quickActionPill, { backgroundColor: isDark ? colors.surface : '#FFF' }]}
+            onPress={handleEditProfile}
+          >
+            <Text style={[newStyles.quickActionPillText, { color: colors.textPrimary }]}>Edit Profile</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[newStyles.quickActionCircle, { backgroundColor: isDark ? colors.surface : '#FFF' }]}
+            onPress={handleExportCV}
+          >
+            <FileText size={20} color={colors.textPrimary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Big Banner */}
+        {!isProfileComplete ? (
+          <View style={[newStyles.bannerCard, { backgroundColor: colors.primary }]}>
+            <View style={newStyles.bannerHeader}>
+              <View style={[newStyles.bannerIconWrapper, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+                <Zap size={24} color="#FFF" />
+              </View>
+              <View style={newStyles.bannerTextContainer}>
+                <Text style={newStyles.bannerTitle}>Complete Profile</Text>
+                <Text style={newStyles.bannerSubtitle}>Add your experience and skills to get better job matches.</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={newStyles.bannerButton} onPress={handleEditProfile}>
+              <Text style={newStyles.bannerButtonText}>+ Add Details</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={[newStyles.bannerCard, { backgroundColor: colors.success || '#84CC16' }]}>
+            <View style={newStyles.bannerHeader}>
+              <View style={[newStyles.bannerIconWrapper, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+                <Zap size={24} color="#FFF" />
+              </View>
+              <View style={newStyles.bannerTextContainer}>
+                <Text style={newStyles.bannerTitle}>Profile Complete!</Text>
+                <Text style={newStyles.bannerSubtitle}>You're ready to match with top employers in your trade.</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={newStyles.bannerButton} onPress={handleExportCV}>
+              <Text style={newStyles.bannerButtonText}>Export CV</Text>
+            </TouchableOpacity>
           </View>
         )}
 
-        <View style={[styles.section, { backgroundColor: colors.surface, shadowColor: isDark ? '#000' : colors.primary }]}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Basic Information</Text>
-          <InfoRow label="Name" value={data.name} colors={colors} />
-          <InfoRow label="Phone" value={data.phone} colors={colors} />
-          <InfoRow label="Trade" value={data.trade} colors={colors} />
-          <InfoRow label="Country" value={data.country} colors={colors} />
-        </View>
-
-        <View style={[styles.section, { backgroundColor: colors.surface, shadowColor: isDark ? '#000' : colors.primary }]}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Experience</Text>
-          <InfoRow label="Years of Experience" value={`${data.yearsExperience} years`} colors={colors} />
-          <InfoRow label="Availability" value={data.availability} colors={colors} />
-        </View>
-
-        <View style={[styles.section, { backgroundColor: colors.surface, shadowColor: isDark ? '#000' : colors.primary }]}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Skills</Text>
-          {data.skills.length > 0 ? (
-            <View style={styles.skillsContainer}>
-              {data.skills.map((skill, index) => (
-                <View key={index} style={[styles.skillChip, { backgroundColor: isDark ? colors.background : `${colors.primary}15` }]}>
-                  <Text style={[styles.skillText, { color: colors.primary }]}>{skill}</Text>
-                </View>
-              ))}
+        {/* Square Stats Row */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={newStyles.statsScroll}>
+          <View style={[newStyles.statSquare, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
+            <View style={[newStyles.statIconBadge, { backgroundColor: `${colors.primary}15` }]}>
+              <Briefcase size={20} color={colors.primary} />
             </View>
-          ) : (
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No skills added yet</Text>
-          )}
+            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>Experience</Text>
+            <Text style={[newStyles.statSubtitle, { color: colors.textSecondary }]}>{data.yearsExperience} yrs</Text>
+          </View>
+
+          <View style={[newStyles.statSquare, { backgroundColor: isDark ? colors.surface : `${colors.primary}20` }]}>
+            <View style={[newStyles.statIconBadge, { backgroundColor: isDark ? colors.background : '#FFF' }]}>
+              <PenTool size={20} color={colors.primary} />
+            </View>
+            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>Skills</Text>
+            <Text style={[newStyles.statSubtitle, { color: colors.textSecondary }]}>{data.skills.length} added</Text>
+          </View>
+
+          <View style={[newStyles.statSquare, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
+            <View style={[newStyles.statIconBadge, { backgroundColor: `${colors.primary}15` }]}>
+              <Award size={20} color={colors.primary} />
+            </View>
+            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>Certs</Text>
+            <Text style={[newStyles.statSubtitle, { color: colors.textSecondary }]}>{userCerts.length} active</Text>
+          </View>
+        </ScrollView>
+
+        {/* Profile Details List */}
+        <View style={newStyles.listSection}>
+          <View style={newStyles.listHeader}>
+            <Text style={[newStyles.listTitle, { color: colors.textPrimary }]}>Your Details</Text>
+            <TouchableOpacity onPress={handleEditProfile}>
+              <Text style={[newStyles.listViewAll, { color: colors.textSecondary }]}>Edit All</Text>
+            </TouchableOpacity>
+          </View>
+
+          <ListCard 
+            icon={User} 
+            title="Basic Information" 
+            subtitle={`${data.phone || 'Phone not set'} • ${data.country || 'Country not set'}`} 
+            colors={colors} 
+            onPress={() => router.push('/profile/edit/name')}
+          />
+          <ListCard 
+            icon={Zap} 
+            title="Trade Specialisation" 
+            subtitle={data.trade || 'Not set'} 
+            colors={colors} 
+            onPress={() => router.push('/profile/edit/skills')}
+          />
+          <ListCard 
+            icon={Briefcase} 
+            title="Availability" 
+            subtitle={data.availability || 'Not set'} 
+            colors={colors} 
+            onPress={() => router.push('/profile/edit/availability')}
+          />
         </View>
-
-        <Button
-          title="Edit Profile"
-          variant="primary"
-          onPress={handleEditProfile}
-          style={{ marginTop: Spacing.md }}
-        />
-
-        <Button
-          title="Export CV as PDF"
-          variant="outline"
-          onPress={handleExportCV}
-          icon={<Text style={{fontSize: 16}}>📄</Text>}
-          style={{ marginTop: Spacing.md, marginBottom: Spacing.xl, borderColor: colors.primary }}
-          textStyle={{ color: colors.primary }}
-        />
       </ScrollView>
 
+      {/* CV Export Modal */}
       <Modal
         visible={showPreview}
         animationType="slide"
@@ -321,8 +366,6 @@ export default function ProfileScreen() {
             <TouchableOpacity
               onPress={() => setShowPreview(false)}
               style={styles.modalCloseButton}
-              accessibilityRole="button"
-              accessibilityLabel="Close CV Preview"
             >
               <Text style={[styles.modalCloseText, { color: colors.textSecondary }]}>✕</Text>
             </TouchableOpacity>
@@ -373,6 +416,244 @@ export default function ProfileScreen() {
   );
 }
 
+const newStyles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 30,
+  },
+  userBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 6,
+    borderRadius: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    paddingRight: 14,
+  },
+  avatarPlaceholder: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#8B5CF6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  avatarText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  userBadgeText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  heroSection: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  heroTextLight: {
+    fontSize: 36,
+    fontWeight: '400',
+    letterSpacing: -0.5,
+  },
+  heroTextBold: {
+    fontSize: 36,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    marginTop: -4,
+  },
+  quickActionsRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    gap: 12,
+    marginBottom: 30,
+  },
+  quickActionPill: {
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  quickActionPillText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  quickActionCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  bannerCard: {
+    marginHorizontal: 20,
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 30,
+  },
+  bannerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  bannerIconWrapper: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  bannerTextContainer: {
+    flex: 1,
+  },
+  bannerTitle: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  bannerSubtitle: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  bannerButton: {
+    backgroundColor: '#FFF',
+    borderRadius: 30,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  bannerButtonText: {
+    color: '#000',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  statsScroll: {
+    paddingHorizontal: 20,
+    gap: 12,
+    marginBottom: 30,
+  },
+  statSquare: {
+    width: (SCREEN_WIDTH - 64) / 3,
+    height: 120,
+    borderRadius: 20,
+    padding: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  statIconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  statTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  statSubtitle: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  listSection: {
+    paddingHorizontal: 20,
+  },
+  listHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  listTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  listViewAll: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  listCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  listCardIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  listCardText: {
+    flex: 1,
+  },
+  listCardTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  listCardSubtitle: {
+    fontSize: 13,
+  },
+  listCardArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -383,18 +664,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.lg,
-  },
-  title: {
-    fontSize: Typography.headerLarge,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-  },
-  settingsIcon: {
-    padding: Spacing.sm,
-    minWidth: Spacing.minTapTarget,
-    minHeight: Spacing.minTapTarget,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   centerContainer: {
     flex: 1,
@@ -412,95 +681,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: Spacing.lg,
   },
-  emptyTitle: {
-    fontSize: Typography.header,
-    fontWeight: 'bold',
-    marginBottom: Spacing.sm,
-  },
-  emptyText: {
-    fontSize: Typography.body,
-    textAlign: 'center',
-    marginBottom: Spacing.lg,
-  },
-  incompleteCard: {
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
-    marginBottom: Spacing.lg,
-    borderLeftWidth: 4,
-  },
-  incompleteTitle: {
-    fontSize: Typography.body,
-    fontWeight: '700',
-    marginBottom: Spacing.xs,
-  },
-  incompleteText: {
-    fontSize: Typography.small,
-  },
-  section: {
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.xl,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
-    shadowRadius: 16,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontSize: Typography.body,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: Spacing.sm,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: Spacing.sm,
-    borderBottomWidth: 1,
-  },
-  infoLabel: {
-    fontSize: Typography.body,
-  },
-  infoValue: {
-    fontSize: Typography.body,
-    fontWeight: '500',
-  },
-  skillsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: Spacing.xs,
-  },
-  skillChip: {
-    borderRadius: BorderRadius.full,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    marginRight: Spacing.sm,
-    marginBottom: Spacing.sm,
-  },
-  skillText: {
-    fontSize: Typography.small,
-    fontWeight: '500',
-  },
-  button: {
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: Spacing.md,
-    minHeight: Spacing.minTapTarget,
-  },
-  buttonSecondary: {
-    borderWidth: 1,
-  },
-  buttonText: {
-    fontSize: Typography.body,
-    fontWeight: '600',
-  },
-  buttonTextSecondary: {
-    fontSize: Typography.body,
-    fontWeight: '600',
-  },
   retryButton: {
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.lg,
@@ -511,6 +691,22 @@ const styles = StyleSheet.create({
     fontSize: Typography.body,
     fontWeight: '600',
     color: '#fff',
+  },
+  section: {
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.xl,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.05,
+    shadowRadius: 16,
+    elevation: 3,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: Spacing.sm,
+    borderBottomWidth: 1,
   },
   modalContainer: {
     flex: 1,

@@ -557,7 +557,7 @@ export default function PrepScreen() {
             activeOpacity={0.7}
           >
             <View style={[newStyles.cardIconWrapper, { backgroundColor: `${colors.primary}15` }]}>
-              <Zap size={24} color={colors.primary} />
+              <Zap size={20} color={colors.primary} />
             </View>
             <Text style={[newStyles.cardTitle, { color: colors.textPrimary }]}>Flashcards</Text>
             <Text style={[newStyles.cardDesc, { color: colors.textSecondary }]}>Quick technical review</Text>
@@ -569,7 +569,7 @@ export default function PrepScreen() {
             activeOpacity={0.7}
           >
             <View style={[newStyles.cardIconWrapper, { backgroundColor: `${colors.success}15` }]}>
-              <MessageSquare size={24} color={colors.success} />
+              <MessageSquare size={20} color={colors.success} />
             </View>
             <Text style={[newStyles.cardTitle, { color: colors.textPrimary }]}>Text Chat</Text>
             <Text style={[newStyles.cardDesc, { color: colors.textSecondary }]}>Ask any question</Text>
@@ -577,7 +577,7 @@ export default function PrepScreen() {
 
           <TouchableOpacity style={[newStyles.modeCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : colors.warning }]} activeOpacity={0.7}>
             <View style={[newStyles.cardIconWrapper, { backgroundColor: `${colors.warning}15` }]}>
-              <Headphones size={24} color={colors.warning} />
+              <Headphones size={20} color={colors.warning} />
             </View>
             <Text style={[newStyles.cardTitle, { color: colors.textPrimary }]}>Voice Session</Text>
             <Text style={[newStyles.cardDesc, { color: colors.textSecondary }]}>Mock interview</Text>
@@ -585,7 +585,7 @@ export default function PrepScreen() {
 
           <TouchableOpacity style={[newStyles.modeCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : '#8B5CF6' }]} activeOpacity={0.7}>
             <View style={[newStyles.cardIconWrapper, { backgroundColor: `#8B5CF615` }]}>
-              <BookOpen size={24} color="#8B5CF6" />
+              <BookOpen size={20} color="#8B5CF6" />
             </View>
             <Text style={[newStyles.cardTitle, { color: colors.textPrimary }]}>Trade Knowledge</Text>
             <Text style={[newStyles.cardDesc, { color: colors.textSecondary }]}>Code & safety</Text>
@@ -737,34 +737,34 @@ const newStyles = StyleSheet.create({
   },
   modeCard: {
     width: (SCREEN_WIDTH - 40 - 16) / 2,
-    padding: 20,
-    borderRadius: 24,
+    padding: 16,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.03)',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 4,
     marginBottom: 4,
   },
   cardIconWrapper: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   cardTitle: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: '700',
-    marginBottom: 6,
-    letterSpacing: -0.3,
+    marginBottom: 4,
+    letterSpacing: -0.2,
   },
   cardDesc: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '500',
-    lineHeight: 18,
+    lineHeight: 16,
   },
   bottomInputContainer: {
     position: 'absolute',

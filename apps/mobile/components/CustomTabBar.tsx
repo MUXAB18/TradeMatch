@@ -100,13 +100,13 @@ export function CustomTabBar({ state, descriptors, navigation }: any) {
     ]}>
       <View style={styles.shadowContainer}>
         <BlurView 
-          intensity={80} 
+          intensity={90} 
           tint={isDark ? "dark" : "light"} 
           style={[
             styles.capsule, 
             { 
-              backgroundColor: isDark ? 'rgba(25,25,25,0.7)' : 'rgba(255,255,255,0.75)',
-              borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.8)',
+              backgroundColor: isDark ? 'rgba(25,25,25,0.7)' : 'rgba(255, 255, 255, 0.95)',
+              borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
             }
           ]}
         >
@@ -169,10 +169,10 @@ const styles = StyleSheet.create({
   shadowContainer: {
     width: TAB_BAR_WIDTH,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
-    elevation: 12,
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.2,
+    shadowRadius: 32,
+    elevation: 16,
     borderRadius: 36,
   },
   capsule: {

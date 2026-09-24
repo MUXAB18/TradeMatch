@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   TextInput,
+  Keyboard,
 } from 'react-native';
 import * as Haptics from '../../utils/haptics';
 import Animated, {
@@ -372,6 +373,16 @@ export default function PrepScreen() {
   // Modes: 'home', 'flashcards', 'chat'
   const [mode, setMode] = useState<'home' | 'flashcards' | 'chat'>('home');
   const [questionText, setQuestionText] = useState('');
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+  React.useEffect(() => {
+    const showSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   // Update active cards when data arrives or shuffle setting changes
   React.useEffect(() => {
@@ -413,7 +424,7 @@ export default function PrepScreen() {
           <Skeleton width="60%" height={16} />
         </View>
 
-        <View style={styles.flashcardContainer}>
+        <View style={[styles.flashcardContainer, { paddingBottom: 80 + (insets.bottom > 0 ? insets.bottom : 12) }]}>
           <View style={styles.progressSection}>
             <Skeleton width="100%" height={12} borderRadius={6} style={{ marginTop: Spacing.md }} />
           </View>
@@ -480,18 +491,20 @@ export default function PrepScreen() {
           </TouchableOpacity>
         </View>
 
-        <Flashcard
-          question={currentCard.question}
-          answer={currentCard.answer}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          currentIndex={currentIndex}
-          totalCards={activeCards.length}
-          isFirst={currentIndex === 0}
-          isLast={currentIndex === activeCards.length - 1}
-          colors={colors}
-          isDark={isDark}
-        />
+        <View style={{ flex: 1, paddingBottom: 80 + (insets.bottom > 0 ? insets.bottom : 12) }}>
+          <Flashcard
+            question={currentCard.question}
+            answer={currentCard.answer}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            currentIndex={currentIndex}
+            totalCards={activeCards.length}
+            isFirst={currentIndex === 0}
+            isLast={currentIndex === activeCards.length - 1}
+            colors={colors}
+            isDark={isDark}
+          />
+        </View>
 
         <PrepSettingsModal
           visible={settingsVisible}
@@ -574,7 +587,8 @@ export default function PrepScreen() {
       <View style={[newStyles.bottomInputContainer, { 
         backgroundColor: isDark ? colors.surface : '#FFFFFF',
         borderColor: isDark ? colors.border : '#E5E7EB',
-        paddingBottom: Math.max(insets.bottom + 10, 20)
+        bottom: isKeyboardVisible ? 20 : (60 + Math.max(insets.bottom, 12) + 20),
+        paddingBottom: isKeyboardVisible ? Math.max(insets.bottom + 10, 20) : 20,
       }]}>
         <View style={newStyles.inputWrapper}>
           <Sparkles size={18} color={colors.textSecondary} style={{ marginRight: 8 }} />
@@ -857,7 +871,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: CARD_PADDING,
     paddingTop: Spacing.lg,
-    paddingBottom: 100, // Space for bottom nav + buttons
+    paddingBottom: Spacing.md,
     justifyContent: 'space-between',
   },
   progressSection: {

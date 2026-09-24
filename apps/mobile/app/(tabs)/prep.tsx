@@ -7,6 +7,9 @@ import {
   Pressable,
   Dimensions,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  TextInput,
 } from 'react-native';
 import * as Haptics from '../../utils/haptics';
 import Animated, {
@@ -16,8 +19,11 @@ import Animated, {
   withTiming,
   interpolate,
   useReducedMotion,
+  withRepeat,
+  withSequence,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { Bot, ArrowLeft, Menu, Plus, Mic, Send, Sparkles, ChevronDown, MessageSquare, Zap, Headphones, BookOpen } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useUserProfile } from '../../hooks/useUserProfile';
@@ -313,6 +319,41 @@ const DUMMY_QUESTIONS = [
   }
 ];
 
+function GlowingAvatar({ colors }: { colors: any }) {
+  const pulse = useSharedValue(1);
+  
+  React.useEffect(() => {
+    pulse.value = withRepeat(
+      withSequence(
+        withTiming(1.15, { duration: 1500 }),
+        withTiming(1, { duration: 1500 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const ringStyle1 = useAnimatedStyle(() => ({
+    transform: [{ scale: pulse.value }],
+    opacity: interpolate(pulse.value, [1, 1.15], [0.4, 0]),
+  }));
+  
+  const ringStyle2 = useAnimatedStyle(() => ({
+    transform: [{ scale: pulse.value * 1.08 }],
+    opacity: interpolate(pulse.value, [1, 1.15], [0.2, 0]),
+  }));
+
+  return (
+    <View style={newStyles.avatarContainer}>
+      <Animated.View style={[newStyles.glowingRing, { backgroundColor: colors.primary }, ringStyle2]} />
+      <Animated.View style={[newStyles.glowingRing, { backgroundColor: colors.primary }, ringStyle1]} />
+      <View style={[newStyles.avatarInner, { backgroundColor: colors.primary }]}>
+        <Bot size={44} color="#FFF" strokeWidth={2.5} />
+      </View>
+    </View>
+  );
+}
+
 export default function PrepScreen() {
   const { data: profile, loading: profileLoading } = useUserProfile();
   const { cards: fetchedCards, loading: cardsLoading, error } = useInterviewPrep(
@@ -327,6 +368,10 @@ export default function PrepScreen() {
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [shuffleEnabled, setShuffleEnabled] = useState(false);
   const [activeCards, setActiveCards] = useState(cards);
+  
+  // Modes: 'home', 'flashcards', 'chat'
+  const [mode, setMode] = useState<'home' | 'flashcards' | 'chat'>('home');
+  const [questionText, setQuestionText] = useState('');
 
   // Update active cards when data arrives or shuffle setting changes
   React.useEffect(() => {
@@ -419,65 +464,339 @@ export default function PrepScreen() {
 
   const currentCard = activeCards[currentIndex];
 
-  if (!currentCard) {
+  if (mode === 'flashcards' && currentCard) {
     return (
-      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
-        <Text style={[styles.errorTitle, { color: colors.error }]}>No Question Found</Text>
-        <Text style={[styles.errorText, { color: colors.textSecondary }]}>Unable to load question data.</Text>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={[newStyles.flashcardHeader, { paddingTop: Math.max(insets.top + 10, 50) }]}>
+          <TouchableOpacity onPress={() => setMode('home')} style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+            <ArrowLeft size={20} color={colors.textPrimary} />
+          </TouchableOpacity>
+          <View style={[newStyles.pillHeader, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+            <Zap size={14} color={colors.primary} />
+            <Text style={[newStyles.pillText, { color: colors.textPrimary }]}>Flashcards</Text>
+          </View>
+          <TouchableOpacity onPress={() => setSettingsVisible(true)} style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+            <Ionicons name="settings-outline" size={20} color={colors.textPrimary} />
+          </TouchableOpacity>
+        </View>
+
+        <Flashcard
+          question={currentCard.question}
+          answer={currentCard.answer}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+          currentIndex={currentIndex}
+          totalCards={activeCards.length}
+          isFirst={currentIndex === 0}
+          isLast={currentIndex === activeCards.length - 1}
+          colors={colors}
+          isDark={isDark}
+        />
+
+        <PrepSettingsModal
+          visible={settingsVisible}
+          onClose={() => setSettingsVisible(false)}
+          onResetProgress={() => setCurrentIndex(0)}
+          isShuffleEnabled={shuffleEnabled}
+          onToggleShuffle={setShuffleEnabled}
+        />
       </View>
     );
   }
 
+  // Home / AI Agent Mode
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Premium Header */}
-      <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border, paddingTop: Math.max(insets.top + Spacing.md, 50) }]}>
-        <View style={styles.headerContent}>
-          <View style={styles.headerLeft}>
-            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Interview Prep</Text>
-            <View style={styles.headerSubtitleRow}>
-              <View style={[styles.tradeBadge, { backgroundColor: `${colors.primary}15` }]}>
-                <Text style={[styles.tradeBadgeText, { color: colors.primary }]}>⚡</Text>
-              </View>
-              <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-                {profile?.trade || 'Electrician'}
-              </Text>
-            </View>
+    <KeyboardAvoidingView 
+      style={[styles.container, { backgroundColor: colors.background }]} 
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 120 }} keyboardShouldPersistTaps="handled">
+        {/* Top Navigation */}
+        <View style={[newStyles.topBar, { paddingTop: Math.max(insets.top + 10, 50) }]}>
+          <TouchableOpacity style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+            <ArrowLeft size={22} color={colors.textPrimary} />
+          </TouchableOpacity>
+          
+          <View style={[newStyles.pillHeader, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+            <Sparkles size={16} color={colors.primary} />
+            <Text style={[newStyles.pillText, { color: colors.textPrimary }]}>AI Interview Buddy</Text>
           </View>
-          <TouchableOpacity 
-            style={[styles.settingsButton, { backgroundColor: isDark ? colors.background : colors.background }]}
-            accessibilityLabel="Settings"
-            accessibilityRole="button"
-            onPress={() => setSettingsVisible(true)}
-          >
-            <Ionicons name="settings-outline" size={20} color={colors.textSecondary} />
+
+          <TouchableOpacity style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+            <Menu size={22} color={colors.textPrimary} />
           </TouchableOpacity>
         </View>
+
+        {/* Center Content */}
+        <View style={newStyles.centerContent}>
+          <GlowingAvatar colors={colors} />
+          
+          <Text style={[newStyles.title, { color: colors.textPrimary }]}>
+            How Can I Help You Prepare Today?
+          </Text>
+        </View>
+
+        {/* Suggested Modes Tags */}
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={newStyles.tagsContainer}
+        >
+          <TouchableOpacity 
+            style={[newStyles.tag, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}
+            onPress={() => setMode('flashcards')}
+          >
+            <Zap size={14} color={colors.primary} />
+            <Text style={[newStyles.tagText, { color: colors.textPrimary }]}>Flashcards</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[newStyles.tag, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}
+            onPress={() => setMode('chat')}
+          >
+            <MessageSquare size={14} color={colors.success} />
+            <Text style={[newStyles.tagText, { color: colors.textPrimary }]}>Text Chat</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[newStyles.tag, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+            <Headphones size={14} color={colors.warning} />
+            <Text style={[newStyles.tagText, { color: colors.textPrimary }]}>Voice Session</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[newStyles.tag, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+            <BookOpen size={14} color="#8B5CF6" />
+            <Text style={[newStyles.tagText, { color: colors.textPrimary }]}>Trade Knowledge</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </ScrollView>
+
+      {/* Bottom Input Area */}
+      <View style={[newStyles.bottomInputContainer, { 
+        backgroundColor: isDark ? colors.surface : '#FFFFFF',
+        borderColor: isDark ? colors.border : '#E5E7EB',
+        paddingBottom: Math.max(insets.bottom + 10, 20)
+      }]}>
+        <View style={newStyles.inputWrapper}>
+          <Sparkles size={18} color={colors.textSecondary} style={{ marginRight: 8 }} />
+          <TextInput
+            style={[newStyles.textInput, { color: colors.textPrimary }]}
+            placeholder="Ask a question..."
+            placeholderTextColor={colors.textSecondary}
+            value={questionText}
+            onChangeText={setQuestionText}
+          />
+        </View>
+
+        <View style={newStyles.inputControlsRow}>
+          <View style={newStyles.leftControls}>
+            <TouchableOpacity style={[newStyles.circleBtn, { borderColor: isDark ? colors.border : '#E5E7EB' }]}>
+              <Plus size={18} color={colors.textPrimary} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={[newStyles.deepThinkBtn, { borderColor: isDark ? colors.border : '#E5E7EB' }]}>
+              <Text style={[newStyles.deepThinkText, { color: colors.textPrimary }]}>Deep Think</Text>
+              <ChevronDown size={14} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={newStyles.rightControls}>
+            <TouchableOpacity style={newStyles.circleBtnIconOnly}>
+              <Mic size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[
+                newStyles.sendBtn, 
+                { backgroundColor: questionText.trim() ? colors.primary : `${colors.primary}50` }
+              ]}
+              disabled={!questionText.trim()}
+              onPress={() => setMode('chat')}
+            >
+              <Send size={16} color="#FFF" style={{ marginLeft: 2 }} />
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
-
-      <Flashcard
-        question={currentCard.question}
-        answer={currentCard.answer}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-        currentIndex={currentIndex}
-        totalCards={activeCards.length}
-        isFirst={currentIndex === 0}
-        isLast={currentIndex === activeCards.length - 1}
-        colors={colors}
-        isDark={isDark}
-      />
-
-      <PrepSettingsModal
-        visible={settingsVisible}
-        onClose={() => setSettingsVisible(false)}
-        onResetProgress={() => setCurrentIndex(0)}
-        isShuffleEnabled={shuffleEnabled}
-        onToggleShuffle={setShuffleEnabled}
-      />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
+
+const newStyles = StyleSheet.create({
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 40,
+  },
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  pillHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 24,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  pillText: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  flashcardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  centerContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 40,
+    marginBottom: 60,
+  },
+  avatarContainer: {
+    width: 140,
+    height: 140,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  glowingRing: {
+    position: 'absolute',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+  },
+  avatarInner: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  title: {
+    fontSize: 34,
+    fontWeight: '800',
+    textAlign: 'center',
+    paddingHorizontal: 30,
+    lineHeight: 42,
+    letterSpacing: -0.5,
+  },
+  tagsContainer: {
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+  tag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 20,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  tagText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  bottomInputContainer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    right: 20,
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingBottom: 16,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  inputControlsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  leftControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  circleBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deepThinkBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    height: 36,
+    gap: 4,
+  },
+  deepThinkText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  rightControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  circleBtnIconOnly: {
+    padding: 8,
+  },
+  sendBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 const styles = StyleSheet.create({
   container: {

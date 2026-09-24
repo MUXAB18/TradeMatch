@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '../constants/theme';
-import { Home, Users, Sparkles, ClipboardList, Hexagon } from 'lucide-react-native';
+import { Home, Briefcase, Sparkles, ClipboardList, Settings } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import * as Haptics from '../utils/haptics';
 import Animated, {
@@ -42,10 +42,10 @@ function TabItem({ isFocused, route, onPress, onLongPress, isCenter }: TabItemPr
   }, [isFocused]);
 
   let Icon = Home;
-  if (route.name === 'jobs') Icon = Users;
+  if (route.name === 'jobs') Icon = Briefcase;
   if (route.name === 'prep') Icon = Sparkles;
   if (route.name === 'certifications') Icon = ClipboardList;
-  if (route.name === 'settings') Icon = Hexagon;
+  if (route.name === 'settings') Icon = Settings;
 
   const animatedIconStyle = useAnimatedStyle(() => {
     const scale = isCenter ? 1 : 1 + (progress.value * 0.15);
@@ -119,15 +119,15 @@ export function CustomTabBar({ state, navigation }: any) {
     <View style={[
       styles.container,
       {
-        bottom: insets.bottom > 0 ? insets.bottom + 10 : 30,
+        bottom: insets.bottom > 0 ? insets.bottom : 16,
         position: Platform.OS === 'web' ? ('fixed' as any) : 'absolute',
       }
     ]}>
       <View style={styles.shadowContainer}>
         {/* Background layer */}
         <View style={styles.glassPillContainer}>
-          <BlurView intensity={isDark ? 50 : 30} tint="dark" style={StyleSheet.absoluteFill} />
-          <View style={[styles.glassPillOverlay, { backgroundColor: isDark ? 'rgba(40, 40, 45, 0.65)' : 'rgba(30, 30, 35, 0.75)' }]} />
+          <BlurView intensity={isDark ? 50 : 40} tint="dark" style={StyleSheet.absoluteFill} />
+          <View style={[styles.glassPillOverlay, { backgroundColor: isDark ? 'rgba(40, 40, 45, 0.35)' : 'rgba(30, 30, 35, 0.45)' }]} />
         </View>
 
         {/* The sliding white circle layer (NOT clipped, allows break out) */}

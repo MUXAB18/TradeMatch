@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Platform } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Platform, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '../constants/theme';
 import { Home, User, Award, Briefcase, BookOpen, Settings } from 'lucide-react-native';
@@ -9,13 +9,10 @@ import Animated, {
   useSharedValue, 
   useAnimatedStyle, 
   withSpring, 
-  interpolateColor
 } from 'react-native-reanimated';
 
-const ICON_SIZE = 22;
-const TAB_WIDTH_INACTIVE = 50;
-const TAB_WIDTH_ACTIVE = 135;
-const TAB_HEIGHT = 50;
+const { width } = Dimensions.get('window');
+const TAB_BAR_WIDTH = Math.min(width - 32, 400); 
 
 interface TabItemProps {
   isFocused: boolean;
@@ -27,33 +24,14 @@ interface TabItemProps {
 
 function TabItem({ isFocused, route, onPress, onLongPress, label }: TabItemProps) {
   const { colors } = useAppTheme();
-  
   const progress = useSharedValue(isFocused ? 1 : 0);
 
   useEffect(() => {
     progress.value = withSpring(isFocused ? 1 : 0, {
       damping: 14,
-      stiffness: 120,
+      stiffness: 150,
     });
   }, [isFocused]);
-
-  const animatedContainerStyle = useAnimatedStyle(() => {
-    return {
-      width: TAB_WIDTH_INACTIVE + progress.value * (TAB_WIDTH_ACTIVE - TAB_WIDTH_INACTIVE),
-      backgroundColor: interpolateColor(
-        progress.value,
-        [0, 1],
-        ['transparent', colors.primary]
-      )
-    };
-  });
-
-  const animatedLabelStyle = useAnimatedStyle(() => {
-    return {
-      opacity: progress.value,
-      transform: [{ translateX: (1 - progress.value) * -10 }],
-    };
-  });
 
   let Icon = Home;
   if (route.name === 'certifications') Icon = Award;
@@ -62,7 +40,26 @@ function TabItem({ isFocused, route, onPress, onLongPress, label }: TabItemProps
   if (route.name === 'prep') Icon = BookOpen;
   if (route.name === 'settings') Icon = Settings;
 
-  const iconColor = isFocused ? '#FFFFFF' : colors.textSecondary;
+  const animatedIconStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { translateY: progress.value * -8 }
+      ],
+    };
+  });
+
+  const animatedTextStyle = useAnimatedStyle(() => {
+    return {
+      opacity: progress.value,
+      transform: [
+        { translateY: (1 - progress.value) * 10 }
+      ],
+    };
+  });
+
+  const iconColor = isFocused ? colors.primary : colors.textSecondary;
+  
+  const displayLabel = label === 'Certifications' ? 'Certs' : label;
 
   return (
     <TouchableOpacity
@@ -71,19 +68,20 @@ function TabItem({ isFocused, route, onPress, onLongPress, label }: TabItemProps
       accessibilityLabel={label}
       onPress={onPress}
       onLongPress={onLongPress}
-      activeOpacity={1}
+      activeOpacity={0.8}
+      style={styles.tabItem}
     >
-      <Animated.View style={[styles.tabItem, animatedContainerStyle]}>
-        <View style={styles.iconContainer}>
-          <Icon size={ICON_SIZE} color={iconColor} strokeWidth={isFocused ? 2.5 : 2} />
-        </View>
+      <View style={styles.contentContainer}>
+        <Animated.View style={animatedIconStyle}>
+          <Icon size={24} color={iconColor} strokeWidth={isFocused ? 2.5 : 2} />
+        </Animated.View>
         
-        <Animated.View style={[styles.labelContainer, animatedLabelStyle]}>
-          <Text style={styles.tabLabel} numberOfLines={1}>
-            {label}
+        <Animated.View style={[styles.labelContainer, animatedTextStyle]}>
+          <Text style={[styles.tabLabel, { color: colors.primary }]} numberOfLines={1}>
+            {displayLabel}
           </Text>
         </Animated.View>
-      </Animated.View>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -102,11 +100,14 @@ export function CustomTabBar({ state, descriptors, navigation }: any) {
     ]}>
       <View style={styles.shadowContainer}>
         <BlurView 
-          intensity={isDark ? 40 : 80} 
+          intensity={80} 
           tint={isDark ? "dark" : "light"} 
           style={[
             styles.capsule, 
-            { backgroundColor: isDark ? 'rgba(30,30,30,0.6)' : 'rgba(255,255,255,0.85)' }
+            { 
+              backgroundColor: isDark ? 'rgba(25,25,25,0.7)' : 'rgba(255,255,255,0.75)',
+              borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.8)',
+            }
           ]}
         >
           {state.routes.map((route: any, index: number) => {
@@ -159,52 +160,47 @@ export function CustomTabBar({ state, descriptors, navigation }: any) {
 
 const styles = StyleSheet.create({
   container: {
-    left: 16,
-    right: 16,
+    left: 0,
+    right: 0,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 100,
   },
   shadowContainer: {
+    width: TAB_BAR_WIDTH,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 10,
-    width: '100%',
-    maxWidth: 400,
-    borderRadius: 100,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 12,
+    borderRadius: 36,
   },
   capsule: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 6,
-    paddingVertical: 6,
-    borderRadius: 100,
+    justifyContent: 'space-evenly',
+    height: 68,
+    borderRadius: 34,
+    borderWidth: 1,
     overflow: 'hidden',
+    paddingHorizontal: 8,
   },
   tabItem: {
-    flexDirection: 'row',
+    flex: 1,
+    height: '100%',
+  },
+  contentContainer: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    height: TAB_HEIGHT,
-    borderRadius: TAB_HEIGHT / 2,
-    overflow: 'hidden',
-  },
-  iconContainer: {
-    position: 'absolute',
-    left: (TAB_WIDTH_INACTIVE / 2) - (ICON_SIZE / 2),
   },
   labelContainer: {
     position: 'absolute',
-    left: 42,
-    right: 12,
+    bottom: 12,
   },
   tabLabel: {
-    fontSize: 14,
+    fontSize: 10,
     fontWeight: '700',
-    color: '#FFFFFF',
     letterSpacing: 0.2,
   }
 });

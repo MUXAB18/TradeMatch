@@ -520,10 +520,13 @@ export default function PrepScreen() {
   // Home / AI Agent Mode
   return (
     <KeyboardAvoidingView 
-      style={[styles.container, { backgroundColor: colors.background }]} 
+      style={[styles.container, { 
+        backgroundColor: colors.background,
+        paddingBottom: isKeyboardVisible ? 0 : (60 + Math.max(insets.bottom, 12)) 
+      }]} 
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 240 }} keyboardShouldPersistTaps="handled">
+      <View style={{ flex: 1, justifyContent: 'space-between', paddingBottom: 16 }}>
         {/* Top Navigation */}
         <View style={[newStyles.topBar, { paddingTop: Math.max(insets.top + 10, 50) }]}>
           <TouchableOpacity style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
@@ -599,13 +602,13 @@ export default function PrepScreen() {
             </View>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </View>
 
       {/* Bottom Input Area */}
       <View style={[newStyles.bottomInputContainer, { 
         backgroundColor: isDark ? colors.surface : '#FFFFFF',
         borderColor: isDark ? colors.border : '#E5E7EB',
-        bottom: isKeyboardVisible ? 20 : (60 + Math.max(insets.bottom, 12) + 20),
+        marginBottom: isKeyboardVisible ? 20 : (60 + Math.max(insets.bottom, 12) + 20),
         paddingBottom: isKeyboardVisible ? Math.max(insets.bottom + 10, 20) : 20,
       }]}>
         <View style={newStyles.inputWrapper}>
@@ -659,7 +662,6 @@ const newStyles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 40,
   },
   iconButton: {
     width: 44,
@@ -700,8 +702,6 @@ const newStyles = StyleSheet.create({
   centerContent: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 40,
-    marginBottom: 60,
   },
   avatarContainer: {
     width: 140,
@@ -779,10 +779,7 @@ const newStyles = StyleSheet.create({
     fontWeight: '500',
   },
   bottomInputContainer: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
+    marginHorizontal: 20,
     borderRadius: 24,
     padding: 16,
     borderWidth: 1,

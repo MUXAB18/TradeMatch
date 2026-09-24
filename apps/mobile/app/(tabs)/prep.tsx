@@ -549,46 +549,54 @@ export default function PrepScreen() {
           </Text>
         </View>
 
-        {/* Suggested Modes Grid */}
+        {/* Suggested Modes Control Panel */}
         <View style={newStyles.cardsGrid}>
           <TouchableOpacity 
-            style={[newStyles.modeCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : colors.primary }]}
+            style={[newStyles.compactCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : colors.primary }]}
             onPress={() => setMode('flashcards')}
             activeOpacity={0.7}
           >
-            <View style={[newStyles.cardIconWrapper, { backgroundColor: `${colors.primary}15` }]}>
-              <Zap size={20} color={colors.primary} />
+            <View style={[newStyles.compactIconWrapper, { backgroundColor: `${colors.primary}12` }]}>
+              <Zap size={18} color={colors.primary} />
             </View>
-            <Text style={[newStyles.cardTitle, { color: colors.textPrimary }]}>Flashcards</Text>
-            <Text style={[newStyles.cardDesc, { color: colors.textSecondary }]}>Quick technical review</Text>
+            <View style={newStyles.compactTextContainer}>
+              <Text style={[newStyles.compactTitle, { color: colors.textPrimary }]}>Flashcards</Text>
+              <Text style={[newStyles.compactDesc, { color: colors.textSecondary }]}>Review</Text>
+            </View>
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[newStyles.modeCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : colors.success }]}
+            style={[newStyles.compactCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : colors.success }]}
             onPress={() => setMode('chat')}
             activeOpacity={0.7}
           >
-            <View style={[newStyles.cardIconWrapper, { backgroundColor: `${colors.success}15` }]}>
-              <MessageSquare size={20} color={colors.success} />
+            <View style={[newStyles.compactIconWrapper, { backgroundColor: `${colors.success}12` }]}>
+              <MessageSquare size={18} color={colors.success} />
             </View>
-            <Text style={[newStyles.cardTitle, { color: colors.textPrimary }]}>Text Chat</Text>
-            <Text style={[newStyles.cardDesc, { color: colors.textSecondary }]}>Ask any question</Text>
+            <View style={newStyles.compactTextContainer}>
+              <Text style={[newStyles.compactTitle, { color: colors.textPrimary }]}>Text Chat</Text>
+              <Text style={[newStyles.compactDesc, { color: colors.textSecondary }]}>Q&A</Text>
+            </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[newStyles.modeCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : colors.warning }]} activeOpacity={0.7}>
-            <View style={[newStyles.cardIconWrapper, { backgroundColor: `${colors.warning}15` }]}>
-              <Headphones size={20} color={colors.warning} />
+          <TouchableOpacity style={[newStyles.compactCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : colors.warning }]} activeOpacity={0.7}>
+            <View style={[newStyles.compactIconWrapper, { backgroundColor: `${colors.warning}12` }]}>
+              <Headphones size={18} color={colors.warning} />
             </View>
-            <Text style={[newStyles.cardTitle, { color: colors.textPrimary }]}>Voice Session</Text>
-            <Text style={[newStyles.cardDesc, { color: colors.textSecondary }]}>Mock interview</Text>
+            <View style={newStyles.compactTextContainer}>
+              <Text style={[newStyles.compactTitle, { color: colors.textPrimary }]}>Voice</Text>
+              <Text style={[newStyles.compactDesc, { color: colors.textSecondary }]}>Interview</Text>
+            </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[newStyles.modeCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : '#8B5CF6' }]} activeOpacity={0.7}>
-            <View style={[newStyles.cardIconWrapper, { backgroundColor: `#8B5CF615` }]}>
-              <BookOpen size={20} color="#8B5CF6" />
+          <TouchableOpacity style={[newStyles.compactCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : '#8B5CF6' }]} activeOpacity={0.7}>
+            <View style={[newStyles.compactIconWrapper, { backgroundColor: `#8B5CF612` }]}>
+              <BookOpen size={18} color="#8B5CF6" />
             </View>
-            <Text style={[newStyles.cardTitle, { color: colors.textPrimary }]}>Trade Knowledge</Text>
-            <Text style={[newStyles.cardDesc, { color: colors.textSecondary }]}>Code & safety</Text>
+            <View style={newStyles.compactTextContainer}>
+              <Text style={[newStyles.compactTitle, { color: colors.textPrimary }]}>Trade Data</Text>
+              <Text style={[newStyles.compactDesc, { color: colors.textSecondary }]}>Code & Safety</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -732,39 +740,43 @@ const newStyles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: 20,
-    gap: 16,
+    gap: 12,
     justifyContent: 'space-between',
   },
-  modeCard: {
-    width: (SCREEN_WIDTH - 40 - 16) / 2,
-    padding: 16,
-    borderRadius: 20,
+  compactCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: (SCREEN_WIDTH - 40 - 12) / 2,
+    padding: 12,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.03)',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.06,
-    shadowRadius: 16,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 3,
     marginBottom: 4,
   },
-  cardIconWrapper: {
-    width: 40,
-    height: 40,
-    borderRadius: 14,
+  compactIconWrapper: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginRight: 10,
   },
-  cardTitle: {
-    fontSize: 15,
+  compactTextContainer: {
+    flex: 1,
+  },
+  compactTitle: {
+    fontSize: 14,
     fontWeight: '700',
-    marginBottom: 4,
     letterSpacing: -0.2,
+    marginBottom: 2,
   },
-  cardDesc: {
-    fontSize: 12,
+  compactDesc: {
+    fontSize: 11,
     fontWeight: '500',
-    lineHeight: 16,
   },
   bottomInputContainer: {
     position: 'absolute',

@@ -18,9 +18,9 @@ const TAB_COUNT = 5;
 const TAB_WIDTH = TAB_BAR_WIDTH / TAB_COUNT;
 
 // EXACT Dimensions to match the 100000% image
-const PILL_HEIGHT = 52;
-const INDICATOR_SIZE = 64; // White circle breaks out by 6px top/bottom
-const CENTER_CIRCLE_SIZE = 64; // Blue circle breaks out exactly like the white one
+const PILL_HEIGHT = 68;
+const INDICATOR_SIZE = 54; 
+const CONTAINER_HEIGHT = 68; // Parent container height
 
 interface TabItemProps {
   isFocused: boolean;
@@ -74,10 +74,9 @@ function TabItem({ isFocused, route, onPress, onLongPress, isCenter }: TabItemPr
         )}
         {!isCenter && (
           <Animated.View style={animatedIconStyle}>
-            {/* When focused it is black inside the white circle, otherwise light translucent gray */}
             <Icon 
               size={24} 
-              color={isFocused ? '#000000' : 'rgba(255,255,255,0.75)'} 
+              color={isFocused ? '#000000' : 'rgba(255,255,255,0.65)'} 
               strokeWidth={isFocused ? 2.5 : 2.2} 
             />
           </Animated.View>
@@ -89,6 +88,7 @@ function TabItem({ isFocused, route, onPress, onLongPress, isCenter }: TabItemPr
 
 export function CustomTabBar({ state, navigation }: any) {
   const insets = useSafeAreaInsets();
+  const { isDark } = useAppTheme();
   
   const indicatorPosition = useSharedValue(0);
   const indicatorOpacity = useSharedValue(1);
@@ -124,10 +124,10 @@ export function CustomTabBar({ state, navigation }: any) {
       }
     ]}>
       <View style={styles.shadowContainer}>
-        {/* Background layer (clipped) */}
+        {/* Background layer */}
         <View style={styles.glassPillContainer}>
-          <BlurView intensity={50} tint="dark" style={StyleSheet.absoluteFill} />
-          <View style={styles.glassPillOverlay} />
+          <BlurView intensity={isDark ? 50 : 30} tint="dark" style={StyleSheet.absoluteFill} />
+          <View style={[styles.glassPillOverlay, { backgroundColor: isDark ? 'rgba(40, 40, 45, 0.65)' : 'rgba(30, 30, 35, 0.75)' }]} />
         </View>
 
         {/* The sliding white circle layer (NOT clipped, allows break out) */}
@@ -187,22 +187,24 @@ const styles = StyleSheet.create({
   },
   shadowContainer: {
     width: TAB_BAR_WIDTH,
-    height: PILL_HEIGHT,
+    height: CONTAINER_HEIGHT,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.3,
-    shadowRadius: 24,
-    elevation: 16,
-    // We do NOT overflow: hidden here so the active indicator can break out
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
   },
   glassPillContainer: {
-    position: 'absolute', top: 0, bottom: 0, left: 0, right: 0,
+    position: 'absolute', 
+    top: (CONTAINER_HEIGHT - PILL_HEIGHT) / 2, 
+    height: PILL_HEIGHT, 
+    left: 0, 
+    right: 0,
     borderRadius: PILL_HEIGHT / 2,
     overflow: 'hidden',
   },
   glassPillOverlay: {
     position: 'absolute', top: 0, bottom: 0, left: 0, right: 0,
-    backgroundColor: 'rgba(90, 90, 95, 0.45)', // The exact dark translucent gray tone from the image
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.12)',
     borderRadius: PILL_HEIGHT / 2,
@@ -218,15 +220,14 @@ const styles = StyleSheet.create({
     height: INDICATOR_SIZE,
     borderRadius: INDICATOR_SIZE / 2,
     backgroundColor: '#FFFFFF',
-    // Position it vertically so it breaks out equally top and bottom
-    top: (PILL_HEIGHT - INDICATOR_SIZE) / 2, 
+    top: (CONTAINER_HEIGHT - INDICATOR_SIZE) / 2, 
     left: 0,
     zIndex: 0, // Behind the icons
     
     // Slight shadow for the white circle to make it pop like the image
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -241,9 +242,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   centerCircle: {
-    width: CENTER_CIRCLE_SIZE,
-    height: CENTER_CIRCLE_SIZE,
-    borderRadius: CENTER_CIRCLE_SIZE / 2,
+    width: INDICATOR_SIZE,
+    height: INDICATOR_SIZE,
+    borderRadius: INDICATOR_SIZE / 2,
     justifyContent: 'center',
     alignItems: 'center',
     // We want the blue circle to pop slightly

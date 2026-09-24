@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
   Modal,
   ScrollView,
   Dimensions,
@@ -12,7 +11,7 @@ import {
 import { useRouter } from 'expo-router';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { Settings, FileText, Home, Sparkles, User, Briefcase, Award, Zap, ChevronRight, PenTool } from 'lucide-react-native';
+import { Settings, FileText, Briefcase, Award, Zap, ChevronRight, PenTool, Home } from 'lucide-react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -33,7 +32,7 @@ import { useToast } from '../../providers/ToastProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme, Typography, Spacing, BorderRadius } from '../../constants/theme';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 
 function ListCard({ icon: Icon, title, subtitle, onPress, colors }: any) {
   return (
@@ -45,8 +44,8 @@ function ListCard({ icon: Icon, title, subtitle, onPress, colors }: any) {
         <Text style={[newStyles.listCardTitle, { color: colors.textPrimary }]}>{title}</Text>
         <Text style={[newStyles.listCardSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
       </View>
-      <View style={[newStyles.listCardArrow, { backgroundColor: colors.background }]}>
-        <ChevronRight size={16} color={colors.textSecondary} />
+      <View style={newStyles.listCardArrow}>
+        <ChevronRight size={20} color={colors.textSecondary} />
       </View>
     </TouchableOpacity>
   );
@@ -215,50 +214,94 @@ export default function ProfileScreen() {
       >
         {/* Header */}
         <View style={[newStyles.header, { marginTop: Math.max(insets.top + 10, 50) }]}>
-          <View style={[newStyles.userBadge, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
-            <View style={newStyles.avatarPlaceholder}>
-               <Text style={newStyles.avatarText}>{firstName.charAt(0)}</Text>
+          <TouchableOpacity 
+            style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFF' }]}
+            onPress={() => router.push('/(tabs)/home')}
+          >
+            <Home size={20} color={colors.textPrimary} />
+          </TouchableOpacity>
+          
+          <Text style={[newStyles.headerTitle, { color: colors.textPrimary }]}>Profile</Text>
+
+          <TouchableOpacity 
+            style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFF' }]}
+            onPress={() => router.push('/(tabs)/settings')}
+          >
+            <Settings size={20} color={colors.textPrimary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Top Profile Card */}
+        <View style={[newStyles.topCard, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
+          <View style={newStyles.topCardLeft}>
+            <View style={newStyles.avatarLarge}>
+               <Text style={newStyles.avatarLargeText}>{firstName.charAt(0)}</Text>
             </View>
-            <Text style={[newStyles.userBadgeText, { color: colors.textPrimary }]}>
-              Hello, {firstName}!
+            <Text style={[newStyles.profileName, { color: colors.textPrimary }]}>{data.name}</Text>
+            <View style={newStyles.badgeContainer}>
+               <Text style={newStyles.badgeText}>{data.trade || 'No Trade Set'}</Text>
+            </View>
+            <Text style={[newStyles.tagline, { color: colors.textSecondary }]}>
+              {data.country ? `Based in ${data.country}` : 'Keep learning, keep growing!'}
             </Text>
-            <ChevronRight size={14} color={colors.textSecondary} style={{ marginLeft: 4 }} />
           </View>
           
-          <View style={newStyles.headerActions}>
-            <TouchableOpacity style={[newStyles.iconButton, { backgroundColor: colors.primary }]}>
-              <Sparkles size={18} color="#FFF" />
-            </TouchableOpacity>
+          <View style={newStyles.topCardRight}>
             <TouchableOpacity 
-              style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFF' }]}
-              onPress={() => router.push('/(tabs)/settings')}
+              style={[newStyles.miniStatCard, { borderColor: isDark ? colors.border : '#F0F0F0' }]} 
+              onPress={handleEditProfile}
             >
-              <Settings size={18} color={colors.textPrimary} />
+              <View style={[newStyles.miniStatIcon, { backgroundColor: '#F3E8FF' }]}>
+                <PenTool size={16} color="#9333EA" />
+              </View>
+              <View>
+                <Text style={[newStyles.miniStatValue, { color: colors.textPrimary }]}>Edit</Text>
+                <Text style={[newStyles.miniStatLabel, { color: colors.textSecondary }]}>Profile</Text>
+              </View>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[newStyles.miniStatCard, { borderColor: isDark ? colors.border : '#F0F0F0' }]} 
+              onPress={handleExportCV}
+            >
+              <View style={[newStyles.miniStatIcon, { backgroundColor: '#DCFCE7' }]}>
+                <FileText size={16} color="#16A34A" />
+              </View>
+              <View>
+                <Text style={[newStyles.miniStatValue, { color: colors.textPrimary }]}>Export</Text>
+                <Text style={[newStyles.miniStatLabel, { color: colors.textSecondary }]}>CV PDF</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Hero Text */}
-        <View style={newStyles.heroSection}>
-          <Text style={[newStyles.heroTextLight, { color: colors.textSecondary }]}>Ready to build</Text>
-          <Text style={[newStyles.heroTextBold, { color: colors.textPrimary }]}>your career?</Text>
-        </View>
-
-        {/* Quick Actions Row */}
-        <View style={newStyles.quickActionsRow}>
-          <TouchableOpacity 
-            style={[newStyles.quickActionPill, { backgroundColor: isDark ? colors.surface : '#FFF' }]}
-            onPress={handleEditProfile}
-          >
-            <Text style={[newStyles.quickActionPillText, { color: colors.textPrimary }]}>Edit Profile</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[newStyles.quickActionCircle, { backgroundColor: isDark ? colors.surface : '#FFF' }]}
-            onPress={handleExportCV}
-          >
-            <FileText size={20} color={colors.textPrimary} />
-          </TouchableOpacity>
+        {/* 3-Column Stats Card */}
+        <View style={[newStyles.threeColCard, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
+          <View style={newStyles.colStat}>
+             <View style={[newStyles.colIcon, { backgroundColor: '#F3E8FF' }]}>
+               <Briefcase size={20} color="#9333EA" />
+             </View>
+             <Text style={[newStyles.colLabel, { color: colors.textSecondary }]}>Experience</Text>
+             <Text style={[newStyles.colValue, { color: colors.textPrimary }]}>{data.yearsExperience} <Text style={{fontSize: 14}}>yrs</Text></Text>
+          </View>
+          <View style={[newStyles.colDivider, { backgroundColor: isDark ? colors.border : '#F0F0F0' }]} />
+          <View style={newStyles.colStat}>
+             <View style={[newStyles.colIcon, { backgroundColor: '#E0F2FE' }]}>
+               <Zap size={20} color="#0284C7" />
+             </View>
+             <Text style={[newStyles.colLabel, { color: colors.textSecondary }]}>Skills</Text>
+             <Text style={[newStyles.colValue, { color: colors.textPrimary }]}>{data.skills.length}</Text>
+          </View>
+          <View style={[newStyles.colDivider, { backgroundColor: isDark ? colors.border : '#F0F0F0' }]} />
+          <View style={newStyles.colStat}>
+             <View style={[newStyles.colIcon, { backgroundColor: '#FFEDD5' }]}>
+               <Award size={20} color="#EA580C" />
+             </View>
+             <Text style={[newStyles.colLabel, { color: colors.textSecondary }]}>Active Certs</Text>
+             <Text style={[newStyles.colValue, { color: colors.textPrimary }]}>
+               {userCerts.length < 10 ? `0${userCerts.length}` : userCerts.length}
+             </Text>
+          </View>
         </View>
 
         {/* Big Banner */}
@@ -289,64 +332,30 @@ export default function ProfileScreen() {
               </View>
             </View>
             <TouchableOpacity style={newStyles.bannerButton} onPress={handleExportCV}>
-              <Text style={newStyles.bannerButtonText}>Export CV</Text>
+              <Text style={newStyles.bannerButtonText}>+ Export CV</Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* Square Stats Row */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={newStyles.statsScroll}>
-          <View style={[newStyles.statSquare, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
-            <View style={[newStyles.statIconBadge, { backgroundColor: `${colors.primary}15` }]}>
-              <Briefcase size={20} color={colors.primary} />
-            </View>
-            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>Experience</Text>
-            <Text style={[newStyles.statSubtitle, { color: colors.textSecondary }]}>{data.yearsExperience} yrs</Text>
-          </View>
-
-          <View style={[newStyles.statSquare, { backgroundColor: isDark ? colors.surface : `${colors.primary}20` }]}>
-            <View style={[newStyles.statIconBadge, { backgroundColor: isDark ? colors.background : '#FFF' }]}>
-              <PenTool size={20} color={colors.primary} />
-            </View>
-            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>Skills</Text>
-            <Text style={[newStyles.statSubtitle, { color: colors.textSecondary }]}>{data.skills.length} added</Text>
-          </View>
-
-          <View style={[newStyles.statSquare, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
-            <View style={[newStyles.statIconBadge, { backgroundColor: `${colors.primary}15` }]}>
-              <Award size={20} color={colors.primary} />
-            </View>
-            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>Certs</Text>
-            <Text style={[newStyles.statSubtitle, { color: colors.textSecondary }]}>{userCerts.length} active</Text>
-          </View>
-        </ScrollView>
-
         {/* Profile Details List */}
         <View style={newStyles.listSection}>
-          <View style={newStyles.listHeader}>
-            <Text style={[newStyles.listTitle, { color: colors.textPrimary }]}>Your Details</Text>
-            <TouchableOpacity onPress={handleEditProfile}>
-              <Text style={[newStyles.listViewAll, { color: colors.textSecondary }]}>Edit All</Text>
-            </TouchableOpacity>
-          </View>
-
           <ListCard 
-            icon={User} 
-            title="Basic Information" 
+            icon={PenTool} 
+            title="Edit Basic Information" 
             subtitle={`${data.phone || 'Phone not set'} • ${data.country || 'Country not set'}`} 
             colors={colors} 
             onPress={() => router.push('/profile/edit/name')}
           />
           <ListCard 
             icon={Zap} 
-            title="Trade Specialisation" 
+            title="Edit Trade Specialisation" 
             subtitle={data.trade || 'Not set'} 
             colors={colors} 
             onPress={() => router.push('/profile/edit/skills')}
           />
           <ListCard 
             icon={Briefcase} 
-            title="Availability" 
+            title="Edit Availability" 
             subtitle={data.availability || 'Not set'} 
             colors={colors} 
             onPress={() => router.push('/profile/edit/availability')}
@@ -422,42 +431,11 @@ const newStyles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 30,
+    marginBottom: 24,
   },
-  userBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-    paddingVertical: 6,
-    borderRadius: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    paddingRight: 14,
-  },
-  avatarPlaceholder: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#8B5CF6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  avatarText: {
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  userBadgeText: {
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 12,
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
   },
   iconButton: {
     width: 44,
@@ -471,58 +449,131 @@ const newStyles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  heroSection: {
-    paddingHorizontal: 20,
-    marginBottom: 24,
-  },
-  heroTextLight: {
-    fontSize: 36,
-    fontWeight: '400',
-    letterSpacing: -0.5,
-  },
-  heroTextBold: {
-    fontSize: 36,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-    marginTop: -4,
-  },
-  quickActionsRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    gap: 12,
-    marginBottom: 30,
-  },
-  quickActionPill: {
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  quickActionPillText: {
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  quickActionCircle: {
-    width: 48,
-    height: 48,
+  topCard: {
+    marginHorizontal: 20,
     borderRadius: 24,
+    padding: 20,
+    marginBottom: 20,
+    flexDirection: 'row',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  topCardLeft: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  avatarLarge: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#8B5CF6',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 16,
+  },
+  avatarLargeText: {
+    color: '#FFF',
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+  profileName: {
+    fontSize: 22,
+    fontWeight: '800',
+    marginBottom: 8,
+  },
+  badgeContainer: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  badgeText: {
+    color: '#16A34A',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  tagline: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  topCardRight: {
+    justifyContent: 'space-between',
+    width: 140,
+    paddingVertical: 4,
+  },
+  miniStatCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 10,
+  },
+  miniStatIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  miniStatValue: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  miniStatLabel: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  threeColCard: {
+    marginHorizontal: 20,
+    borderRadius: 24,
+    flexDirection: 'row',
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  colStat: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  colIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  colLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  colValue: {
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  colDivider: {
+    width: 1,
+    height: '80%',
+    alignSelf: 'center',
   },
   bannerCard: {
     marginHorizontal: 20,
     borderRadius: 24,
     padding: 24,
-    marginBottom: 30,
+    marginBottom: 24,
   },
   bannerHeader: {
     flexDirection: 'row',
@@ -562,57 +613,8 @@ const newStyles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
   },
-  statsScroll: {
-    paddingHorizontal: 20,
-    gap: 12,
-    marginBottom: 30,
-  },
-  statSquare: {
-    width: (SCREEN_WIDTH - 64) / 3,
-    height: 120,
-    borderRadius: 20,
-    padding: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  statIconBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  statTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  statSubtitle: {
-    fontSize: 11,
-    fontWeight: '500',
-  },
   listSection: {
     paddingHorizontal: 20,
-  },
-  listHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  listTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  listViewAll: {
-    fontSize: 13,
-    fontWeight: '600',
   },
   listCard: {
     flexDirection: 'row',
@@ -646,129 +648,32 @@ const newStyles = StyleSheet.create({
     fontSize: 13,
   },
   listCardArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
 });
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: Spacing.lg,
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: Spacing.lg,
-  },
-  errorTitle: {
-    fontSize: Typography.header,
-    fontWeight: 'bold',
-    marginBottom: Spacing.sm,
-  },
-  errorText: {
-    fontSize: Typography.body,
-    textAlign: 'center',
-    marginBottom: Spacing.lg,
-  },
-  retryButton: {
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    minHeight: Spacing.minTapTarget,
-  },
-  retryText: {
-    fontSize: Typography.body,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  section: {
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.xl,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
-    shadowRadius: 16,
-    elevation: 3,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: Spacing.sm,
-    borderBottomWidth: 1,
-  },
-  modalContainer: {
-    flex: 1,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: Spacing.lg,
-    paddingTop: Spacing.xl * 2,
-    borderBottomWidth: 1,
-  },
-  modalTitle: {
-    fontSize: Typography.headerLarge,
-    fontWeight: '800',
-  },
-  modalCloseButton: {
-    padding: Spacing.sm,
-    minWidth: Spacing.minTapTarget,
-    minHeight: Spacing.minTapTarget,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalCloseText: {
-    fontSize: Typography.headerLarge,
-  },
-  modalContent: {
-    flex: 1,
-  },
-  previewContainer: {
-    padding: Spacing.lg,
-  },
-  previewHint: {
-    fontSize: Typography.body,
-    textAlign: 'center',
-    marginBottom: Spacing.lg,
-  },
-  previewCard: {
-    borderRadius: BorderRadius.md,
-    padding: Spacing.xl,
-    borderWidth: 1,
-  },
-  previewName: {
-    fontSize: Typography.headerLarge,
-    fontWeight: '800',
-    marginBottom: Spacing.xs,
-  },
-  previewTrade: {
-    fontSize: Typography.header,
-    marginBottom: Spacing.md,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    fontWeight: '600',
-  },
-  previewSection: {
-    fontSize: Typography.body,
-    marginBottom: Spacing.xs,
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    padding: Spacing.lg,
-    borderTopWidth: 1,
-    paddingBottom: Spacing.xxl,
-  },
+  container: { flex: 1, padding: Spacing.lg },
+  headerContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.lg },
+  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.lg },
+  errorTitle: { fontSize: Typography.header, fontWeight: 'bold', marginBottom: Spacing.sm },
+  errorText: { fontSize: Typography.body, textAlign: 'center', marginBottom: Spacing.lg },
+  retryButton: { borderRadius: BorderRadius.md, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md, minHeight: Spacing.minTapTarget },
+  retryText: { fontSize: Typography.body, fontWeight: '600', color: '#fff' },
+  section: { borderRadius: BorderRadius.lg, padding: Spacing.lg, marginBottom: Spacing.xl, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.05, shadowRadius: 16, elevation: 3 },
+  infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: Spacing.sm, borderBottomWidth: 1 },
+  modalContainer: { flex: 1 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: Spacing.lg, paddingTop: Spacing.xl * 2, borderBottomWidth: 1 },
+  modalTitle: { fontSize: Typography.headerLarge, fontWeight: '800' },
+  modalCloseButton: { padding: Spacing.sm, minWidth: Spacing.minTapTarget, minHeight: Spacing.minTapTarget, justifyContent: 'center', alignItems: 'center' },
+  modalCloseText: { fontSize: Typography.headerLarge },
+  modalContent: { flex: 1 },
+  previewContainer: { padding: Spacing.lg },
+  previewHint: { fontSize: Typography.body, textAlign: 'center', marginBottom: Spacing.lg },
+  previewCard: { borderRadius: BorderRadius.md, padding: Spacing.xl, borderWidth: 1 },
+  previewName: { fontSize: Typography.headerLarge, fontWeight: '800', marginBottom: Spacing.xs },
+  previewTrade: { fontSize: Typography.header, marginBottom: Spacing.md, textTransform: 'uppercase', letterSpacing: 1, fontWeight: '600' },
+  previewSection: { fontSize: Typography.body, marginBottom: Spacing.xs },
+  modalFooter: { flexDirection: 'row', padding: Spacing.lg, borderTopWidth: 1, paddingBottom: Spacing.xxl },
 });

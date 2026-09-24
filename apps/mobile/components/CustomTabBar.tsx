@@ -13,10 +13,14 @@ import Animated, {
 } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
-const TAB_BAR_WIDTH = Math.min(width - 40, 360);
+const TAB_BAR_WIDTH = Math.min(width - 60, 320); // slightly narrower
 const TAB_COUNT = 5;
 const TAB_WIDTH = TAB_BAR_WIDTH / TAB_COUNT;
-const INDICATOR_SIZE = 52; // Big white circle
+
+// EXACT Dimensions to match the 100000% image
+const PILL_HEIGHT = 52;
+const INDICATOR_SIZE = 64; // White circle breaks out by 6px top/bottom
+const CENTER_CIRCLE_SIZE = 64; // Blue circle breaks out exactly like the white one
 
 interface TabItemProps {
   isFocused: boolean;
@@ -27,7 +31,7 @@ interface TabItemProps {
 }
 
 function TabItem({ isFocused, route, onPress, onLongPress, isCenter }: TabItemProps) {
-  const { colors, isDark } = useAppTheme();
+  const { colors } = useAppTheme();
   const progress = useSharedValue(isFocused ? 1 : 0);
 
   useEffect(() => {
@@ -44,13 +48,11 @@ function TabItem({ isFocused, route, onPress, onLongPress, isCenter }: TabItemPr
   if (route.name === 'settings') Icon = Hexagon;
 
   const animatedIconStyle = useAnimatedStyle(() => {
-    // Slight scale up for center or focused icon
-    const scale = isCenter ? 1 : 1 + (progress.value * 0.1);
+    const scale = isCenter ? 1 : 1 + (progress.value * 0.15);
     return {
       transform: [{ scale }],
     };
   });
-
 
   return (
     <TouchableOpacity
@@ -65,15 +67,19 @@ function TabItem({ isFocused, route, onPress, onLongPress, isCenter }: TabItemPr
         {isCenter && (
           <View style={[styles.centerCircle, { backgroundColor: colors.primary }]}>
             <Animated.View style={animatedIconStyle}>
+              {/* Note: The image shows white sparkles */}
               <Icon size={24} color="#FFFFFF" strokeWidth={2.5} />
             </Animated.View>
           </View>
         )}
         {!isCenter && (
           <Animated.View style={animatedIconStyle}>
-             {/* We use an Animated component for the icon to animate color, but lucide-react-native icons don't animate color easily with animated props. 
-                 Instead, we just hardcode the color switch based on isFocused. */}
-            <Icon size={24} color={isFocused ? '#000000' : (isDark ? '#A0A0A0' : '#888888')} strokeWidth={isFocused ? 2.5 : 2} />
+            {/* When focused it is black inside the white circle, otherwise light translucent gray */}
+            <Icon 
+              size={24} 
+              color={isFocused ? '#000000' : 'rgba(255,255,255,0.75)'} 
+              strokeWidth={isFocused ? 2.5 : 2.2} 
+            />
           </Animated.View>
         )}
       </View>
@@ -89,12 +95,12 @@ export function CustomTabBar({ state, navigation }: any) {
   
   useEffect(() => {
     const isCenter = state.index === 2;
-    // Calculate the position of the indicator
+    // Calculate the precise X position so it's perfectly centered on the tab
     const newPosition = (state.index * TAB_WIDTH) + (TAB_WIDTH / 2) - (INDICATOR_SIZE / 2);
     
     indicatorPosition.value = withSpring(newPosition, {
-      damping: 15,
-      stiffness: 150,
+      damping: 16,
+      stiffness: 160,
       mass: 0.8
     });
     
@@ -118,20 +124,17 @@ export function CustomTabBar({ state, navigation }: any) {
       }
     ]}>
       <View style={styles.shadowContainer}>
-        <BlurView
-          intensity={60}
-          tint="dark" // Image shows dark translucent pill
-          style={[
-            styles.capsule,
-            {
-              backgroundColor: 'rgba(30, 30, 30, 0.65)',
-              borderColor: 'rgba(255,255,255,0.1)',
-            }
-          ]}
-        >
-          {/* Animated active indicator */}
-          <Animated.View style={[styles.activeIndicator, animatedIndicatorStyle]} />
+        {/* Background layer (clipped) */}
+        <View style={styles.glassPillContainer}>
+          <BlurView intensity={50} tint="dark" style={StyleSheet.absoluteFill} />
+          <View style={styles.glassPillOverlay} />
+        </View>
 
+        {/* The sliding white circle layer (NOT clipped, allows break out) */}
+        <Animated.View style={[styles.activeIndicator, animatedIndicatorStyle]} />
+
+        {/* The icons layer (NOT clipped) */}
+        <View style={styles.tabsContainer}>
           {state.routes.map((route: any, index: number) => {
             const isFocused = state.index === index;
             const isCenter = index === 2;
@@ -168,7 +171,7 @@ export function CustomTabBar({ state, navigation }: any) {
               />
             );
           })}
-        </BlurView>
+        </View>
       </View>
     </View>
   );
@@ -184,22 +187,30 @@ const styles = StyleSheet.create({
   },
   shadowContainer: {
     width: TAB_BAR_WIDTH,
+    height: PILL_HEIGHT,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 16 },
     shadowOpacity: 0.3,
     shadowRadius: 24,
     elevation: 16,
-    borderRadius: 36,
+    // We do NOT overflow: hidden here so the active indicator can break out
   },
-  capsule: {
+  glassPillContainer: {
+    position: 'absolute', top: 0, bottom: 0, left: 0, right: 0,
+    borderRadius: PILL_HEIGHT / 2,
+    overflow: 'hidden',
+  },
+  glassPillOverlay: {
+    position: 'absolute', top: 0, bottom: 0, left: 0, right: 0,
+    backgroundColor: 'rgba(90, 90, 95, 0.45)', // The exact dark translucent gray tone from the image
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderRadius: PILL_HEIGHT / 2,
+  },
+  tabsContainer: {
+    position: 'absolute', top: 0, bottom: 0, left: 0, right: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    height: 70,
-    borderRadius: 35,
-    borderWidth: 1,
-    overflow: 'hidden',
-    paddingHorizontal: 0,
-    position: 'relative',
   },
   activeIndicator: {
     position: 'absolute',
@@ -207,9 +218,17 @@ const styles = StyleSheet.create({
     height: INDICATOR_SIZE,
     borderRadius: INDICATOR_SIZE / 2,
     backgroundColor: '#FFFFFF',
-    top: 9, // (70 - 52) / 2
+    // Position it vertically so it breaks out equally top and bottom
+    top: (PILL_HEIGHT - INDICATOR_SIZE) / 2, 
     left: 0,
-    zIndex: 0,
+    zIndex: 0, // Behind the icons
+    
+    // Slight shadow for the white circle to make it pop like the image
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   tabItem: {
     flex: 1,
@@ -222,14 +241,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   centerCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: CENTER_CIRCLE_SIZE,
+    height: CENTER_CIRCLE_SIZE,
+    borderRadius: CENTER_CIRCLE_SIZE / 2,
     justifyContent: 'center',
     alignItems: 'center',
+    // We want the blue circle to pop slightly
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 6,
   }

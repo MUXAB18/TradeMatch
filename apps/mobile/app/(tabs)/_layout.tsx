@@ -22,13 +22,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="certifications"
-        options={{
-          title: t('tabs.certifications'),
-          tabBarAccessibilityLabel: 'Certifications tab. Manage your certifications.',
-        }}
-      />
-      <Tabs.Screen
         name="jobs"
         options={{
           title: t('tabs.jobs'),
@@ -40,6 +33,13 @@ export default function TabLayout() {
         options={{
           title: t('tabs.prep'),
           tabBarAccessibilityLabel: 'Interview prep tab. Practice interview questions.',
+        }}
+      />
+      <Tabs.Screen
+        name="certifications"
+        options={{
+          title: t('tabs.certifications'),
+          tabBarAccessibilityLabel: 'Certifications tab. Manage your certifications.',
         }}
       />
       <Tabs.Screen

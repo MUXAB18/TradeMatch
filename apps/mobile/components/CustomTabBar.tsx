@@ -5,14 +5,14 @@ import { useAppTheme } from '../constants/theme';
 import { Home, User, Award, Briefcase, BookOpen, Settings } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import * as Haptics from '../utils/haptics';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withSpring, 
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
 } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
-const TAB_BAR_WIDTH = Math.min(width - 32, 400); 
+const TAB_BAR_WIDTH = Math.min(width - 32, 400);
 
 interface TabItemProps {
   isFocused: boolean;
@@ -58,7 +58,7 @@ function TabItem({ isFocused, route, onPress, onLongPress, label }: TabItemProps
   });
 
   const iconColor = isFocused ? colors.primary : colors.textSecondary;
-  
+
   const displayLabel = label === 'Certifications' ? 'Certs' : label;
 
   return (
@@ -75,7 +75,7 @@ function TabItem({ isFocused, route, onPress, onLongPress, label }: TabItemProps
         <Animated.View style={animatedIconStyle}>
           <Icon size={24} color={iconColor} strokeWidth={isFocused ? 2.5 : 2} />
         </Animated.View>
-        
+
         <Animated.View style={[styles.labelContainer, animatedTextStyle]}>
           <Text style={[styles.tabLabel, { color: colors.primary }]} numberOfLines={1}>
             {displayLabel}
@@ -92,19 +92,19 @@ export function CustomTabBar({ state, descriptors, navigation }: any) {
 
   return (
     <View style={[
-      styles.container, 
-      { 
+      styles.container,
+      {
         bottom: insets.bottom > 0 ? insets.bottom : 20,
         position: Platform.OS === 'web' ? ('fixed' as any) : 'absolute',
       }
     ]}>
       <View style={styles.shadowContainer}>
-        <BlurView 
-          intensity={90} 
-          tint={isDark ? "dark" : "light"} 
+        <BlurView
+          intensity={90}
+          tint={isDark ? "dark" : "light"}
           style={[
-            styles.capsule, 
-            { 
+            styles.capsule,
+            {
               backgroundColor: isDark ? 'rgba(25,25,25,0.7)' : 'rgba(255, 255, 255, 0.95)',
               borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
             }
@@ -116,8 +116,8 @@ export function CustomTabBar({ state, descriptors, navigation }: any) {
               options.tabBarLabel !== undefined
                 ? options.tabBarLabel
                 : options.title !== undefined
-                ? options.title
-                : route.name;
+                  ? options.title
+                  : route.name;
             const isFocused = state.index === index;
 
             const onPress = () => {

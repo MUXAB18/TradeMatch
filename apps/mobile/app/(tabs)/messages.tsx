@@ -59,9 +59,9 @@ export default function MessagesScreen() {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Messages</Text>
-        <TouchableOpacity style={[styles.addButton, { backgroundColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.05)' }]}>
-          <Plus size={20} color={colors.textPrimary} />
+        <Text style={[styles.headerTitle, { color: '#FFF' }]}>Messages</Text>
+        <TouchableOpacity style={[styles.addButton, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+          <Plus size={20} color="#FFF" />
         </TouchableOpacity>
       </View>
 
@@ -75,7 +75,7 @@ export default function MessagesScreen() {
               onPress={() => router.push(`/chat/${user.id}`)}
             >
               <Image source={{ uri: user.image }} style={styles.activeUserImage} />
-              <Text style={[styles.activeUserName, { color: colors.textSecondary }]}>{user.name}</Text>
+              <Text style={[styles.activeUserName, { color: 'rgba(255,255,255,0.9)' }]}>{user.name}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>

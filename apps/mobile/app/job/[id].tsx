@@ -113,18 +113,19 @@ export default function JobDetailsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.primary }]}>
       {/* Header Area */}
-      <View style={[styles.headerContainer, { paddingTop: Math.max(insets.top, Platform.OS === 'android' ? 20 : 0) }]}>
-        <TouchableOpacity style={[styles.iconButton, { backgroundColor: 'rgba(255,255,255,0.2)' }]} onPress={() => router.back()}>
+      <View style={[styles.headerContainer, { paddingTop: Math.max(insets.top + 10, 50) }]}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => router.back()}>
           <ChevronLeft size={24} color="#FFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Jobs Details</Text>
-        <TouchableOpacity style={[styles.iconButton, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+        <TouchableOpacity style={styles.iconButton}>
           <SlidersHorizontal size={20} color="#FFF" />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.companyNameContainer}>
-        <Text style={styles.companyName}>{job.company || 'Unknown Company'}</Text>
+      <View style={styles.heroContainer}>
+        <Text style={styles.heroTitle}>{job.title}</Text>
+        <Text style={styles.heroLocation}>{job.country || 'Unknown Location'}</Text>
       </View>
 
       {/* Wrapper for Overlapping Logo */}
@@ -135,9 +136,8 @@ export default function JobDetailsScreen() {
             contentContainerStyle={[styles.scrollContent, { paddingTop: 64 }]}
             showsVerticalScrollIndicator={false}
           >
-            {/* Title & Location */}
-          <Text style={[styles.jobTitle, { color: colors.textPrimary }]}>{job.title}</Text>
-          <Text style={[styles.jobLocation, { color: colors.textSecondary }]}>{job.country || 'Unknown Location'}</Text>
+            {/* Company Name */}
+            <Text style={[styles.companyNameCard, { color: colors.textPrimary }]}>{job.company || 'Unknown Company'}</Text>
 
           {/* Two Stats Blocks */}
           <View style={styles.statsRow}>
@@ -220,13 +220,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 24,
     marginBottom: 24,
-    marginTop: 48, // Pushed down further
   },
   iconButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 18,
-    backgroundColor: '#1C1C1E',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -236,14 +235,29 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: -0.2,
   },
-  companyNameContainer: {
+  heroContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 70,
+    paddingHorizontal: 20,
   },
-  companyName: {
+  heroTitle: {
     color: '#FFF',
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  heroLocation: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  companyNameCard: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: '800',
+    textAlign: 'center',
+    marginBottom: 32,
     letterSpacing: -0.3,
   },
   contentCard: {
@@ -297,22 +311,6 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 28,
     fontWeight: '800',
-  },
-  jobTitle: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: '#000',
-    textAlign: 'center',
-    marginBottom: 8,
-    letterSpacing: -0.5,
-  },
-  jobLocation: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#9CA3AF',
-    textAlign: 'center',
-    marginBottom: 28,
-    letterSpacing: 0.5,
   },
   statsRow: {
     flexDirection: 'row',

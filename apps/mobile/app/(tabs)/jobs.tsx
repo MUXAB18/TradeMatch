@@ -195,7 +195,8 @@ export default function JobsScreen() {
 
   if (profileLoading || jobsLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.primary }]}>
+      <View style={[styles.container, { backgroundColor: isDark ? colors.background : '#F5F7FA' }]}>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', backgroundColor: colors.primary }} />
         <View style={[styles.topBar, { paddingTop: Math.max(insets.top + 10, 50) }]}>
            <Skeleton width={44} height={44} borderRadius={16} />
            <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -213,9 +214,9 @@ export default function JobsScreen() {
 
   if (error) {
     return (
-      <View style={[styles.centerContainer, { backgroundColor: colors.primary }]}>
-        <Text style={[styles.errorTitle, { color: '#FFF' }]}>Error Loading Jobs</Text>
-        <Text style={[styles.errorText, { color: 'rgba(255,255,255,0.8)' }]}>{error}</Text>
+      <View style={[styles.centerContainer, { backgroundColor: isDark ? colors.background : '#F5F7FA' }]}>
+        <Text style={[styles.errorTitle, { color: colors.error }]}>Error Loading Jobs</Text>
+        <Text style={[styles.errorText, { color: colors.textSecondary }]}>{error}</Text>
       </View>
     );
   }
@@ -228,7 +229,7 @@ export default function JobsScreen() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.primary }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? colors.background : '#F5F7FA' }]}>
       <Animated.ScrollView
         style={styles.scrollView}
         contentContainerStyle={[styles.scrollContent, { paddingTop: Math.max(insets.top + 10, 30) }]}
@@ -237,6 +238,7 @@ export default function JobsScreen() {
         onScroll={scrollHandler}
         scrollEventThrottle={16}
       >
+        <View style={{ position: 'absolute', top: -1000, left: 0, right: 0, height: 1400, backgroundColor: colors.primary }} />
         {/* Top Header */}
         <View style={styles.topBar}>
           <TouchableOpacity 

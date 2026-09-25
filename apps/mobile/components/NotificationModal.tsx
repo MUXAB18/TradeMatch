@@ -7,6 +7,7 @@ import { useAppTheme } from '../constants/theme';
 interface NotificationModalProps {
   visible: boolean;
   onClose: () => void;
+  adminNotifications?: any[];
 }
 
 const NOTIFICATIONS = [
@@ -16,7 +17,7 @@ const NOTIFICATIONS = [
   { id: '4', type: 'job', title: 'Application Update', message: 'Your application for Uber was reviewed.', time: '2d ago', unread: false },
 ];
 
-export default function NotificationModal({ visible, onClose }: NotificationModalProps) {
+export default function NotificationModal({ visible, onClose, adminNotifications = [] }: NotificationModalProps) {
   const { colors, isDark } = useAppTheme();
   const insets = useSafeAreaInsets();
 
@@ -57,6 +58,27 @@ export default function NotificationModal({ visible, onClose }: NotificationModa
           </View>
           
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+            {adminNotifications.map((notif) => (
+              <TouchableOpacity 
+                key={notif.id} 
+                style={[
+                  styles.notifCard, 
+                  { backgroundColor: colors.surface, borderWidth: 1, borderColor: 'rgba(0, 122, 255, 0.3)' }
+                ]}
+              >
+                <View style={[styles.notifIconContainer, { backgroundColor: colors.background }]}>
+                  {getIcon('system')}
+                </View>
+                <View style={styles.notifTextContainer}>
+                  <Text style={[styles.notifTitle, { color: colors.textPrimary }]}>{notif.title}</Text>
+                  <Text style={[styles.notifMessage, { color: colors.textSecondary }]}>{notif.body || notif.message}</Text>
+                  {notif.createdAt?.toDate && (
+                    <Text style={[styles.notifTime, { color: colors.textSecondary }]}>{new Date(notif.createdAt.toDate()).toLocaleDateString()}</Text>
+                  )}
+                </View>
+                <View style={styles.unreadDot} />
+              </TouchableOpacity>
+            ))}
             {NOTIFICATIONS.map((notif) => (
               <TouchableOpacity 
                 key={notif.id} 

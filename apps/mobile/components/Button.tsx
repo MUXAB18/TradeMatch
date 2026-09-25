@@ -3,7 +3,6 @@ import {
   Pressable,
   Text,
   StyleSheet,
-  ActivityIndicator,
   ViewStyle,
   TextStyle,
   View,
@@ -17,6 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from '../utils/haptics';
 import { useAppTheme, Spacing } from '../constants/theme';
+import BouncingDots from './BouncingDots';
 
 interface ButtonProps {
   title?: string;
@@ -178,23 +178,27 @@ export default function Button({
           },
         ]}
       >
-        {loading ? (
-          <ActivityIndicator color={getTextColor()} />
-        ) : (
-          <View style={styles.contentContainer}>
-            {icon && iconPosition === 'left' && <View style={[title ? styles.iconLeft : null]}>{icon}</View>}
-            {title && (
-              <Text
-                style={[
-                  styles.text,
-                  { color: getTextColor(), fontSize: getFontSize() },
-                  textStyle
-                ]}
-              >
-                {title}
-              </Text>
-            )}
-            {icon && iconPosition === 'right' && <View style={[title ? styles.iconRight : null]}>{icon}</View>}
+        <View style={[styles.contentContainer, { opacity: loading ? 0 : 1 }]}>
+          {icon && iconPosition === 'left' && <View style={[title ? styles.iconLeft : null]}>{icon}</View>}
+          {title && (
+            <Text
+              style={[
+                styles.text,
+                { color: getTextColor(), fontSize: getFontSize() },
+                textStyle
+              ]}
+            >
+              {title}
+            </Text>
+          )}
+          {icon && iconPosition === 'right' && <View style={[title ? styles.iconRight : null]}>{icon}</View>}
+        </View>
+
+        {loading && (
+          <View style={StyleSheet.absoluteFillObject}>
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+              <BouncingDots color={getTextColor()} />
+            </View>
           </View>
         )}
       </Pressable>

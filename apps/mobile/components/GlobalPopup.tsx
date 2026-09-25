@@ -70,8 +70,10 @@ export function GlobalPopup() {
         const valid = all.filter(p => {
           if (p.startDate && now < p.startDate) return false;
           if (p.endDate   && now > p.endDate)   return false;
-          if (p.target === 'workers'  && (user as any)?.role !== 'worker')  return false;
-          if (p.target === 'agencies' && (user as any)?.role !== 'agency') return false;
+          
+          const role = 'worker'; // Mobile app is for workers
+          if (p.target === 'workers'  && role !== 'worker')  return false;
+          if (p.target === 'agencies' && role !== 'agency') return false;
           return true;
         });
         if (valid.length > 0) { setValidPromos(valid); setCurrentIndex(0); setVisible(true); }

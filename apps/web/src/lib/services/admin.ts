@@ -9,7 +9,10 @@ import {
   orderBy, limit, where, getCountFromServer,
   serverTimestamp, Timestamp,
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { initializeApp } from 'firebase/app';
+import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { app, db, storage } from '@/lib/firebase';
 import type { User, JobPosting, Certification, InterviewPrepCard } from '@/types';
 
 /* ─── Types ──────────────────────────────────────────────────── */
@@ -19,8 +22,29 @@ export interface AdminUser extends User {
   adminStatus?: 'active' | 'suspended' | 'pending';
 }
 
-export interface AdminJob extends JobPosting {
+export interface AdminJob {
   id: string;
+  title: string;
+  company?: string;
+  trade?: string;
+  country?: string;
+  location?: string | any;
+  salary?: string;
+  description?: string;
+  requirements?: string[];
+  requiredSkills?: string[];
+  requiredCerts?: string[];
+  type?: string;
+  jobType?: string;
+  status?: string;
+  active?: boolean;
+  postedAt?: number | any;
+  postedBy?: string;
+  applicants?: number;
+  matchScore?: number;
+  verifiedRecruiter?: boolean;
+  agencyId?: string;
+  [key: string]: any;
 }
 
 export interface AdminCert extends Certification {
@@ -49,6 +73,8 @@ export interface AdminNotification {
   title: string;
   body: string;
   target: 'all' | 'workers' | 'agencies';
+  priority?: 'normal' | 'high';
+  actionUrl?: string;
   createdAt: any;
   sentBy: string;
 }
@@ -101,6 +127,9 @@ export interface GlobalSettings {
   supportEmail: string;
   platformFee: number;
   announcementBanner: string;
+  disableNewRegistrations?: boolean;
+  forceAppUpdateVersion?: string;
+  enableBetaFeatures?: boolean;
 }
 
 export interface CMSBlock {
@@ -170,7 +199,7 @@ export async function getGlobalSettings(): Promise<GlobalSettings> {
   if (snap.exists()) {
     return snap.data() as GlobalSettings;
   }
-  return { maintenanceMode: false, supportEmail: 'support@tradematch.com', platformFee: 5, announcementBanner: '' };
+  return { maintenanceMode: false, supportEmail: 'support@tradematch.com', platformFee: 5, announcementBanner: '', disableNewRegistrations: false, forceAppUpdateVersion: '', enableBetaFeatures: false };
 }
 
 export async function updateGlobalSettings(settings: Partial<GlobalSettings>, adminEmail: string): Promise<void> {
@@ -484,6 +513,11 @@ export async function sendNotification(n: Omit<AdminNotification, 'id'>, adminEm
   return ref.id;
 }
 
+export async function deleteNotification(id: string, adminEmail: string): Promise<void> {
+  await deleteDoc(doc(db, 'adminNotifications', id));
+  addAudit('Notification Deleted', `adminNotifications/${id}`, id, adminEmail, 'Deleted notification');
+}
+
 export async function getNotifications(): Promise<(AdminNotification & { id: string })[]> {
   try {
     const q = query(collection(db, 'adminNotifications'), orderBy('createdAt', 'desc'), limit(50));
@@ -492,4 +526,49 @@ export async function getNotifications(): Promise<(AdminNotification & { id: str
   } catch {
     return [];
   }
+}
+
+export async function createCompanyUser(data: any, adminEmail: string) {
+  const secondaryApp = initializeApp(app.options, 'SecondaryAdminApp');
+  const secondaryAuth = getAuth(secondaryApp);
+  
+  const userCredential = await createUserWithEmailAndPassword(secondaryAuth, data.email, data.password);
+  const uid = userCredential.user.uid;
+  
+  // Handle file upload if present
+  let businessLicenseUrl = '';
+  if (data.businessLicenseFile) {
+    const fileRef = storageRef(storage, `agencies/${uid}/license_${Date.now()}`);
+    await uploadBytes(fileRef, data.businessLicenseFile);
+    businessLicenseUrl = await getDownloadURL(fileRef);
+  }
+  
+  await setDoc(doc(db, 'users', uid), {
+    email: data.email,
+    name: data.companyName || data.name,
+    role: 'agency',
+    accountStatus: 'approved',
+    adminStatus: 'active',
+    country: data.country || '',
+    city: data.city || '',
+    createdAt: serverTimestamp(),
+  });
+  
+  await setDoc(doc(db, 'agencies', uid), {
+    companyName: data.companyName || data.name,
+    businessEmail: data.email,
+    industry: data.industry || '',
+    website: data.website || '',
+    country: data.country || '',
+    address: data.address || '',
+    city: data.city || '',
+    hiringTrades: data.targetTrades ? data.targetTrades.split(',').map((t: string) => t.trim()) : [],
+    hiringCountries: data.targetCountries ? data.targetCountries.split(',').map((c: string) => c.trim()) : [],
+    businessLicenseUrl,
+    verified: true,
+  });
+  
+  await secondaryAuth.signOut();
+  addAudit('Company Registered', `agencies/${uid}`, uid, adminEmail, `Created ${data.companyName || data.name}`);
+  return uid;
 }

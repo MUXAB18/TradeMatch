@@ -272,7 +272,7 @@ export default function ChangePhoneScreen() {
                   keyboardType="phone-pad"
                   autoComplete="tel"
                   error={error}
-                  containerStyle={{ marginBottom: 0 }}
+                  style={{ marginBottom: 0 }}
                   icon={<Phone size={20} color={colors.textSecondary} />}
                   autoFocus
                 />
@@ -299,7 +299,7 @@ export default function ChangePhoneScreen() {
               {otp.map((digit, index) => (
                 <TextInput
                   key={index}
-                  ref={ref => inputRefs.current[index] = ref}
+                  ref={ref => { inputRefs.current[index] = ref; }}
                   style={[
                     styles.otpInput,
                     { 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ import { useAppTheme, Typography, Spacing, BorderRadius } from '../../constants/
 import { COUNTRIES, POPULAR_COUNTRIES, Country } from '../../constants/countries';
 import CountryFlag from 'react-native-country-flag';
 import Animated, { FadeInDown, LinearTransition, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { Search, MapPin, Check, Globe, ChevronRight } from 'lucide-react-native';
+import { Search, MapPin, Globe } from 'lucide-react-native';
 import * as Haptics from '../../utils/haptics';
 
 // Custom Animated Components
@@ -62,7 +62,8 @@ function CountryCard({ country, selected, onPress, index }: CountryCardProps) {
         styles.card,
         { backgroundColor: isDark ? colors.surface : colors.white, borderColor: colors.border },
         selected && { borderColor: colors.primary, backgroundColor: isDark ? 'rgba(93, 214, 44, 0.1)' : 'rgba(93, 214, 44, 0.05)' },
-        !country.isLive && { opacity: 0.7 }
+        !country.isLive && { opacity: 0.7 },
+        animatedStyle
       ]}
       activeOpacity={0.9}
     >
@@ -333,7 +334,6 @@ export default function LocationScreen() {
             stickySectionHeadersEnabled
             keyboardShouldPersistTaps="handled"
             layout={LinearTransition.springify()}
-            itemLayoutAnimation={LinearTransition.springify()}
           />
         </Animated.View>
       )}

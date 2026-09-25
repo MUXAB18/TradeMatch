@@ -33,6 +33,12 @@ export function VerificationBadge({ status, label, className = '' }: Verificatio
       icon: XCircle,
       text: 'Not Verified',
     },
+    rejected: {
+      color: 'text-red-600',
+      bg: 'bg-red-50 border-red-200',
+      icon: XCircle,
+      text: 'Rejected',
+    },
   };
 
   const { color, bg, icon: Icon, text } = config[status] || config.unverified;

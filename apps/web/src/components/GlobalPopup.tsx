@@ -5,9 +5,14 @@ import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import * as LucideIcons from 'lucide-react';
 import { Promotion } from '@/lib/services/admin';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { usePathname } from 'next/navigation';
 
 export default function GlobalPopup() {
   const { user } = useAuth();
+  const { profile } = useUserProfile();
+  const pathname = usePathname();
+  
   const [validPromos, setValidPromos] = useState<Promotion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -22,8 +27,12 @@ export default function GlobalPopup() {
         const validPromosList = promos.filter(p => {
           if (p.startDate && now < p.startDate) return false;
           if (p.endDate && now > p.endDate) return false;
-          if (p.target === 'workers' && (user as any)?.role !== 'worker') return false;
-          if (p.target === 'agencies' && (user as any)?.role !== 'agency') return false;
+          
+          if (pathname?.includes('/admin')) return true; // Admins see all promos to test them
+          
+          const role = profile?.role || 'worker'; // Fallback to worker if role missing
+          if (p.target === 'workers' && role !== 'worker') return false;
+          if (p.target === 'agencies' && role !== 'agency') return false;
 
           return true;
         });
@@ -37,7 +46,7 @@ export default function GlobalPopup() {
       }
     }
     fetchPromo();
-  }, [user]);
+  }, [user, profile, pathname]);
 
   const activePromo = validPromos[currentIndex];
   if (!activePromo) return null;

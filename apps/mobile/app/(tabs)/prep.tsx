@@ -25,7 +25,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { Bot, ArrowLeft, Menu, Plus, Mic, Send, Sparkles, ChevronDown, MessageSquare, Zap, Headphones, BookOpen } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useInterviewPrep } from '../../hooks/useInterviewPrep';
@@ -33,12 +33,12 @@ import Skeleton from '../../components/Skeleton';
 import EmptyState from '../../components/EmptyState';
 import { NoInterviewPrepIllustration } from '../../components/illustrations';
 import PrepSettingsModal from '../../components/PrepSettingsModal';
-import { useAppTheme, Typography, Spacing, BorderRadius } from '../../constants/theme';
+import { useAppTheme, Spacing } from '../../constants/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_PADDING = Spacing.lg * 2;
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
 interface FlashcardProps {

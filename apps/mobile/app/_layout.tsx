@@ -1,7 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Stack, useRouter } from 'expo-router';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../services/firebase';
 import { StatusBar } from 'expo-status-bar';
-import { View, AccessibilityInfo, Image, StyleSheet, Text } from 'react-native';
+import { View, AccessibilityInfo, Image, StyleSheet, Text, Modal } from 'react-native';
+import { BlurView } from 'expo-blur';
 import * as SplashScreen from 'expo-splash-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -173,6 +176,25 @@ function RootLayoutNav() {
   const [reduceMotion, setReduceMotion] = useState(false);
   const [appReady, setAppReady] = useState(false);
   const [splashFinished, setSplashFinished] = useState(false);
+  const [maintenance, setMaintenance] = useState<{ active: boolean, message: string, endTime?: number }>({ active: false, message: '' });
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, 'platform_settings', 'global'), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.maintenanceMode) {
+          setMaintenance({ 
+            active: true, 
+            message: data.maintenanceMessage || 'We are currently performing maintenance. Please check back later.',
+            endTime: data.maintenanceEndTime 
+          });
+        } else {
+          setMaintenance({ active: false, message: '' });
+        }
+      }
+    });
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
@@ -229,6 +251,70 @@ function RootLayoutNav() {
       {appReady && !splashFinished && (
         <PremiumSplashScreen onAnimationComplete={onSplashAnimationComplete} reduceMotion={reduceMotion} />
       )}
+
+      <Modal
+        visible={maintenance.active && splashFinished}
+        animationType="fade"
+        transparent={true}
+        statusBarTranslucent={true}
+      >
+        <BlurView intensity={isDark ? 80 : 100} tint={isDark ? "dark" : "light"} style={StyleSheet.absoluteFill}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+            
+            <View style={{
+              backgroundColor: isDark ? 'rgba(30, 35, 45, 0.85)' : 'rgba(255, 255, 255, 0.9)',
+              borderRadius: 36,
+              padding: 40,
+              width: '100%',
+              maxWidth: 380,
+              alignItems: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 24 },
+              shadowOpacity: isDark ? 0.4 : 0.1,
+              shadowRadius: 32,
+              elevation: 12,
+              borderWidth: 1,
+              borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.6)',
+            }}>
+              
+              <View style={{
+                width: 88, height: 88, borderRadius: 44, 
+                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F3F6F8',
+                justifyContent: 'center', alignItems: 'center', marginBottom: 28,
+                borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.04)',
+                shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.05, shadowRadius: 16
+              }}>
+                <Image source={require('../assets/logo-v2.png')} style={{ width: 48, height: 48, resizeMode: 'contain' }} />
+              </View>
+              
+              <Text style={{ fontSize: 26, fontWeight: '800', color: colors.textPrimary, marginBottom: 16, textAlign: 'center', letterSpacing: -0.5 }}>
+                We'll be right back.
+              </Text>
+              
+              <Text style={{ fontSize: 16, color: colors.textSecondary, textAlign: 'center', lineHeight: 24, marginBottom: maintenance.endTime ? 16 : 36, paddingHorizontal: 10 }}>
+                {maintenance.message || "We're performing a quick scheduled update. The platform will be online shortly."}
+              </Text>
+
+              {maintenance.endTime && (
+                <View style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12, marginBottom: 32 }}>
+                  <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textPrimary, textAlign: 'center' }}>
+                    Estimated completion: <Text style={{ color: colors.primary }}>
+                      {new Date(maintenance.endTime).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </Text>
+                  </Text>
+                </View>
+              )}
+
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, opacity: 0.6 }}>
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.textSecondary }} />
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.textSecondary, opacity: 0.5 }} />
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.textSecondary, opacity: 0.2 }} />
+              </View>
+              
+            </View>
+          </View>
+        </BlurView>
+      </Modal>
 
     </View>
   );

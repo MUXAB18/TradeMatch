@@ -14,6 +14,7 @@ export type VerificationState =
   | 'unverified'   // not submitted
   | 'submitted'    // candidate submitted, pending admin review
   | 'verified'     // admin confirmed
+  | 'rejected'     // admin rejected
   | 'attention';   // previously verified, now requires re-submission
 
 export interface VerificationStatus {
@@ -147,6 +148,7 @@ export interface JobPosting {
   description?: string;
   company?: string;
   salary?: string;
+  jobType?: string;
   verifiedRecruiter?: boolean; // BACKEND REQUIRED: admin-verified agency
 }
 

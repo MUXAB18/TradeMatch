@@ -31,6 +31,7 @@ import JobApplicationModal from '../../components/JobApplicationModal';
 import JobFilterModal, { JobFilters } from '../../components/JobFilterModal';
 import NotificationModal from '../../components/NotificationModal';
 import { Grid as GridIcon, Bell, Sliders, List } from 'lucide-react-native';
+import { BlurView } from 'expo-blur';
 
 export default function JobsScreen() {
   const { data: profile, loading: profileLoading, refetch: refetchProfile } = useUserProfile();
@@ -241,29 +242,45 @@ export default function JobsScreen() {
         <View style={{ position: 'absolute', top: -1000, left: 0, right: 0, height: 1400, backgroundColor: colors.primary }} />
         {/* Top Header */}
         <View style={styles.topBar}>
-          <TouchableOpacity 
-            style={[styles.iconBtn, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
-            onPress={() => setViewMode(prev => prev === 'list' ? 'grid' : 'list')}
-          >
-            {viewMode === 'list' ? (
-              <GridIcon size={22} color="#FFF" />
-            ) : (
-              <List size={22} color="#FFF" />
-            )}
-          </TouchableOpacity>
-          <View style={styles.topBarRight}>
+          <View style={styles.premiumIconBtnShadow}>
             <TouchableOpacity 
-              style={[styles.iconBtn, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
-              onPress={() => setNotifModalVisible(true)}
+              style={styles.premiumIconBtnWrapper}
+              onPress={() => setViewMode(prev => prev === 'list' ? 'grid' : 'list')}
             >
-              <Bell size={22} color="#FFF" />
-              <View style={[styles.filterBadge, { top: 12, right: 12, backgroundColor: '#EF4444' }]} />
+              <BlurView intensity={20} tint="light" style={styles.premiumIconBtn}>
+                {viewMode === 'list' ? (
+                  <GridIcon size={22} color="#FFF" />
+                ) : (
+                  <List size={22} color="#FFF" />
+                )}
+              </BlurView>
             </TouchableOpacity>
+          </View>
+          <View style={styles.topBarRight}>
+            <View style={styles.premiumIconBtnShadow}>
+              <TouchableOpacity 
+                style={styles.premiumIconBtnWrapper}
+                onPress={() => setNotifModalVisible(true)}
+              >
+                <BlurView intensity={20} tint="light" style={styles.premiumIconBtn}>
+                  <Bell size={22} color="#FFF" />
+                  <View style={[styles.filterBadge, { top: 12, right: 12, backgroundColor: '#EF4444', borderWidth: 2, borderColor: colors.primary }]} />
+                </BlurView>
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity onPress={() => router.push('/profile')}>
-              <Image 
-                source={{ uri: 'https://i.pravatar.cc/150' }} 
-                style={styles.avatar} 
-              />
+              {profile?.photoURL ? (
+                <Image 
+                  source={{ uri: profile.photoURL }} 
+                  style={[styles.avatar, { borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.4)' }]} 
+                />
+              ) : (
+                <View style={[styles.avatar, { backgroundColor: '#8B5CF6', justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.4)' }]}>
+                  <Text style={{ color: '#FFF', fontSize: 16, fontWeight: 'bold' }}>
+                    {(profile?.name || 'U').substring(0, 1).toUpperCase()}
+                  </Text>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -284,15 +301,19 @@ export default function JobsScreen() {
               onChangeText={setSearchQuery}
             />
           </View>
-          <TouchableOpacity 
-            style={[styles.filterBtn, { backgroundColor: 'rgba(255,255,255,0.15)' }]}
-            onPress={() => setFilterModalVisible(true)}
-          >
-            <Sliders size={22} color="#FFF" />
-            {(advancedFilters.type || advancedFilters.experience || advancedFilters.salary !== 'Any') && (
-              <View style={[styles.filterBadge, { backgroundColor: '#EF4444' }]} />
-            )}
-          </TouchableOpacity>
+          <View style={[styles.premiumIconBtnShadow, { borderRadius: 16 }]}>
+            <TouchableOpacity 
+              style={[styles.premiumIconBtnWrapper, { width: 56, height: 56, borderRadius: 16 }]}
+              onPress={() => setFilterModalVisible(true)}
+            >
+              <BlurView intensity={20} tint="light" style={[styles.premiumIconBtn, { width: 56, height: 56, borderRadius: 16 }]}>
+                <Sliders size={22} color="#FFF" />
+                {(advancedFilters.type || advancedFilters.experience || advancedFilters.salary !== 'Any') && (
+                  <View style={[styles.filterBadge, { backgroundColor: '#EF4444' }]} />
+                )}
+              </BlurView>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Filters */}
@@ -454,6 +475,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
+  },
+  premiumIconBtnShadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 4,
+    borderRadius: 24,
+    backgroundColor: 'transparent',
+  },
+  premiumIconBtnWrapper: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    width: 48,
+    height: 48,
+  },
+  premiumIconBtn: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
   topBarRight: {
     flexDirection: 'row',

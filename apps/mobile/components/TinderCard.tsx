@@ -92,8 +92,6 @@ export default function TinderCard({
           onPress={() => {}}
           colors={colors}
           isDark={isDark}
-          swipeEnabled={false}
-          parallaxEnabled={false}
           onApplyPress={onApplyPress}
           isSaved={isSaved}
           isApplied={isApplied}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Bookmark, MoreVertical } from 'lucide-react-native';
+import { Bookmark } from 'lucide-react-native';
 import Animated, { 
   FadeInUp, 
   useReducedMotion
@@ -21,7 +21,9 @@ interface JobCardProps {
   isApplied?: boolean;
   onSave?: () => void;
   onApply?: () => void;
+  onApplyPress?: () => void;
   variant?: 'featured' | 'list' | 'grid';
+  parallaxEnabled?: boolean;
 }
 
 export default function JobCard({ 
@@ -37,7 +39,8 @@ export default function JobCard({
   onSave,
   onApply,
   onApplyPress,
-  variant = 'list'
+  variant = 'list',
+  parallaxEnabled
 }: JobCardProps) {
   const reducedMotion = useReducedMotion();
 
@@ -79,7 +82,7 @@ export default function JobCard({
               </View>
             )}
             <View style={[styles.featuredTag, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
-              <Text style={[styles.featuredTagText, { color: '#FFFFFF' }]}>Full Time</Text>
+              <Text style={[styles.featuredTagText, { color: '#FFFFFF' }]}>{job.jobType || 'Full Time'}</Text>
             </View>
             <View style={[styles.featuredTag, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
               <Text style={[styles.featuredTagText, { color: '#FFFFFF' }]}>{Math.round(score.total)}% Match</Text>

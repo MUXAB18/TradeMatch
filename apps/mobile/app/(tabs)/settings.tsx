@@ -9,9 +9,10 @@ import {
   Modal,
   I18nManager,
   TouchableOpacity,
+  Image,
 } from 'react-native';
-import Animated, { 
-  FadeInUp, 
+import Animated, {
+  FadeInUp,
   useReducedMotion,
   useSharedValue,
   useAnimatedStyle,
@@ -20,7 +21,12 @@ import Animated, {
   interpolate,
   useDerivedValue,
 } from 'react-native-reanimated';
-import { useAppTheme, Typography, Spacing, BorderRadius } from '../../constants/theme';
+import {
+  useAppTheme,
+  Typography,
+  Spacing,
+  BorderRadius,
+} from '../../constants/theme';
 import Button from '../../components/Button';
 import { useRouter } from 'expo-router';
 import { signOut } from 'firebase/auth';
@@ -32,19 +38,44 @@ import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SUPPORTED_LANGUAGES } from '../../i18n';
 import {
-  Sun, Moon, Smartphone, ChevronRight, LogOut,
-  User, Phone, Mail, Lock, ShieldCheck,
-  Bell, MessageSquare, Clock,
-  Globe, DollarSign, Trash2,
-  HelpCircle, FileText, Shield, Info, Award, RefreshCw
+  Sun,
+  Moon,
+  Smartphone,
+  ChevronRight,
+  LogOut,
+  User,
+  Phone,
+  Mail,
+  Lock,
+  ShieldCheck,
+  Bell,
+  MessageSquare,
+  Clock,
+  Globe,
+  DollarSign,
+  Trash2,
+  HelpCircle,
+  FileText,
+  Shield,
+  Info,
+  Award,
+  RefreshCw,
 } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // ─── Custom Premium Switch ────────────────────────────────────────────────────
 
-function PremiumSwitch({ value, onValueChange, activeColor, inactiveColor, thumbColor }: any) {
-  const progress = useDerivedValue(() => withSpring(value ? 1 : 0, { damping: 20, stiffness: 200 }));
-  
+function PremiumSwitch({
+  value,
+  onValueChange,
+  activeColor,
+  inactiveColor,
+  thumbColor,
+}: any) {
+  const progress = useDerivedValue(() =>
+    withSpring(value ? 1 : 0, { damping: 20, stiffness: 200 })
+  );
+
   const trackStyle = useAnimatedStyle(() => {
     return {
       backgroundColor: interpolateColor(
@@ -54,7 +85,7 @@ function PremiumSwitch({ value, onValueChange, activeColor, inactiveColor, thumb
       ) as string,
     };
   });
-  
+
   const thumbStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateX: interpolate(progress.value, [0, 1], [2, 23]) }],
@@ -62,9 +93,20 @@ function PremiumSwitch({ value, onValueChange, activeColor, inactiveColor, thumb
   });
 
   return (
-    <Pressable onPress={() => onValueChange(!value)} hitSlop={8} accessibilityRole="switch" accessibilityState={{ checked: value }}>
+    <Pressable
+      onPress={() => onValueChange(!value)}
+      hitSlop={8}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: value }}
+    >
       <Animated.View style={[styles.switchTrack, trackStyle]}>
-        <Animated.View style={[styles.switchThumb, { backgroundColor: thumbColor }, thumbStyle]} />
+        <Animated.View
+          style={[
+            styles.switchThumb,
+            { backgroundColor: thumbColor },
+            thumbStyle,
+          ]}
+        />
       </Animated.View>
     </Pressable>
   );
@@ -80,7 +122,13 @@ function SectionHeader({ title, colors }: { title: string; colors: any }) {
   );
 }
 
-function SettingsCard({ children, colors }: { children: React.ReactNode; colors: any }) {
+function SettingsCard({
+  children,
+  colors,
+}: {
+  children: React.ReactNode;
+  colors: any;
+}) {
   return (
     <View style={[styles.card, { backgroundColor: colors.surface }]}>
       {children}
@@ -101,44 +149,92 @@ interface RowProps {
   danger?: boolean;
 }
 
-function SettingsRow({ icon, title, subtitle, value, onPress, rightElement, isLast, colors, isDark, danger }: RowProps) {
+function SettingsRow({
+  icon,
+  title,
+  subtitle,
+  value,
+  onPress,
+  rightElement,
+  isLast,
+  colors,
+  isDark,
+  danger,
+}: RowProps) {
   const isPressed = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    backgroundColor: isPressed.value 
-      ? (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)') 
+    backgroundColor: isPressed.value
+      ? isDark
+        ? 'rgba(255,255,255,0.05)'
+        : 'rgba(0,0,0,0.03)'
       : 'transparent',
   }));
 
   return (
     <View style={{ overflow: 'hidden' }}>
       <Pressable
-        onPressIn={() => { if (onPress) isPressed.value = 1; }}
-        onPressOut={() => { if (onPress) isPressed.value = 0; }}
+        onPressIn={() => {
+          if (onPress) isPressed.value = 1;
+        }}
+        onPressOut={() => {
+          if (onPress) isPressed.value = 0;
+        }}
         onPress={onPress}
         disabled={!onPress && !rightElement}
         accessibilityRole={onPress ? 'button' : 'none'}
       >
         <Animated.View style={[styles.row, animatedStyle]}>
-          <View style={[styles.iconCircle, { backgroundColor: `${danger ? colors.error : colors.primary}15` }]}>
+          <View
+            style={[
+              styles.iconCircle,
+              {
+                backgroundColor: `${danger ? colors.error : colors.primary}15`,
+              },
+            ]}
+          >
             {icon}
           </View>
           <View style={styles.rowContent}>
-            <Text style={[styles.rowTitle, { color: danger ? colors.error : colors.textPrimary }]}>{title}</Text>
+            <Text
+              style={[
+                styles.rowTitle,
+                { color: danger ? colors.error : colors.textPrimary },
+              ]}
+            >
+              {title}
+            </Text>
             {subtitle ? (
-              <Text style={[styles.rowSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
+              <Text
+                style={[styles.rowSubtitle, { color: colors.textSecondary }]}
+              >
+                {subtitle}
+              </Text>
             ) : null}
           </View>
           {value ? (
-            <Text style={[styles.rowValue, { color: colors.textSecondary }]}>{value}</Text>
+            <Text style={[styles.rowValue, { color: colors.textSecondary }]}>
+              {value}
+            </Text>
           ) : null}
           {rightElement ?? null}
           {onPress && !rightElement ? (
-            <ChevronRight size={18} color={colors.textSecondary} style={{ opacity: 0.6 }} />
+            <ChevronRight
+              size={18}
+              color={colors.textSecondary}
+              style={{ opacity: 0.6 }}
+            />
           ) : null}
         </Animated.View>
       </Pressable>
-      {!isLast && <View style={[styles.divider, { backgroundColor: colors.border, opacity: 0.3 }]} />}
+      {!isLast && (
+        <View
+          style={[
+            styles.divider,
+            { backgroundColor: colors.border, opacity: 0.3 },
+          ]}
+        />
+      )}
     </View>
   );
 }
@@ -154,17 +250,28 @@ interface RadioRowProps {
   isDark: boolean;
 }
 
-function RadioRow({ icon, title, subtitle, selected, onPress, isLast, colors, isDark }: RadioRowProps) {
+function RadioRow({
+  icon,
+  title,
+  subtitle,
+  selected,
+  onPress,
+  isLast,
+  colors,
+  isDark,
+}: RadioRowProps) {
   const isPressed = useSharedValue(0);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    backgroundColor: isPressed.value 
-      ? (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)') 
+    backgroundColor: isPressed.value
+      ? isDark
+        ? 'rgba(255,255,255,0.05)'
+        : 'rgba(0,0,0,0.03)'
       : 'transparent',
   }));
 
   const scaleStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: withSpring(selected ? 1 : 0.8, { damping: 15 }) }]
+    transform: [{ scale: withSpring(selected ? 1 : 0.8, { damping: 15 }) }],
   }));
 
   return (
@@ -177,21 +284,58 @@ function RadioRow({ icon, title, subtitle, selected, onPress, isLast, colors, is
         accessibilityState={{ checked: selected }}
       >
         <Animated.View style={[styles.row, animatedStyle]}>
-          <View style={[styles.iconCircle, { backgroundColor: `${selected ? colors.primary : colors.textSecondary}15` }]}>
+          <View
+            style={[
+              styles.iconCircle,
+              {
+                backgroundColor: `${selected ? colors.primary : colors.textSecondary}15`,
+              },
+            ]}
+          >
             {icon}
           </View>
           <View style={styles.rowContent}>
-            <Text style={[styles.rowTitle, { color: selected ? colors.primary : colors.textPrimary }]}>{title}</Text>
-            <Text style={[styles.rowSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
+            <Text
+              style={[
+                styles.rowTitle,
+                { color: selected ? colors.primary : colors.textPrimary },
+              ]}
+            >
+              {title}
+            </Text>
+            <Text style={[styles.rowSubtitle, { color: colors.textSecondary }]}>
+              {subtitle}
+            </Text>
           </View>
-          <View style={[styles.radioOuter, { borderColor: selected ? colors.primary : colors.textSecondary, opacity: selected ? 1 : 0.3 }]}>
+          <View
+            style={[
+              styles.radioOuter,
+              {
+                borderColor: selected ? colors.primary : colors.textSecondary,
+                opacity: selected ? 1 : 0.3,
+              },
+            ]}
+          >
             {selected && (
-              <Animated.View style={[styles.radioInner, { backgroundColor: colors.primary }, scaleStyle]} />
+              <Animated.View
+                style={[
+                  styles.radioInner,
+                  { backgroundColor: colors.primary },
+                  scaleStyle,
+                ]}
+              />
             )}
           </View>
         </Animated.View>
       </Pressable>
-      {!isLast && <View style={[styles.divider, { backgroundColor: colors.border, opacity: 0.3 }]} />}
+      {!isLast && (
+        <View
+          style={[
+            styles.divider,
+            { backgroundColor: colors.border, opacity: 0.3 },
+          ]}
+        />
+      )}
     </View>
   );
 }
@@ -223,29 +367,27 @@ export default function SettingsScreen() {
   const displayEmail = user?.email || user?.phoneNumber || 'No email';
 
   const handleLogout = () => {
-    Alert.alert(
-      t('settings.logout'),
-      'Are you sure you want to log out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Log Out',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await signOut(auth);
-              router.replace('/');
-            } catch (error) {
-              console.error('Failed to log out', error);
-            }
-          },
+    Alert.alert(t('settings.logout'), 'Are you sure you want to log out?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Log Out',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await signOut(auth);
+            router.replace('/');
+          } catch (error) {
+            console.error('Failed to log out', error);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleClearCache = () => {
-    Alert.alert('Clear Cache', 'Cached data has been cleared.', [{ text: 'OK' }]);
+    Alert.alert('Clear Cache', 'Cached data has been cleared.', [
+      { text: 'OK' },
+    ]);
   };
 
   const handleResetOnboarding = () => {
@@ -259,7 +401,10 @@ export default function SettingsScreen() {
           style: 'destructive',
           onPress: async () => {
             await AsyncStorage.removeItem('has_seen_onboarding');
-            Alert.alert('Done', 'Restart the app to see the onboarding screen.');
+            Alert.alert(
+              'Done',
+              'Restart the app to see the onboarding screen.'
+            );
           },
         },
       ]
@@ -267,7 +412,10 @@ export default function SettingsScreen() {
   };
 
   const handleComingSoon = (feature: string) => {
-    Alert.alert('Coming Soon', `${feature} will be available in a future update.`);
+    Alert.alert(
+      'Coming Soon',
+      `${feature} will be available in a future update.`
+    );
   };
 
   const handleLanguageChange = () => {
@@ -321,7 +469,9 @@ export default function SettingsScreen() {
           onPress: () => router.push('/change-password'),
         },
         {
-          icon: <ShieldCheck size={18} color={colors.primary} strokeWidth={2.5} />,
+          icon: (
+            <ShieldCheck size={18} color={colors.primary} strokeWidth={2.5} />
+          ),
           title: 'Two-Factor Authentication',
           subtitle: 'Add extra security to your account',
           onPress: () => handleComingSoon('Two-Factor Authentication'),
@@ -337,11 +487,15 @@ export default function SettingsScreen() {
           icon: <Globe size={18} color={colors.primary} strokeWidth={2.5} />,
           title: t('settings.language'),
           subtitle: t('settings.languageSubtitle'),
-          value: SUPPORTED_LANGUAGES.find(l => l.code === i18n.language)?.nativeName ?? 'English',
+          value:
+            SUPPORTED_LANGUAGES.find(l => l.code === i18n.language)
+              ?.nativeName ?? 'English',
           onPress: handleLanguageChange,
         },
         {
-          icon: <DollarSign size={18} color={colors.primary} strokeWidth={2.5} />,
+          icon: (
+            <DollarSign size={18} color={colors.primary} strokeWidth={2.5} />
+          ),
           title: 'Currency',
           subtitle: 'Custom currency',
           value: 'PKR (₨)',
@@ -361,7 +515,9 @@ export default function SettingsScreen() {
       delay: 500,
       rows: [
         {
-          icon: <HelpCircle size={18} color={colors.primary} strokeWidth={2.5} />,
+          icon: (
+            <HelpCircle size={18} color={colors.primary} strokeWidth={2.5} />
+          ),
           title: 'Help & Support',
           subtitle: 'Get help or contact us',
           onPress: () => router.push('/help'),
@@ -373,7 +529,9 @@ export default function SettingsScreen() {
           onPress: () => router.push('/(auth)/onboarding'),
         },
         {
-          icon: <RefreshCw size={18} color={colors.primary} strokeWidth={2.5} />,
+          icon: (
+            <RefreshCw size={18} color={colors.primary} strokeWidth={2.5} />
+          ),
           title: 'Reset Onboarding',
           subtitle: 'Show intro again on next launch',
           onPress: handleResetOnboarding,
@@ -405,40 +563,82 @@ export default function SettingsScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.content, { paddingTop: insets.top + Spacing.lg, paddingBottom: 120 }]}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + Spacing.lg, paddingBottom: 120 },
+        ]}
       >
         {/* Header */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.duration(500)} style={styles.header}>
-          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>{t('settings.title')}</Text>
+        <Animated.View
+          entering={reducedMotion ? undefined : FadeInUp.duration(500)}
+          style={styles.header}
+        >
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
+            {t('settings.title')}
+          </Text>
         </Animated.View>
 
         {/* Profile Card */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(100).duration(500)}>
+        <Animated.View
+          entering={
+            reducedMotion ? undefined : FadeInUp.delay(100).duration(500)
+          }
+        >
           <Pressable
             style={({ pressed }) => [
               styles.profileCard,
               { backgroundColor: colors.surface },
-              pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] }
+              pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
             ]}
             onPress={() => router.push('/profile')}
           >
-            <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-              <Text style={styles.avatarText}>{initials}</Text>
-            </View>
+            {profile?.photoURL ? (
+              <Image source={{ uri: profile.photoURL }} style={styles.avatar} />
+            ) : (
+              <View
+                style={[styles.avatar, { backgroundColor: colors.primary }]}
+              >
+                <Text style={styles.avatarText}>{initials}</Text>
+              </View>
+            )}
             <View style={styles.profileInfo}>
-              <Text style={[styles.profileName, { color: colors.textPrimary }]}>{displayName}</Text>
-              <Text style={[styles.profileEmail, { color: colors.textSecondary }]}>{displayEmail}</Text>
+              <Text style={[styles.profileName, { color: colors.textPrimary }]}>
+                {displayName}
+              </Text>
+              <Text
+                style={[styles.profileEmail, { color: colors.textSecondary }]}
+              >
+                {displayEmail}
+              </Text>
             </View>
-            <ChevronRight size={20} color={colors.textSecondary} style={{ opacity: 0.6 }} />
+            <ChevronRight
+              size={20}
+              color={colors.textSecondary}
+              style={{ opacity: 0.6 }}
+            />
           </Pressable>
         </Animated.View>
 
         {/* Appearance Section */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(150).duration(500)}>
+        <Animated.View
+          entering={
+            reducedMotion ? undefined : FadeInUp.delay(150).duration(500)
+          }
+        >
           <SectionHeader title="APPEARANCE" colors={colors} />
           <SettingsCard colors={colors}>
             <RadioRow
-              icon={<Sun size={18} color={themePreference === 'light' ? colors.primary : colors.textSecondary} strokeWidth={2.5} />}
+              icon={
+                <Sun
+                  size={18}
+                  color={
+                    themePreference === 'light'
+                      ? colors.primary
+                      : colors.textSecondary
+                  }
+                  strokeWidth={2.5}
+                />
+              }
               title="Light Mode"
               subtitle="Bright and clean interface"
               selected={themePreference === 'light'}
@@ -447,7 +647,17 @@ export default function SettingsScreen() {
               isDark={isDark}
             />
             <RadioRow
-              icon={<Moon size={18} color={themePreference === 'dark' ? colors.primary : colors.textSecondary} strokeWidth={2.5} />}
+              icon={
+                <Moon
+                  size={18}
+                  color={
+                    themePreference === 'dark'
+                      ? colors.primary
+                      : colors.textSecondary
+                  }
+                  strokeWidth={2.5}
+                />
+              }
               title="Dark Mode"
               subtitle="Easy on your eyes"
               selected={themePreference === 'dark'}
@@ -456,7 +666,17 @@ export default function SettingsScreen() {
               isDark={isDark}
             />
             <RadioRow
-              icon={<Smartphone size={18} color={themePreference === 'system' ? colors.primary : colors.textSecondary} strokeWidth={2.5} />}
+              icon={
+                <Smartphone
+                  size={18}
+                  color={
+                    themePreference === 'system'
+                      ? colors.primary
+                      : colors.textSecondary
+                  }
+                  strokeWidth={2.5}
+                />
+              }
               title="System Default"
               subtitle="Follows your device settings"
               selected={themePreference === 'system'}
@@ -469,7 +689,11 @@ export default function SettingsScreen() {
         </Animated.View>
 
         {/* Account Section */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(200).duration(500)}>
+        <Animated.View
+          entering={
+            reducedMotion ? undefined : FadeInUp.delay(200).duration(500)
+          }
+        >
           <SectionHeader title="ACCOUNT" colors={colors} />
           <SettingsCard colors={colors}>
             {sections[0].rows.map((row, idx) => (
@@ -488,7 +712,11 @@ export default function SettingsScreen() {
         </Animated.View>
 
         {/* Notifications Section */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(300).duration(500)}>
+        <Animated.View
+          entering={
+            reducedMotion ? undefined : FadeInUp.delay(300).duration(500)
+          }
+        >
           <SectionHeader title="NOTIFICATIONS" colors={colors} />
           <SettingsCard colors={colors}>
             <SettingsRow
@@ -508,7 +736,13 @@ export default function SettingsScreen() {
               }
             />
             <SettingsRow
-              icon={<MessageSquare size={18} color={colors.primary} strokeWidth={2.5} />}
+              icon={
+                <MessageSquare
+                  size={18}
+                  color={colors.primary}
+                  strokeWidth={2.5}
+                />
+              }
               title="Email Notifications"
               subtitle="Receive updates via email"
               colors={colors}
@@ -524,7 +758,9 @@ export default function SettingsScreen() {
               }
             />
             <SettingsRow
-              icon={<Clock size={18} color={colors.primary} strokeWidth={2.5} />}
+              icon={
+                <Clock size={18} color={colors.primary} strokeWidth={2.5} />
+              }
               title="Quiet Hours"
               subtitle="Silence notifications at night"
               onPress={() => handleComingSoon('Quiet Hours')}
@@ -536,7 +772,11 @@ export default function SettingsScreen() {
         </Animated.View>
 
         {/* Preferences Section */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(400).duration(500)}>
+        <Animated.View
+          entering={
+            reducedMotion ? undefined : FadeInUp.delay(400).duration(500)
+          }
+        >
           <SectionHeader title="PREFERENCES" colors={colors} />
           <SettingsCard colors={colors}>
             {sections[1].rows.map((row, idx) => (
@@ -556,7 +796,11 @@ export default function SettingsScreen() {
         </Animated.View>
 
         {/* Support & About Section */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(500).duration(500)}>
+        <Animated.View
+          entering={
+            reducedMotion ? undefined : FadeInUp.delay(500).duration(500)
+          }
+        >
           <SectionHeader title="SUPPORT & ABOUT" colors={colors} />
           <SettingsCard colors={colors}>
             {sections[2].rows.map((row, idx) => (
@@ -575,7 +819,11 @@ export default function SettingsScreen() {
         </Animated.View>
 
         {/* Log Out Button */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(600).duration(500)}>
+        <Animated.View
+          entering={
+            reducedMotion ? undefined : FadeInUp.delay(600).duration(500)
+          }
+        >
           <Button
             style={{ marginTop: Spacing.xl, marginBottom: Spacing.xl }}
             onPress={handleLogout}
@@ -596,10 +844,24 @@ export default function SettingsScreen() {
         statusBarTranslucent
         onRequestClose={() => setLanguageModalVisible(false)}
       >
-        <Pressable style={styles.modalOverlay} onPress={() => setLanguageModalVisible(false)}>
-          <Pressable style={[styles.modalContent, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF' }]} onPress={e => e.stopPropagation()}>
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setLanguageModalVisible(false)}
+        >
+          <Pressable
+            style={[
+              styles.modalContent,
+              { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF' },
+            ]}
+            onPress={e => e.stopPropagation()}
+          >
             {/* Handle bar */}
-            <View style={[styles.modalHandle, { backgroundColor: isDark ? '#3A3A3C' : '#E2E8F0' }]} />
+            <View
+              style={[
+                styles.modalHandle,
+                { backgroundColor: isDark ? '#3A3A3C' : '#E2E8F0' },
+              ]}
+            />
 
             <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
               {t('settings.selectLanguage')}
@@ -614,7 +876,9 @@ export default function SettingsScreen() {
                     style={[
                       styles.langOption,
                       isSelected && { backgroundColor: colors.primary + '12' },
-                      idx === SUPPORTED_LANGUAGES.length - 1 && { borderBottomWidth: 0 },
+                      idx === SUPPORTED_LANGUAGES.length - 1 && {
+                        borderBottomWidth: 0,
+                      },
                       { borderBottomColor: isDark ? '#2C2C2E' : '#F1F5F9' },
                     ]}
                     onPress={() => changeLanguage(lang.code)}
@@ -622,16 +886,43 @@ export default function SettingsScreen() {
                   >
                     <Text style={styles.langFlag}>{lang.flag}</Text>
                     <View style={styles.langTextWrap}>
-                      <Text style={[styles.langNative, { color: isSelected ? colors.primary : colors.textPrimary }]}>
+                      <Text
+                        style={[
+                          styles.langNative,
+                          {
+                            color: isSelected
+                              ? colors.primary
+                              : colors.textPrimary,
+                          },
+                        ]}
+                      >
                         {lang.nativeName}
                       </Text>
-                      <Text style={[styles.langEnglish, { color: colors.textSecondary }]}>
+                      <Text
+                        style={[
+                          styles.langEnglish,
+                          { color: colors.textSecondary },
+                        ]}
+                      >
                         {lang.name}
                       </Text>
                     </View>
                     {isSelected && (
-                      <View style={[styles.langCheck, { backgroundColor: colors.primary }]}>
-                        <Text style={{ color: '#fff', fontSize: 11, fontWeight: '700' }}>✓</Text>
+                      <View
+                        style={[
+                          styles.langCheck,
+                          { backgroundColor: colors.primary },
+                        ]}
+                      >
+                        <Text
+                          style={{
+                            color: '#fff',
+                            fontSize: 11,
+                            fontWeight: '700',
+                          }}
+                        >
+                          ✓
+                        </Text>
                       </View>
                     )}
                   </TouchableOpacity>
@@ -640,10 +931,17 @@ export default function SettingsScreen() {
             </ScrollView>
 
             <TouchableOpacity
-              style={[styles.modalCancelBtn, { backgroundColor: isDark ? '#2C2C2E' : '#F1F5F9' }]}
+              style={[
+                styles.modalCancelBtn,
+                { backgroundColor: isDark ? '#2C2C2E' : '#F1F5F9' },
+              ]}
               onPress={() => setLanguageModalVisible(false)}
             >
-              <Text style={[styles.modalCancelText, { color: colors.textPrimary }]}>{t('common.cancel')}</Text>
+              <Text
+                style={[styles.modalCancelText, { color: colors.textPrimary }]}
+              >
+                {t('common.cancel')}
+              </Text>
             </TouchableOpacity>
           </Pressable>
         </Pressable>

@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
   ScrollView,
   Dimensions,
-  Platform
+  Platform,
+  Image,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, SlidersHorizontal, Bookmark, Settings } from 'lucide-react-native';
+import {
+  ChevronLeft,
+  SlidersHorizontal,
+  Bookmark,
+  Settings,
+} from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppTheme } from '../../constants/theme';
 import { useJobs } from '../../hooks/useJobs';
@@ -28,7 +34,9 @@ export default function JobDetailsScreen() {
   const { data: profile, loading: profileLoading } = useUserProfile();
   const { jobs, loading: jobsLoading } = useJobs(profile || null);
   const { showToast } = useToast();
-  
+
+  const initials = (profile?.name || 'U').substring(0, 1).toUpperCase();
+
   const [applyModalVisible, setApplyModalVisible] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
@@ -93,7 +101,16 @@ export default function JobDetailsScreen() {
 
   if (jobsLoading || profileLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }]}>
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: colors.primary,
+            justifyContent: 'center',
+            alignItems: 'center',
+          },
+        ]}
+      >
         <Text style={{ color: '#FFF' }}>Loading Job Details...</Text>
       </View>
     );
@@ -101,9 +118,26 @@ export default function JobDetailsScreen() {
 
   if (!job) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' }]}>
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: colors.primary,
+            justifyContent: 'center',
+            alignItems: 'center',
+          },
+        ]}
+      >
         <Text style={{ color: '#FFF' }}>Job not found</Text>
-        <TouchableOpacity style={{ marginTop: 20, padding: 10, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8 }} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={{
+            marginTop: 20,
+            padding: 10,
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            borderRadius: 8,
+          }}
+          onPress={() => router.back()}
+        >
           <Text style={{ color: '#FFF' }}>Go Back</Text>
         </TouchableOpacity>
       </View>
@@ -113,93 +147,209 @@ export default function JobDetailsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.primary }]}>
       {/* Header Area */}
-      <View style={[styles.headerContainer, { paddingTop: Math.max(insets.top + 10, 50) }]}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => router.back()}>
+      <View
+        style={[
+          styles.headerContainer,
+          { paddingTop: Math.max(insets.top + 10, 50) },
+        ]}
+      >
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => router.back()}
+        >
           <ChevronLeft size={24} color="#FFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Jobs Details</Text>
-        <TouchableOpacity style={styles.iconButton}>
-          <SlidersHorizontal size={20} color="#FFF" />
+        <TouchableOpacity
+          style={styles.avatarButton}
+          onPress={() => router.push('/profile')}
+        >
+          {profile?.photoURL ? (
+            <Image
+              source={{ uri: profile.photoURL }}
+              style={styles.avatarImage}
+            />
+          ) : (
+            <Text style={styles.avatarText}>{initials}</Text>
+          )}
         </TouchableOpacity>
       </View>
 
       <View style={styles.heroContainer}>
         <Text style={styles.heroTitle}>{job.title}</Text>
-        <Text style={styles.heroLocation}>{job.country || 'Unknown Location'}</Text>
+        <Text style={styles.heroLocation}>
+          {job.country || 'Unknown Location'}
+        </Text>
       </View>
 
       {/* Wrapper for Overlapping Logo */}
       <View style={{ flex: 1, overflow: 'visible', zIndex: 1 }}>
         {/* Main White Content Card */}
-        <View style={[styles.contentCard, { backgroundColor: isDark ? colors.background : '#FFFFFF' }]}>
-          <ScrollView 
+        <View
+          style={[
+            styles.contentCard,
+            { backgroundColor: isDark ? colors.background : '#FFFFFF' },
+          ]}
+        >
+          <ScrollView
             contentContainerStyle={[styles.scrollContent, { paddingTop: 64 }]}
             showsVerticalScrollIndicator={false}
           >
             {/* Company Name */}
-            <Text style={[styles.companyNameCard, { color: colors.textPrimary }]}>{job.company || 'Unknown Company'}</Text>
+            <Text
+              style={[styles.companyNameCard, { color: colors.textPrimary }]}
+            >
+              {job.company || 'Unknown Company'}
+            </Text>
 
-          {/* Two Stats Blocks */}
-          <View style={styles.statsRow}>
-            <View style={[styles.statBox, { backgroundColor: colors.primary }]}>
-              <Text style={[styles.statLabel, { color: 'rgba(255,255,255,0.8)' }]}>Salary/year</Text>
-              <Text style={styles.statValue}>{job.salary || 'Competitive'}</Text>
+            {/* Two Stats Blocks */}
+            <View style={styles.statsRow}>
+              <View
+                style={[styles.statBox, { backgroundColor: colors.primary }]}
+              >
+                <Text
+                  style={[styles.statLabel, { color: 'rgba(255,255,255,0.8)' }]}
+                >
+                  Salary/year
+                </Text>
+                <Text style={styles.statValue}>
+                  {job.salary || 'Competitive'}
+                </Text>
+              </View>
+              <View
+                style={[styles.statBox, { backgroundColor: colors.primary }]}
+              >
+                <Text
+                  style={[styles.statLabel, { color: 'rgba(255,255,255,0.8)' }]}
+                >
+                  Job Type
+                </Text>
+                <Text style={styles.statValue}>{job.jobType || 'Full Time'}</Text>
+              </View>
             </View>
-            <View style={[styles.statBox, { backgroundColor: colors.primary }]}>
-              <Text style={[styles.statLabel, { color: 'rgba(255,255,255,0.8)' }]}>Job Type</Text>
-              <Text style={styles.statValue}>Full Time</Text>
+
+            {/* Job Details Section */}
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+              Job Details
+            </Text>
+            <Text
+              style={[styles.descriptionText, { color: colors.textSecondary }]}
+            >
+              {job.description || 'No description provided.'}
+            </Text>
+
+            {/* Tags */}
+            <View style={styles.tagsContainer}>
+              {job.requiredSkills && job.requiredSkills.length > 0 ? (
+                job.requiredSkills.map((skill: string, index: number) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.tagPill,
+                      {
+                        backgroundColor: isDark ? colors.surface : '#F9FAFB',
+                        borderColor: isDark ? colors.border : '#E5E7EB',
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.tagText, { color: colors.textPrimary }]}
+                    >
+                      {skill}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <View
+                  style={[
+                    styles.tagPill,
+                    {
+                      backgroundColor: isDark ? colors.surface : '#F9FAFB',
+                      borderColor: isDark ? colors.border : '#E5E7EB',
+                    },
+                  ]}
+                >
+                  <Text style={[styles.tagText, { color: colors.textPrimary }]}>
+                    {job.jobType || 'Full Time'}
+                  </Text>
+                </View>
+              )}
+              <View
+                style={[
+                  styles.tagPill,
+                  {
+                    backgroundColor: isDark ? colors.surface : '#F9FAFB',
+                    borderColor: isDark ? colors.border : '#E5E7EB',
+                  },
+                ]}
+              >
+                <Text style={[styles.tagText, { color: colors.textPrimary }]}>
+                  {Math.round(matchResult.total)}% Match
+                </Text>
+              </View>
             </View>
+          </ScrollView>
+
+          {/* Bottom Action Bar */}
+          <View
+            style={[
+              styles.bottomBar,
+              {
+                paddingBottom: Math.max(insets.bottom, 24),
+                backgroundColor: isDark ? colors.background : '#FFFFFF',
+                borderTopColor: isDark ? colors.border : '#F9FAFB',
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={[
+                styles.bookmarkBtn,
+                {
+                  backgroundColor: isDark ? colors.surface : '#FFFFFF',
+                  borderColor: isDark ? colors.border : '#E5E7EB',
+                },
+              ]}
+              onPress={toggleBookmark}
+            >
+              <Bookmark
+                size={24}
+                color={isBookmarked ? colors.primary : colors.textSecondary}
+                fill={isBookmarked ? colors.primary : 'transparent'}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.applyBtn,
+                {
+                  backgroundColor: isApplied ? colors.success : colors.primary,
+                },
+              ]}
+              onPress={() => !isApplied && setApplyModalVisible(true)}
+            >
+              <Text style={styles.applyBtnText}>
+                {isApplied ? 'Applied \u2713' : 'Apply Now'}
+              </Text>
+            </TouchableOpacity>
           </View>
+        </View>
 
-          {/* Job Details Section */}
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Job Details</Text>
-          <Text style={[styles.descriptionText, { color: colors.textSecondary }]}>
-            {job.description || "No description provided."}
+        {/* Fixed Logo Overlapping the Top Edge */}
+        <View
+          style={[
+            styles.logoContainer,
+            {
+              backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF',
+              borderColor: isDark ? colors.background : '#FFFFFF',
+            },
+          ]}
+        >
+          <Text style={[styles.logoText, { color: colors.primary }]}>
+            {job.company ? job.company.substring(0, 4) : 'CO'}
           </Text>
-
-          {/* Tags */}
-          <View style={styles.tagsContainer}>
-            {job.requiredSkills && job.requiredSkills.length > 0 ? (
-               job.requiredSkills.map((skill: string, index: number) => (
-                 <View key={index} style={[styles.tagPill, { backgroundColor: isDark ? colors.surface : '#F9FAFB', borderColor: isDark ? colors.border : '#E5E7EB' }]}>
-                   <Text style={[styles.tagText, { color: colors.textPrimary }]}>{skill}</Text>
-                 </View>
-               ))
-            ) : (
-               <View style={[styles.tagPill, { backgroundColor: isDark ? colors.surface : '#F9FAFB', borderColor: isDark ? colors.border : '#E5E7EB' }]}><Text style={[styles.tagText, { color: colors.textPrimary }]}>Full Time</Text></View>
-            )}
-            <View style={[styles.tagPill, { backgroundColor: isDark ? colors.surface : '#F9FAFB', borderColor: isDark ? colors.border : '#E5E7EB' }]}><Text style={[styles.tagText, { color: colors.textPrimary }]}>{Math.round(matchResult.total)}% Match</Text></View>
-          </View>
-        </ScrollView>
-
-        {/* Bottom Action Bar */}
-        <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 24), backgroundColor: isDark ? colors.background : '#FFFFFF', borderTopColor: isDark ? colors.border : '#F9FAFB' }]}>
-          <TouchableOpacity 
-            style={[styles.bookmarkBtn, { backgroundColor: isDark ? colors.surface : '#FFFFFF', borderColor: isDark ? colors.border : '#E5E7EB' }]}
-            onPress={toggleBookmark}
-          >
-            <Bookmark 
-              size={24} 
-              color={isBookmarked ? colors.primary : colors.textSecondary} 
-              fill={isBookmarked ? colors.primary : "transparent"} 
-            />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.applyBtn, { backgroundColor: isApplied ? colors.success : colors.primary }]}
-            onPress={() => !isApplied && setApplyModalVisible(true)}
-          >
-            <Text style={styles.applyBtnText}>{isApplied ? "Applied \u2713" : "Apply Now"}</Text>
-          </TouchableOpacity>
         </View>
       </View>
 
-      {/* Fixed Logo Overlapping the Top Edge */}
-      <View style={[styles.logoContainer, { backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF', borderColor: isDark ? colors.background : '#FFFFFF' }]}>
-        <Text style={[styles.logoText, { color: colors.primary }]}>{job.company ? job.company.substring(0, 4) : 'CO'}</Text>
-      </View>
-    </View>
-
-    <JobApplicationModal
+      <JobApplicationModal
         visible={applyModalVisible}
         job={job}
         score={matchResult}
@@ -228,6 +378,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  avatarButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#FFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#007AFF',
   },
   headerTitle: {
     color: '#FFF',
@@ -411,5 +579,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '800',
     letterSpacing: -0.2,
-  }
+  },
 });

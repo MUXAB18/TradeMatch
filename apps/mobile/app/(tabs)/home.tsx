@@ -10,9 +10,23 @@ import {
   Dimensions,
   Image,
 } from 'react-native';
-import { User, Settings, Briefcase, Award, Zap, ChevronRight, ArrowRight, Flame, Sparkles, Bot, PenTool, Bell } from 'lucide-react-native';
+import {
+  User,
+  Settings,
+  Briefcase,
+  Award,
+  Zap,
+  ChevronRight,
+  ArrowRight,
+  Flame,
+  Bot,
+  PenTool,
+  Bell,
+} from 'lucide-react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { useRouter } from 'expo-router';
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { db } from '../../services/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from '../../utils/haptics';
 import Animated, {
@@ -33,32 +47,74 @@ import { useAuth } from '../../contexts/AuthContext';
 import JobCard from '../../components/JobCard';
 import JobApplicationModal from '../../components/JobApplicationModal';
 import { GlobalPopup } from '../../components/GlobalPopup';
+import NotificationModal from '../../components/NotificationModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-function QuickLink({ title, actionText, onPress, colors, index, icon: Icon }: any) {
+function QuickLink({
+  title,
+  actionText,
+  onPress,
+  colors,
+  index,
+  icon: Icon,
+}: any) {
   const reducedMotion = useReducedMotion();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }]
+    transform: [{ scale: scale.value }],
   }));
 
   return (
-    <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(500 + index * 100).springify().damping(15)}>
+    <Animated.View
+      entering={
+        reducedMotion
+          ? undefined
+          : FadeInUp.delay(500 + index * 100)
+              .springify()
+              .damping(15)
+      }
+    >
       <TouchableOpacity
         onPress={onPress}
-        onPressIn={() => { scale.value = withSpring(0.97, { damping: 15, stiffness: 300 }); }}
-        onPressOut={() => { scale.value = withSpring(1, { damping: 15, stiffness: 300 }); }}
+        onPressIn={() => {
+          scale.value = withSpring(0.97, { damping: 15, stiffness: 300 });
+        }}
+        onPressOut={() => {
+          scale.value = withSpring(1, { damping: 15, stiffness: 300 });
+        }}
         activeOpacity={1}
       >
-        <Animated.View style={[newStyles.listCard, { backgroundColor: colors.surface }, animatedStyle]}>
-          <View style={[newStyles.listCardIcon, { backgroundColor: `${colors.primary}15` }]}>
+        <Animated.View
+          style={[
+            newStyles.listCard,
+            { backgroundColor: colors.surface },
+            animatedStyle,
+          ]}
+        >
+          <View
+            style={[
+              newStyles.listCardIcon,
+              { backgroundColor: `${colors.primary}15` },
+            ]}
+          >
             <Icon size={20} color={colors.primary} />
           </View>
           <View style={newStyles.listCardText}>
-            <Text style={[newStyles.listCardTitle, { color: colors.textPrimary }]}>{title}</Text>
-            <Text style={[newStyles.listCardSubtitle, { color: colors.textSecondary }]}>{actionText}</Text>
+            <Text
+              style={[newStyles.listCardTitle, { color: colors.textPrimary }]}
+            >
+              {title}
+            </Text>
+            <Text
+              style={[
+                newStyles.listCardSubtitle,
+                { color: colors.textSecondary },
+              ]}
+            >
+              {actionText}
+            </Text>
           </View>
           <View style={newStyles.listCardArrow}>
             <ArrowRight size={20} color={colors.textSecondary} />
@@ -74,10 +130,17 @@ export default function HomeScreen() {
   const reducedMotion = useReducedMotion();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const { data: profile, loading, error, refetch: refetchProfile } = useUserProfile();
+  const {
+    data: profile,
+    loading,
+    error,
+    refetch: refetchProfile,
+  } = useUserProfile();
   const { colors, isDark } = useAppTheme();
-  
-  const initials = (profile?.name || user?.displayName || 'U').substring(0, 1).toUpperCase();
+
+  const initials = (profile?.name || user?.displayName || 'U')
+    .substring(0, 1)
+    .toUpperCase();
   const firstName = profile?.name ? profile.name.split(' ')[0] : 'User';
 
   const { missing: missingCerts, refetch: refetchCerts } = useCertifications(
@@ -97,6 +160,18 @@ export default function HomeScreen() {
 
   const confettiRef = useRef<any>(null);
   const [hasCelebrated, setHasCelebrated] = useState(false);
+
+  const [adminNotifications, setAdminNotifications] = useState<any[]>([]);
+  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+
+  useEffect(() => {
+    const q = query(collection(db, 'adminNotifications'), orderBy('createdAt', 'desc'), limit(20));
+    const unsub = onSnapshot(q, (snap) => {
+      const notifs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+      setAdminNotifications(notifs);
+    });
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     const loadState = async () => {
@@ -134,17 +209,15 @@ export default function HomeScreen() {
       return;
     }
     setRefreshing(true);
-    await Promise.all([
-      refetchProfile(),
-      refetchCerts(),
-      refetchJobs()
-    ]);
+    await Promise.all([refetchProfile(), refetchCerts(), refetchJobs()]);
     setRefreshing(false);
   }, [refetchProfile, refetchCerts, refetchJobs, isOffline, showToast]);
 
   if (loading) {
     return (
-      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
+      <View
+        style={[styles.centerContainer, { backgroundColor: colors.background }]}
+      >
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -152,8 +225,12 @@ export default function HomeScreen() {
 
   if (error || !profile) {
     return (
-      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
-        <Text style={[styles.errorTitle, { color: colors.error }]}>Error Loading Dashboard</Text>
+      <View
+        style={[styles.centerContainer, { backgroundColor: colors.background }]}
+      >
+        <Text style={[styles.errorTitle, { color: colors.error }]}>
+          Error Loading Dashboard
+        </Text>
         <Text style={[styles.errorText, { color: colors.textSecondary }]}>
           {error || 'Failed to load profile'}
         </Text>
@@ -174,47 +251,94 @@ export default function HomeScreen() {
   const isProfileComplete = completedSteps === totalSteps;
 
   return (
-    <View style={{ flex: 1, backgroundColor: isDark ? colors.background : '#F3F6F1' }}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: isDark ? colors.background : '#F3F6F1',
+      }}
+    >
       <ScrollView
         contentContainerStyle={{ paddingBottom: Spacing.xxl + 80 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+          />
         }
       >
         {/* Header */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(100).springify().damping(15)} style={[newStyles.header, { marginTop: Math.max(insets.top + 10, 50) }]}>
-          <TouchableOpacity onPress={() => router.push('/profile')} style={[newStyles.userBadge, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
+        <Animated.View
+          entering={
+            reducedMotion
+              ? undefined
+              : FadeInUp.delay(100).springify().damping(15)
+          }
+          style={[
+            newStyles.header,
+            { marginTop: Math.max(insets.top + 10, 50) },
+          ]}
+        >
+          <TouchableOpacity
+            onPress={() => router.push('/profile')}
+            style={[
+              newStyles.userBadge,
+              { backgroundColor: isDark ? colors.surface : '#FFF' },
+            ]}
+          >
             <View style={newStyles.avatarPlaceholder}>
-               {user?.photoURL ? (
-                 <Image source={{ uri: user.photoURL }} style={{ width: '100%', height: '100%', borderRadius: 16 }} />
-               ) : (
-                 <Text style={newStyles.avatarText}>{initials}</Text>
-               )}
+              {profile?.photoURL ? (
+                <Image
+                  source={{ uri: profile.photoURL }}
+                  style={{ width: '100%', height: '100%', borderRadius: 16 }}
+                />
+              ) : (
+                <Text style={newStyles.avatarText}>{initials}</Text>
+              )}
             </View>
-            <Text style={[newStyles.userBadgeText, { color: colors.textPrimary }]}>
+            <Text
+              style={[newStyles.userBadgeText, { color: colors.textPrimary }]}
+            >
               Hello, {firstName}!
             </Text>
-            <ChevronRight size={14} color={colors.textSecondary} style={{ marginLeft: 4 }} />
+            <ChevronRight
+              size={14}
+              color={colors.textSecondary}
+              style={{ marginLeft: 4 }}
+            />
           </TouchableOpacity>
-          
+
           <View style={newStyles.headerActions}>
-            <TouchableOpacity style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
+            <TouchableOpacity
+              style={[
+                newStyles.iconButton,
+                { backgroundColor: isDark ? colors.surface : '#FFF' },
+              ]}
+              onPress={() => setShowNotificationsModal(true)}
+            >
               <Bell size={18} color={colors.textPrimary} />
-              <View style={{
-                position: 'absolute',
-                top: 10,
-                right: 12,
-                width: 8,
-                height: 8,
-                borderRadius: 4,
-                backgroundColor: '#EF4444',
-                borderWidth: 1.5,
-                borderColor: isDark ? colors.surface : '#FFF'
-              }} />
+              {adminNotifications.length > 0 && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 12,
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: '#EF4444',
+                    borderWidth: 1.5,
+                    borderColor: isDark ? colors.surface : '#FFF',
+                  }}
+                />
+              )}
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFF' }]}
+            <TouchableOpacity
+              style={[
+                newStyles.iconButton,
+                { backgroundColor: isDark ? colors.surface : '#FFF' },
+              ]}
               onPress={() => router.push('/(tabs)/settings')}
             >
               <Settings size={18} color={colors.textPrimary} />
@@ -223,64 +347,141 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* Hero Text */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(150).springify().damping(15)} style={newStyles.heroSection}>
-          <Text style={[newStyles.heroTextLight, { color: colors.textSecondary }]}>Ready for your next</Text>
-          <Text style={[newStyles.heroTextBold, { color: colors.textPrimary }]}>opportunity?</Text>
+        <Animated.View
+          entering={
+            reducedMotion
+              ? undefined
+              : FadeInUp.delay(150).springify().damping(15)
+          }
+          style={newStyles.heroSection}
+        >
+          <Text
+            style={[newStyles.heroTextLight, { color: colors.textSecondary }]}
+          >
+            Ready for your next
+          </Text>
+          <Text style={[newStyles.heroTextBold, { color: colors.textPrimary }]}>
+            opportunity?
+          </Text>
         </Animated.View>
 
         {/* Quick Actions Row */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(200).springify().damping(15)} style={newStyles.quickActionsRow}>
-          <TouchableOpacity 
-            style={[newStyles.quickActionPill, { backgroundColor: isDark ? colors.surface : '#FFF', borderColor: isDark ? colors.border : '#E5E5EA', borderWidth: 1 }]}
+        <Animated.View
+          entering={
+            reducedMotion
+              ? undefined
+              : FadeInUp.delay(200).springify().damping(15)
+          }
+          style={newStyles.quickActionsRow}
+        >
+          <TouchableOpacity
+            style={[
+              newStyles.quickActionPill,
+              {
+                backgroundColor: isDark ? colors.surface : '#FFF',
+                borderColor: isDark ? colors.border : '#E5E5EA',
+                borderWidth: 1,
+              },
+            ]}
             onPress={() => router.push('/(tabs)/jobs')}
           >
-            <Text style={[newStyles.quickActionPillText, { color: colors.textPrimary }]}>Explore Jobs</Text>
+            <Text
+              style={[
+                newStyles.quickActionPillText,
+                { color: colors.textPrimary },
+              ]}
+            >
+              Explore Jobs
+            </Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[newStyles.quickActionCircle, { backgroundColor: isDark ? colors.surface : '#FFF' }]}
+
+          <TouchableOpacity
+            style={[
+              newStyles.quickActionCircle,
+              { backgroundColor: isDark ? colors.surface : '#FFF' },
+            ]}
             onPress={() => router.push('/(tabs)/prep')}
           >
             <Bot size={20} color={colors.textPrimary} />
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[newStyles.quickActionCircle, { backgroundColor: isDark ? colors.surface : '#FFF' }]}
-            onPress={() => router.push('/(tabs)/certifications')}
+          <TouchableOpacity
+            style={[
+              newStyles.quickActionCircle,
+              { backgroundColor: isDark ? colors.surface : '#FFF' },
+            ]}
+            onPress={() => router.push('/profile')}
           >
             <Award size={20} color={colors.textPrimary} />
           </TouchableOpacity>
         </Animated.View>
 
         {/* Big Banner */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(300).springify().damping(15)}>
+        <Animated.View
+          entering={
+            reducedMotion
+              ? undefined
+              : FadeInUp.delay(300).springify().damping(15)
+          }
+        >
           {!isProfileComplete ? (
-            <View style={[newStyles.bannerCard, { backgroundColor: colors.primary }]}>
+            <View
+              style={[
+                newStyles.bannerCard,
+                { backgroundColor: colors.primary },
+              ]}
+            >
               <View style={newStyles.bannerHeader}>
-                <View style={[newStyles.bannerIconWrapper, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+                <View
+                  style={[
+                    newStyles.bannerIconWrapper,
+                    { backgroundColor: 'rgba(255,255,255,0.2)' },
+                  ]}
+                >
                   <Zap size={24} color="#FFF" />
                 </View>
                 <View style={newStyles.bannerTextContainer}>
                   <Text style={newStyles.bannerTitle}>Complete Profile</Text>
-                  <Text style={newStyles.bannerSubtitle}>Add your experience and skills to unlock premium job matches.</Text>
+                  <Text style={newStyles.bannerSubtitle}>
+                    Add your experience and skills to unlock premium job
+                    matches.
+                  </Text>
                 </View>
               </View>
-              <TouchableOpacity style={newStyles.bannerButton} onPress={() => router.push('/profile/edit/name')}>
+              <TouchableOpacity
+                style={newStyles.bannerButton}
+                onPress={() => router.push('/profile/edit/name')}
+              >
                 <Text style={newStyles.bannerButtonText}>+ Add Details</Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <View style={[newStyles.bannerCard, { backgroundColor: colors.success || '#84CC16' }]}>
+            <View
+              style={[
+                newStyles.bannerCard,
+                { backgroundColor: colors.success || '#84CC16' },
+              ]}
+            >
               <View style={newStyles.bannerHeader}>
-                <View style={[newStyles.bannerIconWrapper, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+                <View
+                  style={[
+                    newStyles.bannerIconWrapper,
+                    { backgroundColor: 'rgba(255,255,255,0.2)' },
+                  ]}
+                >
                   <Zap size={24} color="#FFF" />
                 </View>
                 <View style={newStyles.bannerTextContainer}>
                   <Text style={newStyles.bannerTitle}>Profile Complete!</Text>
-                  <Text style={newStyles.bannerSubtitle}>You're ready to match with top employers in your trade.</Text>
+                  <Text style={newStyles.bannerSubtitle}>
+                    You're ready to match with top employers in your trade.
+                  </Text>
                 </View>
               </View>
-              <TouchableOpacity style={newStyles.bannerButton} onPress={() => router.push('/(tabs)/jobs')}>
+              <TouchableOpacity
+                style={newStyles.bannerButton}
+                onPress={() => router.push('/(tabs)/jobs')}
+              >
                 <Text style={newStyles.bannerButtonText}>View Matches</Text>
               </TouchableOpacity>
             </View>
@@ -288,65 +489,174 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* Square Stats Row */}
-        <Animated.ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
+        <Animated.ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
           contentContainerStyle={newStyles.statsScroll}
-          entering={reducedMotion ? undefined : FadeInUp.delay(400).springify().damping(15)}
+          entering={
+            reducedMotion
+              ? undefined
+              : FadeInUp.delay(400).springify().damping(15)
+          }
         >
-          <TouchableOpacity style={[newStyles.statSquare, { backgroundColor: isDark ? colors.surface : '#FFF' }]} onPress={() => router.push('/(tabs)/jobs')}>
-            <View style={[newStyles.statIconBadge, { backgroundColor: `${colors.primary}15` }]}>
+          <TouchableOpacity
+            style={[
+              newStyles.statSquare,
+              { backgroundColor: isDark ? colors.surface : '#FFF' },
+            ]}
+            onPress={() => router.push('/(tabs)/jobs')}
+          >
+            <View
+              style={[
+                newStyles.statIconBadge,
+                { backgroundColor: `${colors.primary}15` },
+              ]}
+            >
               <Briefcase size={20} color={colors.primary} />
             </View>
-            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>Matches</Text>
-            <Text style={[newStyles.statSubtitle, { color: colors.textSecondary }]}>{jobs.length} found</Text>
+            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>
+              Matches
+            </Text>
+            <Text
+              style={[newStyles.statSubtitle, { color: colors.textSecondary }]}
+            >
+              {jobs.length} found
+            </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[newStyles.statSquare, { backgroundColor: isDark ? colors.surface : `${colors.primary}20` }]} onPress={() => router.push('/profile')}>
-            <View style={[newStyles.statIconBadge, { backgroundColor: isDark ? colors.background : '#FFF' }]}>
+          <TouchableOpacity
+            style={[
+              newStyles.statSquare,
+              {
+                backgroundColor: isDark
+                  ? colors.surface
+                  : `${colors.primary}20`,
+              },
+            ]}
+            onPress={() => router.push('/profile')}
+          >
+            <View
+              style={[
+                newStyles.statIconBadge,
+                { backgroundColor: isDark ? colors.background : '#FFF' },
+              ]}
+            >
               <User size={20} color={colors.textPrimary} />
             </View>
-            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>Profile</Text>
-            <Text style={[newStyles.statSubtitle, { color: colors.textSecondary }]}>{completionPercent}% done</Text>
+            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>
+              Profile
+            </Text>
+            <Text
+              style={[newStyles.statSubtitle, { color: colors.textSecondary }]}
+            >
+              {completionPercent}% done
+            </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[newStyles.statSquare, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
-            <View style={[newStyles.statIconBadge, { backgroundColor: `${colors.warning}15` }]}>
+          <TouchableOpacity
+            style={[
+              newStyles.statSquare,
+              { backgroundColor: isDark ? colors.surface : '#FFF' },
+            ]}
+          >
+            <View
+              style={[
+                newStyles.statIconBadge,
+                { backgroundColor: `${colors.warning}15` },
+              ]}
+            >
               <Flame size={20} color={colors.warning} />
             </View>
-            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>Goal</Text>
-            <Text style={[newStyles.statSubtitle, { color: colors.textSecondary }]}>{appliedJobs.length}/5 apps</Text>
+            <Text style={[newStyles.statTitle, { color: colors.textPrimary }]}>
+              Goal
+            </Text>
+            <Text
+              style={[newStyles.statSubtitle, { color: colors.textSecondary }]}
+            >
+              {appliedJobs.length}/5 apps
+            </Text>
           </TouchableOpacity>
         </Animated.ScrollView>
 
         {/* Today's Tasks */}
-        <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(500).springify().damping(15)} style={newStyles.listSection}>
+        <Animated.View
+          entering={
+            reducedMotion
+              ? undefined
+              : FadeInUp.delay(500).springify().damping(15)
+          }
+          style={newStyles.listSection}
+        >
           <View style={newStyles.listHeader}>
-            <Text style={[newStyles.listTitle, { color: colors.textPrimary }]}>Today's Tasks</Text>
+            <Text style={[newStyles.listTitle, { color: colors.textPrimary }]}>
+              Today's Tasks
+            </Text>
             <TouchableOpacity onPress={() => router.push('/(tabs)/jobs')}>
-              <Text style={[newStyles.listViewAll, { color: colors.textSecondary }]}>View All</Text>
+              <Text
+                style={[newStyles.listViewAll, { color: colors.textSecondary }]}
+              >
+                View All
+              </Text>
             </TouchableOpacity>
           </View>
 
           {!completionSteps.name && (
-            <QuickLink title="0 Profile details" actionText="Complete Profile" onPress={() => router.push('/profile/edit/name')} colors={colors} index={0} icon={User} />
+            <QuickLink
+              title="0 Profile details"
+              actionText="Complete Profile"
+              onPress={() => router.push('/profile/edit/name')}
+              colors={colors}
+              index={0}
+              icon={User}
+            />
           )}
           {!completionSteps.skills && (
-            <QuickLink title="0 Skills added" actionText="Add Skills" onPress={() => router.push('/profile/edit/skills')} colors={colors} index={1} icon={PenTool} />
+            <QuickLink
+              title="0 Skills added"
+              actionText="Add Skills"
+              onPress={() => router.push('/profile/edit/skills')}
+              colors={colors}
+              index={1}
+              icon={PenTool}
+            />
           )}
           {missingCerts.length > 0 && (
-            <QuickLink title={`${missingCerts.length} Missing certs`} actionText="Add certificate" onPress={() => router.push('/(tabs)/certifications')} colors={colors} index={2} icon={Award} />
+            <QuickLink
+              title={`${missingCerts.length} Missing certs`}
+              actionText="Add certificate"
+              onPress={() => router.push('/profile')}
+              colors={colors}
+              index={2}
+              icon={Award}
+            />
           )}
-          
-          <QuickLink title="Interview preparation" actionText="Practice now" onPress={() => router.push('/(tabs)/prep')} colors={colors} index={3} icon={Bot} />
 
+          <QuickLink
+            title="Interview preparation"
+            actionText="Practice now"
+            onPress={() => router.push('/(tabs)/prep')}
+            colors={colors}
+            index={3}
+            icon={Bot}
+          />
         </Animated.View>
 
         {/* Recent Matches Feed */}
         {jobs.length > 0 && (
-          <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(600).springify().damping(15)} style={[newStyles.listSection, { marginTop: 10 }]}>
+          <Animated.View
+            entering={
+              reducedMotion
+                ? undefined
+                : FadeInUp.delay(600).springify().damping(15)
+            }
+            style={[newStyles.listSection, { marginTop: 10 }]}
+          >
             <View style={newStyles.listHeader}>
-              <Text style={[newStyles.listTitle, { color: colors.textPrimary }]}>Recent Matches</Text>
+              <Text
+                style={[newStyles.listTitle, { color: colors.textPrimary }]}
+              >
+                Recent Matches
+              </Text>
             </View>
             <View style={styles.feedContainer}>
               {jobs.slice(0, 3).map(({ job, score }, idx) => (
@@ -356,13 +666,13 @@ export default function HomeScreen() {
                     score={score}
                     expanded={expandedJobId === job.id}
                     onPress={() => {
-                      setExpandedJobId(expandedJobId === job.id ? null : (job.id || null));
+                      setExpandedJobId(
+                        expandedJobId === job.id ? null : job.id || null
+                      );
                     }}
                     colors={colors}
                     isDark={isDark}
                     index={idx}
-                    parallaxEnabled={false}
-                    swipeEnabled={false}
                     isApplied={appliedJobs.includes(job.id!)}
                     onApplyPress={() => {
                       if (appliedJobs.includes(job.id!)) return;
@@ -376,7 +686,6 @@ export default function HomeScreen() {
             </View>
           </Animated.View>
         )}
-
       </ScrollView>
 
       <JobApplicationModal
@@ -384,12 +693,12 @@ export default function HomeScreen() {
         job={applyingJob}
         score={applyingJobScore}
         onClose={() => setApplyingJob(null)}
-        onSubmit={(jobId) => {
+        onSubmit={jobId => {
           markJobApplied(jobId);
           setApplyingJob(null);
         }}
       />
-      
+
       <ConfettiCannon
         ref={confettiRef}
         count={200}
@@ -399,6 +708,12 @@ export default function HomeScreen() {
         fallSpeed={3000}
       />
       <GlobalPopup />
+
+      <NotificationModal
+        visible={showNotificationsModal}
+        onClose={() => setShowNotificationsModal(false)}
+        adminNotifications={adminNotifications}
+      />
     </View>
   );
 }
@@ -645,9 +960,22 @@ const newStyles = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
-  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.lg },
-  errorTitle: { fontSize: Typography.header, fontWeight: 'bold', marginBottom: Spacing.sm },
-  errorText: { fontSize: Typography.body, textAlign: 'center', marginBottom: Spacing.lg },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.lg,
+  },
+  errorTitle: {
+    fontSize: Typography.header,
+    fontWeight: 'bold',
+    marginBottom: Spacing.sm,
+  },
+  errorText: {
+    fontSize: Typography.body,
+    textAlign: 'center',
+    marginBottom: Spacing.lg,
+  },
   feedContainer: { gap: 16 },
   feedItem: { width: '100%' },
 });

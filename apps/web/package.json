@@ -15,6 +15,7 @@
     "@types/react-datepicker": "^6.2.0",
     "ai": "^7.0.106",
     "date-fns": "^4.4.0",
+    "dotenv": "^18.0.3",
     "firebase": "^12.19.0",
     "lucide-react": "^1.46.0",
     "next": "16.3.5",

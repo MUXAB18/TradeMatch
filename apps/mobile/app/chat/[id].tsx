@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, Image, LayoutAnimation, UIManager } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../constants/theme';
@@ -54,11 +55,20 @@ export default function ChatScreen() {
   const flatListRef = useRef<FlatList>(null);
 
   const [showAttachments, setShowAttachments] = useState(false);
+  const rotation = useSharedValue(0);
 
   const toggleAttachments = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setShowAttachments(!showAttachments);
+    const nextState = !showAttachments;
+    setShowAttachments(nextState);
+    rotation.value = withSpring(nextState ? 45 : 0, { damping: 14, stiffness: 150 });
   };
+
+  const animatedIconStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotate: `${rotation.value}deg` }],
+    };
+  });
 
   const sendMessage = () => {
     if (inputText.trim().length === 0) return;
@@ -91,7 +101,7 @@ export default function ChatScreen() {
 
   return (
     <KeyboardAvoidingView 
-      style={[styles.container, { backgroundColor: colors.background }]} 
+      style={[styles.container, { backgroundColor: colors.primary }]} 
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {/* Top Card Area */}
@@ -160,8 +170,11 @@ export default function ChatScreen() {
                 { backgroundColor: showAttachments ? colors.primary : (isDark ? '#1C1C1E' : '#F0F0F5') }
               ]}
               onPress={toggleAttachments}
+              activeOpacity={0.7}
             >
-              <LayoutGrid size={16} color={showAttachments ? '#FFFFFF' : (isDark ? '#FFFFFF' : '#000000')} />
+              <Animated.View style={animatedIconStyle}>
+                <LayoutGrid size={16} color={showAttachments ? '#FFFFFF' : (isDark ? '#FFFFFF' : '#000000')} />
+              </Animated.View>
             </TouchableOpacity>
             
             <TextInput
@@ -191,16 +204,16 @@ export default function ChatScreen() {
       {/* Bottom Action Row (Togglable) */}
       {showAttachments && (
         <View style={[styles.bottomActions, { paddingBottom: insets.bottom || 24 }]}>
-          <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.primary }, !isDark ? getShadow(0.08, 6) : {}]}>
-            <Camera size={22} color="#FFFFFF" />
+          <TouchableOpacity style={[styles.actionButton, { backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF' }, !isDark ? getShadow(0.08, 6) : {}]}>
+            <Camera size={22} color={isDark ? '#FFFFFF' : '#000000'} />
           </TouchableOpacity>
           
-          <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.primary }, !isDark ? getShadow(0.08, 6) : {}]}>
-            <FileText size={22} color="#FFFFFF" />
+          <TouchableOpacity style={[styles.actionButton, { backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF' }, !isDark ? getShadow(0.08, 6) : {}]}>
+            <FileText size={22} color={isDark ? '#FFFFFF' : '#000000'} />
           </TouchableOpacity>
           
-          <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.primary }, !isDark ? getShadow(0.08, 6) : {}]}>
-            <Mic size={22} color="#FFFFFF" />
+          <TouchableOpacity style={[styles.actionButton, { backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF' }, !isDark ? getShadow(0.08, 6) : {}]}>
+            <Mic size={22} color={isDark ? '#FFFFFF' : '#000000'} />
           </TouchableOpacity>
         </View>
       )}

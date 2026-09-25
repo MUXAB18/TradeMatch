@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import {
   TextInput,
   View,
@@ -8,13 +8,15 @@ import {
 } from 'react-native';
 import { useAppTheme, Typography, Spacing, BorderRadius } from '../constants/theme';
 
-interface InputProps extends TextInputProps {
+interface InputProps extends Omit<TextInputProps, 'style'> {
   label?: string;
   error?: string;
   icon?: React.ReactNode;
+  style?: import('react-native').StyleProp<import('react-native').ViewStyle>;
+  inputStyle?: import('react-native').StyleProp<import('react-native').TextStyle>;
 }
 
-export default function Input({ label, error, icon, style, onFocus, onBlur, ...props }: InputProps) {
+const Input = forwardRef<TextInput, InputProps>(({ label, error, icon, style, onFocus, onBlur, ...props }, ref) => {
   const { colors } = useAppTheme();
   const [isFocused, setIsFocused] = useState(false);
 
@@ -32,10 +34,12 @@ export default function Input({ label, error, icon, style, onFocus, onBlur, ...p
       >
         {icon && <View style={styles.iconContainer}>{icon}</View>}
         <TextInput
+          ref={ref}
           style={[
             styles.input,
             { color: colors.textPrimary },
-            icon && { paddingLeft: Spacing.sm }, // Icon has its own padding/margin
+            icon ? { paddingLeft: Spacing.sm } : undefined, // Icon has its own padding/margin
+            props.inputStyle,
           ]}
           accessibilityLabel={label || props.placeholder || 'Text input'}
           placeholderTextColor={colors.textPlaceholder}
@@ -53,7 +57,9 @@ export default function Input({ label, error, icon, style, onFocus, onBlur, ...p
       {error && <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>}
     </View>
   );
-}
+});
+
+export default Input;
 
 const styles = StyleSheet.create({
   container: {

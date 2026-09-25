@@ -58,9 +58,14 @@ export const Colors = LightColors;
 export const Typography = {
   // Font sizes (minimum 16px per design.md)
   body: 16,
+  bodySmall: 14,
+  small: 14,
   header: 22,
+  header2: 24,
+  header3: 20,
   headerLarge: 26,
-  small: 14, // Use sparingly
+  headerSmall: 18,
+  headerMedium: 20,
 
   // Line height
   lineHeight: 1.5,
@@ -83,7 +88,9 @@ export const BorderRadius = {
   sm: 4,
   md: 8,
   lg: 12,
+  xl: 16,
   full: 9999,
+  round: 9999,
 };
 
 export function useAppTheme() {

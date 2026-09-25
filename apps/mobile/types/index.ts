@@ -39,6 +39,7 @@ export interface User {
   availability: string;
   location: GeoPoint;
   certifications: string[];
+  photoURL?: string;
   pushToken?: string;
   notificationPreferences?: {
     jobMatches: boolean;

@@ -195,7 +195,7 @@ export default function JobsScreen() {
 
   if (profileLoading || jobsLoading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: colors.primary }]}>
         <View style={[styles.topBar, { paddingTop: Math.max(insets.top + 10, 50) }]}>
            <Skeleton width={44} height={44} borderRadius={16} />
            <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -213,9 +213,9 @@ export default function JobsScreen() {
 
   if (error) {
     return (
-      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
-        <Text style={[styles.errorTitle, { color: colors.error }]}>Error Loading Jobs</Text>
-        <Text style={[styles.errorText, { color: colors.textSecondary }]}>{error}</Text>
+      <View style={[styles.centerContainer, { backgroundColor: colors.primary }]}>
+        <Text style={[styles.errorTitle, { color: '#FFF' }]}>Error Loading Jobs</Text>
+        <Text style={[styles.errorText, { color: 'rgba(255,255,255,0.8)' }]}>{error}</Text>
       </View>
     );
   }
@@ -228,34 +228,34 @@ export default function JobsScreen() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.primary }]}>
       <Animated.ScrollView
         style={styles.scrollView}
-        contentContainerStyle={[styles.scrollContent, { paddingTop: Math.max(insets.top + 10, 50) }]}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: Math.max(insets.top + 10, 30) }]}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FFFFFF" />}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
       >
         {/* Top Header */}
         <View style={styles.topBar}>
           <TouchableOpacity 
-            style={[styles.iconBtn, { backgroundColor: colors.surface }]}
+            style={[styles.iconBtn, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
             onPress={() => setViewMode(prev => prev === 'list' ? 'grid' : 'list')}
           >
             {viewMode === 'list' ? (
-              <GridIcon size={22} color={colors.textPrimary} />
+              <GridIcon size={22} color="#FFF" />
             ) : (
-              <List size={22} color={colors.textPrimary} />
+              <List size={22} color="#FFF" />
             )}
           </TouchableOpacity>
           <View style={styles.topBarRight}>
             <TouchableOpacity 
-              style={[styles.iconBtn, { backgroundColor: colors.surface }]}
+              style={[styles.iconBtn, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
               onPress={() => setNotifModalVisible(true)}
             >
-              <Bell size={22} color={colors.textPrimary} />
-              <View style={[styles.filterBadge, { top: 12, right: 12, backgroundColor: colors.primary }]} />
+              <Bell size={22} color="#FFF" />
+              <View style={[styles.filterBadge, { top: 12, right: 12, backgroundColor: '#EF4444' }]} />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push('/profile')}>
               <Image 
@@ -267,28 +267,28 @@ export default function JobsScreen() {
         </View>
 
         {/* Main Title */}
-        <Text style={[styles.mainTitle, { color: colors.textPrimary }]}>
+        <Text style={[styles.mainTitle, { color: '#FFF' }]}>
           Find Your{'\n'}Best Dream Job
         </Text>
 
         {/* Search Bar */}
         <View style={styles.searchRow}>
-          <View style={[styles.searchContainer, { backgroundColor: colors.surface }]}>
+          <View style={[styles.searchContainer, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
             <TextInput 
               placeholder="Search jobs..." 
-              placeholderTextColor={colors.textSecondary}
-              style={[styles.searchInput, { color: colors.textPrimary }]}
+              placeholderTextColor="rgba(255,255,255,0.6)"
+              style={[styles.searchInput, { color: '#FFF' }]}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
           </View>
           <TouchableOpacity 
-            style={[styles.filterBtn, { backgroundColor: colors.surface }]}
+            style={[styles.filterBtn, { backgroundColor: 'rgba(255,255,255,0.15)' }]}
             onPress={() => setFilterModalVisible(true)}
           >
-            <Sliders size={22} color={colors.textPrimary} />
+            <Sliders size={22} color="#FFF" />
             {(advancedFilters.type || advancedFilters.experience || advancedFilters.salary !== 'Any') && (
-              <View style={styles.filterBadge} />
+              <View style={[styles.filterBadge, { backgroundColor: '#EF4444' }]} />
             )}
           </TouchableOpacity>
         </View>
@@ -303,14 +303,14 @@ export default function JobsScreen() {
                 style={[
                   styles.filterPill,
                   isActive 
-                    ? { backgroundColor: isDark ? colors.surface : '#1A1D1E', borderWidth: 1, borderColor: 'transparent' } 
-                    : { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }
+                    ? { backgroundColor: '#FFFFFF', borderColor: 'transparent' } 
+                    : { backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'transparent' }
                 ]}
                 onPress={() => setActiveFilter(f.id as any)}
               >
                 <Text style={[
                   styles.filterPillText, 
-                  { color: isActive ? '#FFFFFF' : colors.textPrimary }
+                  { color: isActive ? colors.primary : '#FFFFFF' }
                 ]}>
                   {f.label}
                 </Text>
@@ -320,6 +320,7 @@ export default function JobsScreen() {
         </ScrollView>
 
         {/* Jobs List */}
+        <View style={[styles.jobsListWrapper, { backgroundColor: isDark ? colors.background : '#F5F7FA' }]}>
         {filteredAndSortedJobs.length === 0 ? (
           <EmptyState
             illustration={
@@ -348,7 +349,7 @@ export default function JobsScreen() {
                   <View key="recent-header" style={[styles.recentJobsHeader, viewMode === 'grid' && { width: '100%' }]}>
                     <Text style={[styles.recentJobsTitle, { color: colors.textPrimary }]}>Recent Jobs</Text>
                     <TouchableOpacity>
-                      <Text style={[styles.viewAllText, { color: colors.textSecondary }]}>View All</Text>
+                      <Text style={[styles.viewAllText, { color: colors.primary }]}>View All</Text>
                     </TouchableOpacity>
                   </View>
                 );
@@ -378,6 +379,7 @@ export default function JobsScreen() {
             })}
           </View>
         )}
+        </View>
       </Animated.ScrollView>
 
       <JobApplicationModal
@@ -411,6 +413,14 @@ export default function JobsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  jobsListWrapper: {
+    flex: 1,
+    minHeight: 500,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    paddingTop: 24,
+    marginTop: 8,
   },
   centerContainer: {
     flex: 1,

@@ -155,10 +155,13 @@ export default function ChatScreen() {
             !isDark ? getShadow(0.04, 8) : {}
           ]}>
             <TouchableOpacity 
-              style={[styles.gridIconContainer, { backgroundColor: isDark ? '#1C1C1E' : '#F0F0F5' }]}
+              style={[
+                styles.gridIconContainer, 
+                { backgroundColor: showAttachments ? colors.primary : (isDark ? '#1C1C1E' : '#F0F0F5') }
+              ]}
               onPress={toggleAttachments}
             >
-              <LayoutGrid size={16} color={isDark ? '#FFFFFF' : '#000000'} />
+              <LayoutGrid size={16} color={showAttachments ? '#FFFFFF' : (isDark ? '#FFFFFF' : '#000000')} />
             </TouchableOpacity>
             
             <TextInput
@@ -188,16 +191,16 @@ export default function ChatScreen() {
       {/* Bottom Action Row (Togglable) */}
       {showAttachments && (
         <View style={[styles.bottomActions, { paddingBottom: insets.bottom || 24 }]}>
-          <TouchableOpacity style={[styles.actionButton, { backgroundColor: isDark ? '#1C1C1E' : '#E5E5EA' }, !isDark ? getShadow(0.08, 6) : {}]}>
-            <Camera size={22} color={colors.textPrimary} />
+          <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.primary }, !isDark ? getShadow(0.08, 6) : {}]}>
+            <Camera size={22} color="#FFFFFF" />
           </TouchableOpacity>
           
-          <TouchableOpacity style={[styles.actionButton, { backgroundColor: isDark ? '#1C1C1E' : '#E5E5EA' }, !isDark ? getShadow(0.08, 6) : {}]}>
-            <FileText size={22} color={colors.textPrimary} />
+          <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.primary }, !isDark ? getShadow(0.08, 6) : {}]}>
+            <FileText size={22} color="#FFFFFF" />
           </TouchableOpacity>
           
-          <TouchableOpacity style={[styles.actionButton, { backgroundColor: isDark ? '#1C1C1E' : '#E5E5EA' }, !isDark ? getShadow(0.08, 6) : {}]}>
-            <Mic size={22} color={colors.textPrimary} />
+          <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.primary }, !isDark ? getShadow(0.08, 6) : {}]}>
+            <Mic size={22} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       )}

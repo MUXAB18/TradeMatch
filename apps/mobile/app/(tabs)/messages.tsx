@@ -111,7 +111,7 @@ export default function MessagesScreen() {
                     {item.message}
                   </Text>
                   {item.unread > 0 && (
-                    <View style={[styles.unreadBadge, { backgroundColor: colors.error }]}>
+                    <View style={[styles.unreadBadge, { backgroundColor: colors.primary }]}>
                       <Text style={styles.unreadBadgeText}>{item.unread}</Text>
                     </View>
                   )}

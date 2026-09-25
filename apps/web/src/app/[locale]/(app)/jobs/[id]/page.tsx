@@ -17,7 +17,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
   const { id } = use(params);
   const job = MOCK_JOBS.find((j) => j.id === id);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
-  
+
   if (!job) return notFound();
 
   const { isSaved, toggleSaved } = useSavedJob(job.id);
@@ -27,7 +27,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
 
   return (
     <div className="flex flex-col min-h-full max-w-7xl mx-auto w-full px-4 md:px-8 py-8 md:py-12">
-      
+
       {/* Back Link */}
       <Link
         href="/jobs"
@@ -38,10 +38,10 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
       </Link>
 
       <div className="flex flex-col lg:flex-row gap-10 items-start">
-        
+
         {/* Left Side: Main Content */}
         <div className="flex-1 w-full space-y-10">
-          
+
           {/* Header Section */}
           <div className="bg-white dark:bg-surface border border-[#E8EAF0] dark:border-border rounded-2xl p-8">
             <div className="flex items-start justify-between gap-6 mb-6">
@@ -65,9 +65,8 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                 </button>
                 <button
                   onClick={toggleSaved}
-                  className={`w-11 h-11 rounded-full border border-[#E8EAF0] dark:border-border flex items-center justify-center transition-all ${
-                    isSaved ? 'bg-primary/10 text-primary border-primary/20' : 'bg-[#F7F8FA] dark:bg-background text-[#6B7280] dark:text-text-secondary hover:text-primary hover:border-primary/40'
-                  }`}
+                  className={`w-11 h-11 rounded-full border border-[#E8EAF0] dark:border-border flex items-center justify-center transition-all ${isSaved ? 'bg-primary/10 text-primary border-primary/20' : 'bg-[#F7F8FA] dark:bg-background text-[#6B7280] dark:text-text-secondary hover:text-primary hover:border-primary/40'
+                    }`}
                   aria-label={isSaved ? t('unsave_job') : t('save_job')}
                 >
                   <Bookmark size={18} className={`translate-y-[1px] transition-colors ${isSaved ? 'fill-primary text-primary' : ''}`} />
@@ -148,7 +147,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
             {/* Summary details */}
             <div className="p-6">
               <h3 className="text-[18px] font-bold text-[#1D1D1F] dark:text-text-primary mb-6">{t('job_summary')}</h3>
-              
+
               <div className="space-y-5 mb-8">
                 <div className="flex gap-4">
                   <div className="w-10 h-10 rounded-xl bg-[#F7F8FA] dark:bg-background flex items-center justify-center text-[#6B7280] dark:text-text-secondary shrink-0">
@@ -181,7 +180,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                     </div>
                   </div>
                 )}
-                
+
                 <div className="flex gap-4">
                   <div className="w-10 h-10 rounded-xl bg-[#F7F8FA] dark:bg-background flex items-center justify-center text-[#6B7280] dark:text-text-secondary shrink-0">
                     <Clock size={18} />
@@ -196,7 +195,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
               {/* Actions */}
               <div className="space-y-3">
                 {isApplied ? (
-                  <button 
+                  <button
                     disabled
                     className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-green-500/10 text-green-600 font-bold text-[16px] transition-all"
                   >
@@ -204,7 +203,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                     {t('applied')}
                   </button>
                 ) : (
-                  <button 
+                  <button
                     onClick={() => setIsApplyModalOpen(true)}
                     className="w-full py-4 rounded-xl bg-primary text-white font-bold text-[16px] hover:opacity-90 active:scale-[0.98] transition-all shadow-md shadow-primary/25"
                   >
@@ -222,9 +221,9 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
       </div>
 
       {isApplyModalOpen && (
-        <ApplicationModal 
-          job={job} 
-          onClose={() => setIsApplyModalOpen(false)} 
+        <ApplicationModal
+          job={job}
+          onClose={() => setIsApplyModalOpen(false)}
         />
       )}
     </div>

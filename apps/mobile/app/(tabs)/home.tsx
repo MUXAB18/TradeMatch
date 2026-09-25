@@ -10,7 +10,7 @@ import {
   Dimensions,
   Image,
 } from 'react-native';
-import { User, Settings, Briefcase, Award, Zap, ChevronRight, ArrowRight, Flame, Sparkles, Bot, PenTool } from 'lucide-react-native';
+import { User, Settings, Briefcase, Award, Zap, ChevronRight, ArrowRight, Flame, Sparkles, Bot, PenTool, Bell } from 'lucide-react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -199,8 +199,19 @@ export default function HomeScreen() {
           </TouchableOpacity>
           
           <View style={newStyles.headerActions}>
-            <TouchableOpacity style={[newStyles.iconButton, { backgroundColor: colors.primary }]}>
-              <Sparkles size={18} color="#FFF" />
+            <TouchableOpacity style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
+              <Bell size={18} color={colors.textPrimary} />
+              <View style={{
+                position: 'absolute',
+                top: 10,
+                right: 12,
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: '#EF4444',
+                borderWidth: 1.5,
+                borderColor: isDark ? colors.surface : '#FFF'
+              }} />
             </TouchableOpacity>
             <TouchableOpacity 
               style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFF' }]}

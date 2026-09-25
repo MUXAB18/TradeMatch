@@ -15,6 +15,9 @@
     "@ai-sdk/google": "^4.0.74",
     "@types/react-datepicker": "^6.2.0",
     "ai": "^7.0.105",
-    "react-datepicker": "^9.1.0"
+    "react-datepicker": "^9.1.0",
+    "expo": "~57.0.24",
+    "react": "19.2.3",
+    "react-native": "0.86.3"
   }
 }

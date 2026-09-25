@@ -21,8 +21,7 @@ interface JobCardProps {
   isApplied?: boolean;
   onSave?: () => void;
   onApply?: () => void;
-  onApplyPress?: () => void;
-  variant?: 'featured' | 'list';
+  variant?: 'featured' | 'list' | 'grid';
 }
 
 export default function JobCard({ 
@@ -52,14 +51,14 @@ export default function JobCard({
     return (
       <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(index * 50).duration(250)}>
         <TouchableOpacity
-          style={[styles.featuredCard, { backgroundColor: colors.primary, shadowColor: colors.primary }]}
+          style={[styles.featuredCard, { backgroundColor: isDark ? colors.surface : '#1A1D1E' }]}
           onPress={onPress}
           activeOpacity={0.8}
         >
           <View style={styles.featuredHeader}>
             <View style={styles.featuredCompanyInfo}>
-              <View style={[styles.companyLogo, { backgroundColor: colors.surface }]}>
-                <Text style={[styles.companyLogoText, { color: colors.textPrimary }]}>{job.company ? job.company.substring(0, 2).toUpperCase() : 'CO'}</Text>
+              <View style={[styles.companyLogo, { backgroundColor: '#FFFFFF' }]}>
+                <Text style={[styles.companyLogoText, { color: '#000000' }]}>{job.company ? job.company.substring(0, 2).toUpperCase() : 'CO'}</Text>
               </View>
               <View>
                 <Text style={[styles.featuredCompanyName, { color: colors.white }]}>{job.company || 'Unknown Company'}</Text>
@@ -75,15 +74,15 @@ export default function JobCard({
 
           <View style={styles.featuredTags}>
             {job.salary && (
-              <View style={[styles.featuredTag, { backgroundColor: colors.white, opacity: 0.15 }]}>
-                <Text style={[styles.featuredTagText, { color: colors.white }]}>{job.salary}</Text>
+              <View style={[styles.featuredTag, { backgroundColor: '#FFFFFF' }]}>
+                <Text style={[styles.featuredTagText, { color: '#000000' }]}>{job.salary}</Text>
               </View>
             )}
-            <View style={[styles.featuredTag, { backgroundColor: colors.white, opacity: 0.15 }]}>
-              <Text style={[styles.featuredTagText, { color: colors.white }]}>Full Time</Text>
+            <View style={[styles.featuredTag, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
+              <Text style={[styles.featuredTagText, { color: '#FFFFFF' }]}>Full Time</Text>
             </View>
-            <View style={[styles.featuredTag, { backgroundColor: colors.white, opacity: 0.15 }]}>
-              <Text style={[styles.featuredTagText, { color: colors.white }]}>{Math.round(score.total)}% Match</Text>
+            <View style={[styles.featuredTag, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
+              <Text style={[styles.featuredTagText, { color: '#FFFFFF' }]}>{Math.round(score.total)}% Match</Text>
             </View>
           </View>
           
@@ -111,9 +110,45 @@ export default function JobCard({
     );
   }
 
+  if (variant === 'grid') {
+    return (
+      <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay((index % 10) * 50).duration(250)} style={{ width: '48%', marginBottom: 16 }}>
+        <TouchableOpacity
+          style={[styles.gridCard, { backgroundColor: colors.surface }]}
+          onPress={onPress}
+          activeOpacity={0.7}
+        >
+          <View style={styles.gridHeader}>
+            <View style={[styles.companyLogoGrid, { backgroundColor: colors.background }]}>
+              <Text style={[styles.companyLogoTextList, { color: colors.textPrimary }]}>
+                {job.company ? job.company.substring(0, 2).toUpperCase() : 'CO'}
+              </Text>
+            </View>
+            <TouchableOpacity onPress={handleSave}>
+              <Bookmark size={18} color={isSaved ? colors.primary : colors.textSecondary} fill={isSaved ? colors.primary : "transparent"} />
+            </TouchableOpacity>
+          </View>
+          
+          <Text style={[styles.gridJobTitle, { color: colors.textPrimary }]} numberOfLines={2}>
+            {job.title}
+          </Text>
+          <Text style={[styles.gridCompany, { color: colors.textSecondary }]} numberOfLines={1}>
+            {job.company || 'Unknown'}
+          </Text>
+          
+          <View style={styles.gridFooter}>
+            <View style={[styles.gridMatchTag, { backgroundColor: isDark ? '#1E2122' : '#F5F6F8' }]}>
+              <Text style={[styles.gridMatchText, { color: colors.textPrimary }]}>{Math.round(score.total)}% Match</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  }
+
   // LIST VARIANT
   return (
-    <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay(index * 50).duration(250)}>
+    <Animated.View entering={reducedMotion ? undefined : FadeInUp.delay((index % 10) * 50).duration(250)}>
       <TouchableOpacity
         style={[styles.listCard, { backgroundColor: colors.surface }]}
         onPress={onPress}
@@ -126,13 +161,13 @@ export default function JobCard({
             </Text>
           </View>
           <View style={styles.listTextContainer}>
-            <Text style={[styles.listJobTitle, { color: colors.textPrimary }]}>{job.title}</Text>
-            <Text style={[styles.listCompany, { color: colors.textSecondary }]}>
-              {job.company || 'Unknown Company'} • {Math.round(score.total)}% Match
+            <Text style={[styles.listJobTitle, { color: colors.textPrimary }]} numberOfLines={1}>{job.title}</Text>
+            <Text style={[styles.listCompany, { color: colors.textSecondary }]} numberOfLines={1}>
+              {job.company || 'Unknown Company'} - {Math.round(score.total)}% Match
             </Text>
           </View>
           <TouchableOpacity onPress={handleSave} style={{ padding: 8 }}>
-            <MoreVertical size={20} color={colors.textSecondary} />
+            <Bookmark size={20} color={isSaved ? colors.primary : colors.textSecondary} fill={isSaved ? colors.primary : "transparent"} />
           </TouchableOpacity>
         </View>
 
@@ -147,7 +182,7 @@ export default function JobCard({
               {job.description && (
                 <View style={styles.detailSection}>
                   <Text style={[styles.detailLabel, { color: colors.textPrimary }]}>Role Description</Text>
-                  <Text style={[styles.detailText, { color: colors.textSecondary }]}>{job.description}</Text>
+                  <Text style={[styles.detailText, { color: colors.textSecondary }]} numberOfLines={3}>{job.description}</Text>
                 </View>
               )}
               <Button
@@ -287,4 +322,49 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
   },
+  
+  // GRID CARD
+  gridCard: {
+    borderRadius: 20,
+    padding: 16,
+    height: 180,
+    justifyContent: 'space-between',
+  },
+  gridHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  companyLogoGrid: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  gridJobTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 4,
+    lineHeight: 20,
+  },
+  gridCompany: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginBottom: 'auto',
+  },
+  gridFooter: {
+    marginTop: 12,
+  },
+  gridMatchTag: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  gridMatchText: {
+    fontSize: 11,
+    fontWeight: '600',
+  }
 });

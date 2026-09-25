@@ -7,6 +7,7 @@ import {
   Modal,
   ScrollView,
   Dimensions,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Print from 'expo-print';
@@ -234,9 +235,10 @@ export default function ProfileScreen() {
         {/* Top Profile Card */}
         <View style={[newStyles.topCard, { backgroundColor: isDark ? colors.surface : '#FFF' }]}>
           <View style={newStyles.topCardLeft}>
-            <View style={newStyles.avatarLarge}>
-               <Text style={newStyles.avatarLargeText}>{firstName.charAt(0)}</Text>
-            </View>
+            <Image 
+              source={{ uri: 'https://i.pravatar.cc/150' }} 
+              style={newStyles.avatarLarge} 
+            />
             <Text style={[newStyles.profileName, { color: colors.textPrimary }]}>{data.name}</Text>
             <View style={newStyles.badgeContainer}>
                <Text style={newStyles.badgeText}>{data.trade || 'No Trade Set'}</Text>
@@ -469,15 +471,7 @@ const newStyles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: '#8B5CF6',
-    justifyContent: 'center',
-    alignItems: 'center',
     marginBottom: 16,
-  },
-  avatarLargeText: {
-    color: '#FFF',
-    fontSize: 28,
-    fontWeight: 'bold',
   },
   profileName: {
     fontSize: 22,

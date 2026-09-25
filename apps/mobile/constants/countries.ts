@@ -23,3 +23,5 @@ export const COUNTRIES: Country[] = [
   { name: 'Canada', dial_code: '+1', code: 'CA', flag: '🇨🇦', isLive: true },
   { name: 'Australia', dial_code: '+61', code: 'AU', flag: '🇦🇺', isLive: true },
 ];
+
+export const POPULAR_COUNTRIES = ['AE', 'SA', 'QA', 'US', 'GB', 'CA', 'AU'];

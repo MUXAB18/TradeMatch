@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '../constants/theme';
-import { Home, Briefcase, Sparkles, ClipboardList, Settings } from 'lucide-react-native';
+import { Home, Briefcase, Sparkles, MessageSquare, Settings } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import * as Haptics from '../utils/haptics';
 import Animated, {
@@ -13,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
-const TAB_BAR_WIDTH = Math.min(width - 60, 320); // slightly narrower
+const TAB_BAR_WIDTH = Math.min(width - 40, 360); // wider for more space
 const TAB_COUNT = 5;
 const TAB_WIDTH = TAB_BAR_WIDTH / TAB_COUNT;
 
@@ -44,11 +44,20 @@ function TabItem({ isFocused, route, onPress, onLongPress, isCenter }: TabItemPr
   let Icon = Home;
   if (route.name === 'jobs') Icon = Briefcase;
   if (route.name === 'prep') Icon = Sparkles;
-  if (route.name === 'certifications') Icon = ClipboardList;
+  if (route.name === 'messages') Icon = MessageSquare;
   if (route.name === 'settings') Icon = Settings;
 
   const animatedIconStyle = useAnimatedStyle(() => {
-    const scale = isCenter ? 1 : 1 + (progress.value * 0.15);
+    // Both normal icons and the center icon scale up when focused
+    const scale = 1 + (progress.value * 0.15);
+    return {
+      transform: [{ scale }],
+    };
+  });
+
+  const animatedCenterCircleStyle = useAnimatedStyle(() => {
+    // The blue circle itself grows slightly when active
+    const scale = 1 + (progress.value * 0.1);
     return {
       transform: [{ scale }],
     };
@@ -65,12 +74,12 @@ function TabItem({ isFocused, route, onPress, onLongPress, isCenter }: TabItemPr
     >
       <View style={styles.contentContainer}>
         {isCenter && (
-          <View style={[styles.centerCircle, { backgroundColor: colors.primary }]}>
+          <Animated.View style={[styles.centerCircle, { backgroundColor: colors.primary }, animatedCenterCircleStyle]}>
             <Animated.View style={animatedIconStyle}>
               {/* Note: The image shows white sparkles */}
               <Icon size={24} color="#FFFFFF" strokeWidth={2.5} />
             </Animated.View>
-          </View>
+          </Animated.View>
         )}
         {!isCenter && (
           <Animated.View style={animatedIconStyle}>

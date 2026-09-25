@@ -36,10 +36,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="certifications"
+        name="messages"
         options={{
-          title: t('tabs.certifications'),
-          tabBarAccessibilityLabel: 'Certifications tab. Manage your certifications.',
+          title: t('tabs.messages'),
+          tabBarAccessibilityLabel: 'Messages tab. View your conversations.',
         }}
       />
       <Tabs.Screen

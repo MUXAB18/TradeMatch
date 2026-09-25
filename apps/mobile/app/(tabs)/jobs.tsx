@@ -13,7 +13,7 @@ import Animated, {
   useSharedValue, 
   useAnimatedScrollHandler
 } from 'react-native-reanimated';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as StoreReview from 'expo-store-review';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,7 +28,9 @@ import EmptyState from '../../components/EmptyState';
 import LottieView from 'lottie-react-native';
 import JobCard from '../../components/JobCard';
 import JobApplicationModal from '../../components/JobApplicationModal';
-import { Grid, Bell, Sliders } from 'lucide-react-native';
+import JobFilterModal, { JobFilters } from '../../components/JobFilterModal';
+import NotificationModal from '../../components/NotificationModal';
+import { Grid as GridIcon, Bell, Sliders, List } from 'lucide-react-native';
 
 export default function JobsScreen() {
   const { data: profile, loading: profileLoading, refetch: refetchProfile } = useUserProfile();
@@ -38,6 +40,7 @@ export default function JobsScreen() {
   const { isOffline } = useNetwork();
   const { showToast } = useToast();
   const { jobId } = useLocalSearchParams();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -46,6 +49,11 @@ export default function JobsScreen() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'saved' | 'strong' | 'applied'>('all');
   const [applyingJob, setApplyingJob] = useState<any | null>(null);
   const [applyingJobScore, setApplyingJobScore] = useState<any | null>(null);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [advancedFilters, setAdvancedFilters] = useState<JobFilters>({ type: null, experience: null, salary: 'Any' });
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [notifModalVisible, setNotifModalVisible] = useState(false);
 
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
@@ -57,6 +65,9 @@ export default function JobsScreen() {
   React.useEffect(() => {
     const loadState = async () => {
       try {
+        // TEMPORARY: Reset applied jobs so user can test applying again
+        await AsyncStorage.removeItem('appliedJobs');
+        
         const [saved, applied] = await Promise.all([
           AsyncStorage.getItem('savedJobs'),
           AsyncStorage.getItem('appliedJobs'),
@@ -90,6 +101,18 @@ export default function JobsScreen() {
 
   const filteredAndSortedJobs = React.useMemo(() => {
     let result = [...jobs];
+    
+    // Search query filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(j => 
+        j.job.title.toLowerCase().includes(q) || 
+        j.job.company?.toLowerCase().includes(q) ||
+        j.job.trade.toLowerCase().includes(q)
+      );
+    }
+
+    // Top pills filter
     if (activeFilter === 'saved') {
       result = result.filter(j => savedJobs.includes(j.job.id!));
     } else if (activeFilter === 'strong') {
@@ -97,9 +120,32 @@ export default function JobsScreen() {
     } else if (activeFilter === 'applied') {
       result = result.filter(j => appliedJobs.includes(j.job.id!));
     }
+
+    // Advanced Modal Filters
+    if (advancedFilters.type) {
+      const t = advancedFilters.type.toLowerCase();
+      // Since type isn't strictly typed on job, we do a basic includes on title/desc.
+      result = result.filter(j => {
+        const text = `${j.job.title} ${j.job.description || ''}`.toLowerCase();
+        // Fallback: if it's "Full-time", just assume true if no "part-time" or "contract" is found to avoid empty states
+        if (t === 'full-time') return !text.includes('part-time') && !text.includes('contract');
+        return text.includes(t);
+      });
+    }
+
+    if (advancedFilters.experience) {
+      const exp = advancedFilters.experience.toLowerCase();
+      result = result.filter(j => {
+        const text = `${j.job.title} ${j.job.description || ''}`.toLowerCase();
+        if (exp === 'entry level') return text.includes('junior') || text.includes('entry');
+        if (exp === 'senior level') return text.includes('senior') || text.includes('lead');
+        return true; // default passthrough for others to not restrict too much
+      });
+    }
+
     result.sort((a, b) => b.score.total - a.score.total);
     return result;
-  }, [jobs, activeFilter, savedJobs, appliedJobs]);
+  }, [jobs, activeFilter, savedJobs, appliedJobs, searchQuery, advancedFilters]);
 
   React.useEffect(() => {
     if (jobId && typeof jobId === 'string' && jobs.length > 0) {
@@ -125,10 +171,9 @@ export default function JobsScreen() {
 
   const handleJobPress = async (id: string) => {
     Haptics.selectionAsync();
-    const isExpanding = expandedJobId !== id;
-    setExpandedJobId(isExpanding ? id : null);
+    router.push(`/job/${id}`);
 
-    if (isExpanding && profile?.trade && profile?.availability && profile.skills.length > 0) {
+    if (profile?.trade && profile?.availability && profile.skills.length > 0) {
       try {
         const hasRequested = await AsyncStorage.getItem('hasRequestedReview');
         if (hasRequested === 'true') return;
@@ -194,17 +239,30 @@ export default function JobsScreen() {
       >
         {/* Top Header */}
         <View style={styles.topBar}>
-          <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.surface }]}>
-            <Grid size={22} color={colors.textPrimary} />
+          <TouchableOpacity 
+            style={[styles.iconBtn, { backgroundColor: colors.surface }]}
+            onPress={() => setViewMode(prev => prev === 'list' ? 'grid' : 'list')}
+          >
+            {viewMode === 'list' ? (
+              <GridIcon size={22} color={colors.textPrimary} />
+            ) : (
+              <List size={22} color={colors.textPrimary} />
+            )}
           </TouchableOpacity>
           <View style={styles.topBarRight}>
-            <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.surface }]}>
+            <TouchableOpacity 
+              style={[styles.iconBtn, { backgroundColor: colors.surface }]}
+              onPress={() => setNotifModalVisible(true)}
+            >
               <Bell size={22} color={colors.textPrimary} />
+              <View style={[styles.filterBadge, { top: 12, right: 12, backgroundColor: colors.primary }]} />
             </TouchableOpacity>
-            <Image 
-              source={{ uri: 'https://i.pravatar.cc/150' }} 
-              style={styles.avatar} 
-            />
+            <TouchableOpacity onPress={() => router.push('/profile')}>
+              <Image 
+                source={{ uri: 'https://i.pravatar.cc/150' }} 
+                style={styles.avatar} 
+              />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -220,10 +278,18 @@ export default function JobsScreen() {
               placeholder="Search jobs..." 
               placeholderTextColor={colors.textSecondary}
               style={[styles.searchInput, { color: colors.textPrimary }]}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
             />
           </View>
-          <TouchableOpacity style={[styles.filterBtn, { backgroundColor: colors.surface }]}>
+          <TouchableOpacity 
+            style={[styles.filterBtn, { backgroundColor: colors.surface }]}
+            onPress={() => setFilterModalVisible(true)}
+          >
             <Sliders size={22} color={colors.textPrimary} />
+            {(advancedFilters.type || advancedFilters.experience || advancedFilters.salary !== 'Any') && (
+              <View style={styles.filterBadge} />
+            )}
           </TouchableOpacity>
         </View>
 
@@ -236,13 +302,15 @@ export default function JobsScreen() {
                 key={f.id}
                 style={[
                   styles.filterPill,
-                  isActive ? { backgroundColor: colors.primary } : { backgroundColor: colors.surface }
+                  isActive 
+                    ? { backgroundColor: isDark ? colors.surface : '#1A1D1E', borderWidth: 1, borderColor: 'transparent' } 
+                    : { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }
                 ]}
                 onPress={() => setActiveFilter(f.id as any)}
               >
                 <Text style={[
                   styles.filterPillText, 
-                  { color: isActive ? '#FFFFFF' : colors.textSecondary }
+                  { color: isActive ? '#FFFFFF' : colors.textPrimary }
                 ]}>
                   {f.label}
                 </Text>
@@ -268,13 +336,16 @@ export default function JobsScreen() {
             <View />
           </EmptyState>
         ) : (
-          <View style={styles.jobsListContainer}>
+          <View style={[
+            styles.jobsListContainer, 
+            viewMode === 'grid' && { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }
+          ]}>
             {filteredAndSortedJobs.map((jobData, index) => {
               const isFeatured = index === 0 && activeFilter === 'all';
               
               if (index === 1 && activeFilter === 'all') {
                 return (
-                  <View key="recent-header" style={styles.recentJobsHeader}>
+                  <View key="recent-header" style={[styles.recentJobsHeader, viewMode === 'grid' && { width: '100%' }]}>
                     <Text style={[styles.recentJobsTitle, { color: colors.textPrimary }]}>Recent Jobs</Text>
                     <TouchableOpacity>
                       <Text style={[styles.viewAllText, { color: colors.textSecondary }]}>View All</Text>
@@ -301,7 +372,7 @@ export default function JobsScreen() {
                   colors={colors}
                   isDark={isDark}
                   index={index}
-                  variant={isFeatured ? 'featured' : 'list'}
+                  variant={viewMode === 'grid' ? 'grid' : (isFeatured ? 'featured' : 'list')}
                 />
               );
             })}
@@ -318,6 +389,20 @@ export default function JobsScreen() {
           markJobApplied(jobId);
           setApplyingJob(null);
         }}
+      />
+
+      <JobFilterModal 
+        visible={filterModalVisible}
+        onClose={() => setFilterModalVisible(false)}
+        initialFilters={advancedFilters}
+        onApply={(filters) => {
+          setAdvancedFilters(filters);
+        }}
+      />
+
+      <NotificationModal 
+        visible={notifModalVisible}
+        onClose={() => setNotifModalVisible(false)}
       />
     </View>
   );
@@ -458,5 +543,14 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#007AFF',
   }
 });

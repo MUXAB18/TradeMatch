@@ -15,6 +15,10 @@ import { updateUserProfile, getCurrentUserId } from '../../../services/users';
 import ProgressBar from '../../../components/ProgressBar';
 import Button from '../../../components/Button';
 import { useAppTheme, Typography, Spacing, BorderRadius } from '../../../constants/theme';
+import { Mic, Square, FileText } from 'lucide-react-native';
+import { useAudioRecorder, RecordingOptions, requestRecordingPermissionsAsync, setAudioModeAsync, RecordingPresets } from 'expo-audio';
+import * as DocumentPicker from 'expo-document-picker';
+import { extractProfileFromAudio, extractProfileFromCV } from '../../../services/ai';
 
 const TOTAL_STEPS = 4;
 const CURRENT_STEP = 2;
@@ -89,6 +93,106 @@ export default function ExperienceStep() {
       setSelectedValue(closest.value);
     }
   }, [profile]);
+
+  // Audio Recording State
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const audioRecorder = useAudioRecorder(
+    {
+      ...RecordingPresets.HIGH_QUALITY,
+      isMeteringEnabled: true,
+      numberOfChannels: 1,
+    },
+    (status) => {}
+  );
+  const [isRecordingProfile, setIsRecordingProfile] = useState(false);
+
+  const startProfileRecording = async () => {
+    try {
+      const permission = await requestRecordingPermissionsAsync();
+      if (permission.status === 'granted') {
+        await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+        setIsRecordingProfile(true);
+        await audioRecorder.prepareToRecordAsync();
+        audioRecorder.record();
+      } else {
+        showToast('Microphone permission is required.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const stopProfileRecording = async () => {
+    try {
+      setIsRecordingProfile(false);
+      await audioRecorder.stop();
+      if (audioRecorder.uri) {
+        setIsAnalyzing(true);
+        try {
+          const aiData = await extractProfileFromAudio(audioRecorder.uri);
+          
+          const userId = getCurrentUserId();
+          if (userId) {
+            await updateUserProfile(userId, {
+              trade: aiData.trade || profile?.trade,
+              yearsExperience: aiData.yearsExperience || profile?.yearsExperience,
+              skills: aiData.skills?.length > 0 ? aiData.skills : profile?.skills,
+              certifications: aiData.certifications?.length > 0 ? aiData.certifications : profile?.certifications,
+            });
+            showToast('Profile updated from voice!', 'success');
+            // Auto-advance if we got the data
+            if (aiData.yearsExperience !== undefined) {
+               router.push('/profile/edit/skills');
+            }
+          }
+        } catch (e) {
+          showToast('Failed to analyze audio.', 'error');
+        } finally {
+          setIsAnalyzing(false);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const pickAndUploadCV = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf', 'image/*'],
+        copyToCacheDirectory: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const file = result.assets[0];
+        setIsAnalyzing(true);
+        try {
+          const aiData = await extractProfileFromCV(file.uri, file.mimeType || 'application/pdf');
+          
+          const userId = getCurrentUserId();
+          if (userId) {
+            await updateUserProfile(userId, {
+              trade: aiData.trade || profile?.trade,
+              yearsExperience: aiData.yearsExperience || profile?.yearsExperience,
+              skills: aiData.skills?.length > 0 ? aiData.skills : profile?.skills,
+              certifications: aiData.certifications?.length > 0 ? aiData.certifications : profile?.certifications,
+            });
+            showToast('Profile updated from CV!', 'success');
+            // Auto-advance if we got the data
+            if (aiData.yearsExperience !== undefined) {
+               router.push('/profile/edit/skills');
+            }
+          }
+        } catch (e: any) {
+          showToast(e.message || 'Failed to analyze CV.', 'error');
+        } finally {
+          setIsAnalyzing(false);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleContinue = async () => {
     if (isOffline) {
@@ -170,6 +274,53 @@ export default function ExperienceStep() {
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Select the range that best matches your experience in {profile?.trade}
           </Text>
+        </View>
+
+        <TouchableOpacity
+          style={[
+            styles.aiButton,
+            { backgroundColor: isRecordingProfile ? `${colors.error}15` : `${colors.primary}15`, borderColor: isRecordingProfile ? colors.error : colors.primary }
+          ]}
+          onPress={isRecordingProfile ? stopProfileRecording : startProfileRecording}
+          disabled={isAnalyzing}
+        >
+          {isRecordingProfile ? (
+            <Square size={24} color={colors.error} />
+          ) : (
+            <Mic size={24} color={colors.primary} />
+          )}
+          <View style={{ marginLeft: Spacing.md, flex: 1 }}>
+            <Text style={[styles.aiButtonTitle, { color: isRecordingProfile ? colors.error : colors.primary }]}>
+              {isAnalyzing ? 'Analyzing audio...' : isRecordingProfile ? 'Tap to stop' : 'Talk to Fill'}
+            </Text>
+            <Text style={[styles.aiButtonSub, { color: colors.textSecondary }]}>
+              {isAnalyzing ? 'Extracting experience & skills...' : isRecordingProfile ? 'Recording your experience...' : 'Describe your experience instead of typing'}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.aiButton,
+            { backgroundColor: `${colors.surface}20`, borderColor: colors.border }
+          ]}
+          onPress={pickAndUploadCV}
+          disabled={isAnalyzing}
+        >
+          <FileText size={24} color={colors.textPrimary} />
+          <View style={{ marginLeft: Spacing.md, flex: 1 }}>
+            <Text style={[styles.aiButtonTitle, { color: colors.textPrimary }]}>
+              {isAnalyzing ? 'Analyzing CV...' : 'Upload CV'}
+            </Text>
+            <Text style={[styles.aiButtonSub, { color: colors.textSecondary }]}>
+              {isAnalyzing ? 'Extracting experience & skills...' : 'Autofill profile from document'}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        <View style={styles.divider}>
+          <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+          <Text style={[styles.dividerText, { color: colors.textSecondary, backgroundColor: colors.background }]}>OR</Text>
         </View>
 
         <View style={styles.cardsContainer}>
@@ -273,5 +424,39 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     marginTop: Spacing.md,
+  },
+  aiButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    marginBottom: Spacing.lg,
+  },
+  aiButtonTitle: {
+    fontSize: Typography.body,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  aiButtonSub: {
+    fontSize: Typography.small,
+  },
+  divider: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.lg,
+    marginTop: Spacing.sm,
+  },
+  dividerLine: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 1,
+  },
+  dividerText: {
+    paddingHorizontal: Spacing.md,
+    fontSize: Typography.small,
+    fontWeight: '600',
   },
 });

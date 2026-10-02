@@ -95,7 +95,7 @@ function TabItem({ isFocused, route, onPress, onLongPress, isCenter }: TabItemPr
   );
 }
 
-export function CustomTabBar({ state, navigation }: any) {
+export function CustomTabBar({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
   const { isDark } = useAppTheme();
   
@@ -123,6 +123,11 @@ export function CustomTabBar({ state, navigation }: any) {
       opacity: indicatorOpacity.value,
     };
   });
+
+  const focusedOptions = descriptors[state.routes[state.index].key].options;
+  if (focusedOptions?.tabBarStyle?.display === 'none') {
+    return null;
+  }
 
   return (
     <View style={[

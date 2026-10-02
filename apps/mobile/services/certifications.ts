@@ -99,6 +99,21 @@ export async function getUserCertificationStatus(
     const have = allCerts.filter(cert => userCertIds.includes(cert.id));
     const missing = allCerts.filter(cert => !userCertIds.includes(cert.id));
 
+    // Support raw text certifications extracted by AI that don't match Firestore IDs
+    const knownIds = new Set(allCerts.map(c => c.id));
+    const customCerts = userCertIds
+      .filter(id => !knownIds.has(id))
+      .map(name => ({
+        id: name,
+        name: name,
+        trade,
+        country,
+        description: 'Extracted Certification',
+        required: false,
+      }));
+      
+    have.push(...customCerts);
+
     return {
       data: { have, missing },
       error: undefined,

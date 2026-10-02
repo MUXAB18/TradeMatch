@@ -73,7 +73,7 @@ export function GlobalPopup() {
           
           const role = 'worker'; // Mobile app is for workers
           if (p.target === 'workers'  && role !== 'worker')  return false;
-          if (p.target === 'agencies' && role !== 'agency') return false;
+          if (p.target === 'agencies' && role !== 'employer') return false;
           return true;
         });
         if (valid.length > 0) { setValidPromos(valid); setCurrentIndex(0); setVisible(true); }

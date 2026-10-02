@@ -50,6 +50,10 @@ import {
 } from '../../constants/theme';
 import { updateUserProfile } from '../../services/users';
 import { useAuth } from '../../contexts/AuthContext';
+import { extractProfileFromAudio, extractProfileFromCV } from '../../services/ai';
+import { useAudioRecorder, RecordingOptions, requestRecordingPermissionsAsync, setAudioModeAsync, RecordingPresets } from 'expo-audio';
+import * as DocumentPicker from 'expo-document-picker';
+import { Mic, Square } from 'lucide-react-native';
 
 function ListCard({ icon: Icon, title, subtitle, onPress, colors }: any) {
   return (
@@ -93,6 +97,99 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+
+  // Audio Recording State
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const audioRecorder = useAudioRecorder(
+    {
+      ...RecordingPresets.HIGH_QUALITY,
+      isMeteringEnabled: true,
+      numberOfChannels: 1,
+    },
+    (status) => {}
+  );
+  const [isRecordingProfile, setIsRecordingProfile] = useState(false);
+
+  const startProfileRecording = async () => {
+    try {
+      const permission = await requestRecordingPermissionsAsync();
+      if (permission.status === 'granted') {
+        await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+        setIsRecordingProfile(true);
+        await audioRecorder.prepareToRecordAsync();
+        audioRecorder.record();
+      } else {
+        showToast('Microphone permission is required.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const stopProfileRecording = async () => {
+    try {
+      setIsRecordingProfile(false);
+      await audioRecorder.stop();
+      if (audioRecorder.uri) {
+        setIsAnalyzing(true);
+        try {
+          const aiData = await extractProfileFromAudio(audioRecorder.uri);
+          
+          if (user?.uid) {
+            await updateUserProfile(user.uid, {
+              trade: aiData.trade || data?.trade,
+              yearsExperience: aiData.yearsExperience || data?.yearsExperience,
+              skills: aiData.skills?.length > 0 ? aiData.skills : data?.skills,
+              certifications: aiData.certifications?.length > 0 ? aiData.certifications : data?.certifications,
+            });
+            showToast('Profile updated from voice!', 'success');
+            await refetch();
+          }
+        } catch (e) {
+          showToast('Failed to analyze audio.', 'error');
+        } finally {
+          setIsAnalyzing(false);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const pickAndUploadCV = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf', 'image/*'],
+        copyToCacheDirectory: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const file = result.assets[0];
+        setIsAnalyzing(true);
+        try {
+          const aiData = await extractProfileFromCV(file.uri, file.mimeType || 'application/pdf');
+          
+          if (user?.uid) {
+            await updateUserProfile(user.uid, {
+              trade: aiData.trade || data?.trade,
+              yearsExperience: aiData.yearsExperience || data?.yearsExperience,
+              skills: aiData.skills?.length > 0 ? aiData.skills : data?.skills,
+              certifications: aiData.certifications?.length > 0 ? aiData.certifications : data?.certifications,
+            });
+            showToast('Profile updated from CV!', 'success');
+            await refetch();
+          }
+        } catch (e: any) {
+          showToast(e.message || 'Failed to analyze CV.', 'error');
+        } finally {
+          setIsAnalyzing(false);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const { have: userCerts } = useCertifications(
     data?.trade || '',
@@ -398,6 +495,76 @@ export default function ProfileScreen() {
             <TouchableOpacity
               style={[
                 newStyles.miniStatCard,
+                { borderColor: isDark ? colors.border : '#F0F0F0', marginBottom: 8 },
+              ]}
+              onPress={isRecordingProfile ? stopProfileRecording : startProfileRecording}
+              disabled={isAnalyzing}
+            >
+              <View
+                style={[newStyles.miniStatIcon, { backgroundColor: isRecordingProfile ? '#FEE2E2' : '#F3E8FF' }]}
+              >
+                {isRecordingProfile ? (
+                  <Square size={16} color="#DC2626" />
+                ) : (
+                  <Mic size={16} color="#9333EA" />
+                )}
+              </View>
+              <View>
+                <Text
+                  style={[
+                    newStyles.miniStatValue,
+                    { color: colors.textPrimary },
+                  ]}
+                >
+                  {isAnalyzing ? 'Thinking' : isRecordingProfile ? 'Stop' : 'Talk'}
+                </Text>
+                <Text
+                  style={[
+                    newStyles.miniStatLabel,
+                    { color: colors.textSecondary },
+                  ]}
+                >
+                  {isAnalyzing ? '...' : isRecordingProfile ? 'Recording' : 'to Fill'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                newStyles.miniStatCard,
+                { borderColor: isDark ? colors.border : '#F0F0F0', marginBottom: 8 },
+              ]}
+              onPress={pickAndUploadCV}
+              disabled={isAnalyzing}
+            >
+              <View
+                style={[newStyles.miniStatIcon, { backgroundColor: '#E0F2FE' }]}
+              >
+                <FileText size={16} color="#0284C7" />
+              </View>
+              <View>
+                <Text
+                  style={[
+                    newStyles.miniStatValue,
+                    { color: colors.textPrimary },
+                  ]}
+                >
+                  {isAnalyzing ? 'Parsing' : 'Upload'}
+                </Text>
+                <Text
+                  style={[
+                    newStyles.miniStatLabel,
+                    { color: colors.textSecondary },
+                  ]}
+                >
+                  {isAnalyzing ? 'CV...' : 'CV (Auto)'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                newStyles.miniStatCard,
                 { borderColor: isDark ? colors.border : '#F0F0F0' },
               ]}
               onPress={handleEditProfile}
@@ -485,7 +652,7 @@ export default function ProfileScreen() {
               { backgroundColor: isDark ? colors.border : '#F0F0F0' },
             ]}
           />
-          <View style={newStyles.colStat}>
+          <TouchableOpacity style={newStyles.colStat} onPress={() => router.push('/profile/edit/skills')}>
             <View style={[newStyles.colIcon, { backgroundColor: '#E0F2FE' }]}>
               <Zap size={20} color="#0284C7" />
             </View>
@@ -495,14 +662,14 @@ export default function ProfileScreen() {
             <Text style={[newStyles.colValue, { color: colors.textPrimary }]}>
               {data.skills.length}
             </Text>
-          </View>
+          </TouchableOpacity>
           <View
             style={[
               newStyles.colDivider,
               { backgroundColor: isDark ? colors.border : '#F0F0F0' },
             ]}
           />
-          <View style={newStyles.colStat}>
+          <TouchableOpacity style={newStyles.colStat} onPress={() => router.push('/profile/edit/certifications')}>
             <View style={[newStyles.colIcon, { backgroundColor: '#FFEDD5' }]}>
               <Award size={20} color="#EA580C" />
             </View>
@@ -514,7 +681,7 @@ export default function ProfileScreen() {
                 ? `0${userCerts.length}`
                 : userCerts.length}
             </Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* Big Banner */}
@@ -577,6 +744,74 @@ export default function ProfileScreen() {
           </View>
         )}
 
+        {/* Experience Timeline */}
+        {data.yearsExperience > 0 && (
+          <View style={[newStyles.timelineSection, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+            <View style={newStyles.sectionHeader}>
+              <Text style={[newStyles.sectionTitle, { color: colors.textPrimary }]}>Experience Timeline</Text>
+            </View>
+            <View style={newStyles.timelineContainer}>
+              <View style={[newStyles.timelineLine, { backgroundColor: colors.border }]} />
+              
+              <View style={newStyles.timelineItem}>
+                <View style={[newStyles.timelineDot, { backgroundColor: colors.primary, borderColor: isDark ? colors.surface : '#FFFFFF' }]} />
+                <View style={newStyles.timelineContent}>
+                  <Text style={[newStyles.timelineRole, { color: colors.textPrimary }]}>Current Role</Text>
+                  <Text style={[newStyles.timelineTrade, { color: colors.primary }]}>{data.trade || 'Skilled Professional'}</Text>
+                  <Text style={[newStyles.timelineDuration, { color: colors.textSecondary }]}>{data.yearsExperience} years total experience</Text>
+                </View>
+              </View>
+
+              <View style={[newStyles.timelineItem, { opacity: 0.5 }]}>
+                <View style={[newStyles.timelineDot, { backgroundColor: colors.border, borderColor: isDark ? colors.surface : '#FFFFFF' }]} />
+                <View style={newStyles.timelineContent}>
+                  <Text style={[newStyles.timelineRole, { color: colors.textPrimary }]}>Career Started</Text>
+                  <Text style={[newStyles.timelineTrade, { color: colors.textSecondary }]}>Entered the trades</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Certifications Visuals */}
+        {userCerts.length > 0 && (
+          <View style={newStyles.certsSection}>
+            <View style={[newStyles.sectionHeader, { paddingHorizontal: 20 }]}>
+              <Text style={[newStyles.sectionTitle, { color: colors.textPrimary }]}>Verified Certifications</Text>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 16 }}>
+              {userCerts.map((cert) => {
+                const details = data.certificationDetails?.[cert.name];
+                return (
+                  <View key={cert.id} style={[newStyles.certPhotoCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', borderColor: colors.border }]}>
+                    {details?.photoURL ? (
+                      <Image source={{ uri: details.photoURL }} style={[newStyles.certImagePlaceholder, { backgroundColor: isDark ? '#1F2937' : '#F3F4F6' }]} />
+                    ) : (
+                      <View style={[newStyles.certImagePlaceholder, { backgroundColor: isDark ? '#1F2937' : '#F3F4F6' }]}>
+                        <Award size={32} color={colors.textSecondary} style={{ opacity: 0.5 }} />
+                        <Text style={{ color: colors.textSecondary, fontSize: 10, marginTop: 8, fontWeight: '600' }}>NO PHOTO</Text>
+                      </View>
+                    )}
+                    <View style={newStyles.certCardFooter}>
+                      <Text style={[newStyles.certCardTitle, { color: colors.textPrimary }]} numberOfLines={1}>{cert.name}</Text>
+                      {details?.issuer && (
+                        <Text style={{ color: colors.textSecondary, fontSize: 12, marginTop: 2 }} numberOfLines={1}>{details.issuer}</Text>
+                      )}
+                      {details?.completionDate && (
+                        <Text style={{ color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>{details.completionDate}</Text>
+                      )}
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+                        <View style={[newStyles.statusDot, { backgroundColor: colors.success || '#10B981' }]} />
+                        <Text style={[newStyles.certCardStatus, { color: colors.success || '#10B981' }]}>Verified active</Text>
+                      </View>
+                    </View>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
+
         {/* Profile Details List */}
         <View style={newStyles.listSection}>
           <ListCard
@@ -588,10 +823,17 @@ export default function ProfileScreen() {
           />
           <ListCard
             icon={Zap}
-            title="Edit Trade Specialisation"
-            subtitle={data.trade || 'Not set'}
+            title="Edit Trade Specialisation & Skills"
+            subtitle={`${data.trade || 'Not set'} • ${data.skills.length} skills`}
             colors={colors}
             onPress={() => router.push('/profile/edit/skills')}
+          />
+          <ListCard
+            icon={Award}
+            title="Edit Certifications"
+            subtitle={`${userCerts.length} active`}
+            colors={colors}
+            onPress={() => router.push('/profile/edit/certifications')}
           />
           <ListCard
             icon={Briefcase}
@@ -951,6 +1193,24 @@ const newStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  timelineSection: { marginHorizontal: 20, borderRadius: 24, padding: 20, marginBottom: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.03, shadowRadius: 10, elevation: 2 },
+  sectionHeader: { marginBottom: 16 },
+  sectionTitle: { fontSize: 18, fontWeight: '800' },
+  timelineContainer: { paddingLeft: 8, position: 'relative' },
+  timelineLine: { position: 'absolute', left: 14, top: 12, bottom: 20, width: 2 },
+  timelineItem: { flexDirection: 'row', marginBottom: 24, position: 'relative' },
+  timelineDot: { width: 14, height: 14, borderRadius: 7, borderWidth: 3, marginTop: 4, marginRight: 16, zIndex: 2 },
+  timelineContent: { flex: 1 },
+  timelineRole: { fontSize: 16, fontWeight: '700', marginBottom: 2 },
+  timelineTrade: { fontSize: 14, fontWeight: '600', marginBottom: 4 },
+  timelineDuration: { fontSize: 13 },
+  certsSection: { marginBottom: 24, paddingTop: 8 },
+  certPhotoCard: { width: 220, borderRadius: 20, padding: 12, borderWidth: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2 },
+  certImagePlaceholder: { height: 120, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 12, borderWidth: 1, borderStyle: 'dashed', borderColor: 'rgba(0,0,0,0.1)' },
+  certCardFooter: { paddingHorizontal: 4 },
+  certCardTitle: { fontSize: 15, fontWeight: '700' },
+  certCardStatus: { fontSize: 12, fontWeight: '600', marginLeft: 6 },
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
 });
 
 const styles = StyleSheet.create({

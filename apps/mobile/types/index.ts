@@ -39,6 +39,7 @@ export interface User {
   availability: string;
   location: GeoPoint;
   certifications: string[];
+  certificationDetails?: Record<string, { photoURL?: string; completionDate?: string; issuer?: string }>;
   photoURL?: string;
   pushToken?: string;
   notificationPreferences?: {

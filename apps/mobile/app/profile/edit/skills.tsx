@@ -37,7 +37,7 @@ export default function SkillsStep() {
   const presetSkills = profile ? getSkillsForTrade(profile.trade) : [];
 
   useEffect(() => {
-    if (profile && profile.skills.length > 0) {
+    if (profile && profile.skills && profile.skills.length > 0) {
       setSelectedSkills(profile.skills);
     }
   }, [profile]);

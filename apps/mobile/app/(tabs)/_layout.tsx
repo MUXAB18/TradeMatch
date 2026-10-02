@@ -2,10 +2,14 @@ import { Tabs } from 'expo-router';
 import { useAppTheme } from '../../constants/theme';
 import { CustomTabBar } from '../../components/CustomTabBar';
 import { useTranslation } from 'react-i18next';
+import { useNotifications } from '../../hooks/useNotifications';
 
 export default function TabLayout() {
   useAppTheme();
   const { t } = useTranslation();
+  
+  // Initialize Push Notifications
+  useNotifications();
 
   return (
     <Tabs

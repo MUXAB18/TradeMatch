@@ -1,4 +1,42 @@
 PODS:
+  - AgoraInfra_iOS (1.3.5)
+  - AgoraIrisRTC_iOS (4.6.4-build.6)
+  - AgoraRtcEngine_iOS (4.6.4):
+    - AgoraRtcEngine_iOS/AIAEC (= 4.6.4)
+    - AgoraRtcEngine_iOS/AIAECLL (= 4.6.4)
+    - AgoraRtcEngine_iOS/AINS (= 4.6.4)
+    - AgoraRtcEngine_iOS/AINSLL (= 4.6.4)
+    - AgoraRtcEngine_iOS/AudioBeauty (= 4.6.4)
+    - AgoraRtcEngine_iOS/ClearVision (= 4.6.4)
+    - AgoraRtcEngine_iOS/ContentInspect (= 4.6.4)
+    - AgoraRtcEngine_iOS/FaceCapture (= 4.6.4)
+    - AgoraRtcEngine_iOS/FaceDetection (= 4.6.4)
+    - AgoraRtcEngine_iOS/LipSync (= 4.6.4)
+    - AgoraRtcEngine_iOS/ReplayKit (= 4.6.4)
+    - AgoraRtcEngine_iOS/RtcBasic (= 4.6.4)
+    - AgoraRtcEngine_iOS/SpatialAudio (= 4.6.4)
+    - AgoraRtcEngine_iOS/VideoAv1CodecEnc (= 4.6.4)
+    - AgoraRtcEngine_iOS/VideoCodecEnc (= 4.6.4)
+    - AgoraRtcEngine_iOS/VirtualBackground (= 4.6.4)
+    - AgoraRtcEngine_iOS/VQA (= 4.6.4)
+  - AgoraRtcEngine_iOS/AIAEC (4.6.4)
+  - AgoraRtcEngine_iOS/AIAECLL (4.6.4)
+  - AgoraRtcEngine_iOS/AINS (4.6.4)
+  - AgoraRtcEngine_iOS/AINSLL (4.6.4)
+  - AgoraRtcEngine_iOS/AudioBeauty (4.6.4)
+  - AgoraRtcEngine_iOS/ClearVision (4.6.4)
+  - AgoraRtcEngine_iOS/ContentInspect (4.6.4)
+  - AgoraRtcEngine_iOS/FaceCapture (4.6.4)
+  - AgoraRtcEngine_iOS/FaceDetection (4.6.4)
+  - AgoraRtcEngine_iOS/LipSync (4.6.4)
+  - AgoraRtcEngine_iOS/ReplayKit (4.6.4)
+  - AgoraRtcEngine_iOS/RtcBasic (4.6.4):
+    - AgoraInfra_iOS (= 1.3.5)
+  - AgoraRtcEngine_iOS/SpatialAudio (4.6.4)
+  - AgoraRtcEngine_iOS/VideoAv1CodecEnc (4.6.4)
+  - AgoraRtcEngine_iOS/VideoCodecEnc (4.6.4)
+  - AgoraRtcEngine_iOS/VirtualBackground (4.6.4)
+  - AgoraRtcEngine_iOS/VQA (4.6.4)
   - EASClient (57.0.4):
     - ExpoModulesCore
   - EXApplication (57.0.3):
@@ -1856,6 +1894,30 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - react-native-agora (4.6.4):
+    - AgoraIrisRTC_iOS (= 4.6.4-build.6)
+    - AgoraRtcEngine_iOS (= 4.6.4)
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - react-native-netinfo (12.0.1):
     - hermes-engine
     - RCTRequired
@@ -2804,6 +2866,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../../../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../../../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - React-mutationobservernativemodule (from `../../../node_modules/react-native/ReactCommon/react/nativemodule/mutationobserver`)
+  - react-native-agora (from `../../../node_modules/react-native-agora`)
   - "react-native-netinfo (from `../../../node_modules/@react-native-community/netinfo`)"
   - react-native-safe-area-context (from `../../../node_modules/react-native-safe-area-context`)
   - react-native-webview (from `../../../node_modules/react-native-webview`)
@@ -2854,6 +2917,9 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - AgoraInfra_iOS
+    - AgoraIrisRTC_iOS
+    - AgoraRtcEngine_iOS
     - Firebase
     - FirebaseAnalytics
     - FirebaseCore
@@ -3038,6 +3104,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   React-mutationobservernativemodule:
     :path: "../../../node_modules/react-native/ReactCommon/react/nativemodule/mutationobserver"
+  react-native-agora:
+    :path: "../../../node_modules/react-native-agora"
   react-native-netinfo:
     :path: "../../../node_modules/@react-native-community/netinfo"
   react-native-safe-area-context:
@@ -3134,6 +3202,9 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  AgoraInfra_iOS: 0bf927aad4fc425b24ca5d094b333361960f5cb0
+  AgoraIrisRTC_iOS: 617c544eae2240cbc21516f0938f6a46a1ea3646
+  AgoraRtcEngine_iOS: 2ac3c06dd68eff8e895b5529e59a10a05da63878
   EASClient: 0a37063ccb7acd90d4a490e804b16c9bf709d34a
   EXApplication: a727f05eb8592f0bc764f6ab8d51eacc158652ec
   EXConstants: 2dc4473aff5574eccaccb9f3eefe6d95247e5d38
@@ -3231,6 +3302,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 3c805ea54675b00ef1755f23b3c1fccf34962b93
   React-microtasksnativemodule: 97a771dbbb4315c71579995b53e4e3e351a99d89
   React-mutationobservernativemodule: 530bff1bba9511a5133e3cf8170e3b2c0df49e89
+  react-native-agora: a232d2f9a39b97c78762553bb3f31635870769e8
   react-native-netinfo: 2f906d5d9a639090ed1c079135d6485a95f749f1
   react-native-safe-area-context: 6b4966397ada0f7dd481e4486a2ef936834861a1
   react-native-webview: 2da09bdea1aeb6c46e27dd94632e21059cade6c1

@@ -22,6 +22,10 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.tradematch.app',
+      infoPlist: {
+        NSCameraUsageDescription: "Allow TradeMatch to access your camera for video calls.",
+        NSMicrophoneUsageDescription: "Allow TradeMatch to access your microphone for voice calls."
+      }
     },
     android: {
       adaptiveIcon: {
@@ -31,11 +35,28 @@ module.exports = {
         monochromeImage: './assets/android-icon-monochrome.png',
       },
       package: 'com.tradematch.app',
+      permissions: ["CAMERA", "RECORD_AUDIO", "MODIFY_AUDIO_SETTINGS", "ACCESS_NETWORK_STATE", "BLUETOOTH", "ACCESS_WIFI_STATE", "READ_PHONE_STATE", "WAKE_LOCK"]
     },
     web: {
       favicon: './assets/favicon.png',
     },
-    plugins: ['expo-router', 'expo-status-bar', 'expo-sharing'],
+    plugins: [
+      'expo-router', 
+      'expo-status-bar', 
+      'expo-sharing',
+      [
+        'expo-build-properties',
+        {
+          ios: {
+            useFrameworks: 'static',
+            deploymentTarget: '16.4'
+          },
+          android: {
+            minSdkVersion: 24
+          }
+        }
+      ]
+    ],
     experiments: {
       typedRoutes: true,
     },

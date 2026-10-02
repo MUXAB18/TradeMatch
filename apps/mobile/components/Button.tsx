@@ -195,7 +195,7 @@ export default function Button({
         </View>
 
         {loading && (
-          <View style={StyleSheet.absoluteFillObject}>
+          <View style={StyleSheet.absoluteFill}>
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
               <BouncingDots color={getTextColor()} />
             </View>

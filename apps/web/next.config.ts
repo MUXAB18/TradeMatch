@@ -5,6 +5,8 @@ const withNextIntl = createNextIntlPlugin(
   './src/i18n.ts'
 );
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  serverExternalPackages: ["pdf-parse"]
+};
 
 export default withNextIntl(nextConfig);

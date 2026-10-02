@@ -22,9 +22,13 @@ import Animated, {
   useReducedMotion,
   withRepeat,
   withSequence,
+  FadeInUp,
+  FadeInDown,
+  Layout,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { Bot, ArrowLeft, Menu, Plus, Mic, Send, Sparkles, ChevronDown, MessageSquare, Zap, Headphones, BookOpen } from 'lucide-react-native';
+import { useNavigation } from 'expo-router';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useUserProfile } from '../../hooks/useUserProfile';
@@ -34,6 +38,10 @@ import EmptyState from '../../components/EmptyState';
 import { NoInterviewPrepIllustration } from '../../components/illustrations';
 import PrepSettingsModal from '../../components/PrepSettingsModal';
 import { useAppTheme, Spacing } from '../../constants/theme';
+import Button from '../../components/Button';
+import { useAudioRecorder, RecordingOptions, requestRecordingPermissionsAsync, setAudioModeAsync, RecordingPresets } from 'expo-audio';
+import { evaluateInterviewAnswer, sendChatMessage } from '../../services/ai';
+import { useToast } from '../../providers/ToastProvider';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_PADDING = Spacing.lg * 2;
@@ -370,10 +378,103 @@ export default function PrepScreen() {
   const [shuffleEnabled, setShuffleEnabled] = useState(false);
   const [activeCards, setActiveCards] = useState(cards);
   
-  // Modes: 'home', 'flashcards', 'chat'
-  const [mode, setMode] = useState<'home' | 'flashcards' | 'chat'>('home');
+  // Modes: 'home', 'flashcards', 'chat', 'voice'
+  const [mode, setMode] = useState<'home' | 'flashcards' | 'chat' | 'voice'>('home');
   const [questionText, setQuestionText] = useState('');
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const { showToast } = useToast();
+  const navigation = useNavigation();
+
+  React.useEffect(() => {
+    navigation.setOptions({
+      tabBarStyle: { display: mode === 'home' ? 'flex' : 'none' },
+    });
+  }, [mode, navigation]);
+
+  // Voice Interview States
+  const [voiceQuestionIndex, setVoiceQuestionIndex] = useState(0);
+  const [isRecordingInterview, setIsRecordingInterview] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [voiceFeedback, setVoiceFeedback] = useState<{score: number, feedback: string} | null>(null);
+
+  const audioRecorder = useAudioRecorder(
+    {
+      ...RecordingPresets.HIGH_QUALITY,
+      isMeteringEnabled: true,
+      numberOfChannels: 1,
+    },
+    (status) => {}
+  );
+
+  const [chatMessages, setChatMessages] = useState<{role: 'user'|'ai', text: string}[]>([]);
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const chatScrollRef = React.useRef<ScrollView>(null);
+
+  const handleSendChat = async () => {
+    if (!questionText.trim()) return;
+    const userMsg = questionText.trim();
+    setQuestionText('');
+    setChatMessages(prev => [...prev, { role: 'user', text: userMsg }]);
+    setMode('chat');
+    setIsChatLoading(true);
+
+    try {
+      const response = await sendChatMessage(userMsg, profile?.trade || '');
+      setChatMessages(prev => [...prev, { role: 'ai', text: response }]);
+    } catch (e) {
+      setChatMessages(prev => [...prev, { role: 'ai', text: 'Sorry, I encountered an error.' }]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+
+  const startInterviewRecording = async () => {
+    try {
+      const permission = await requestRecordingPermissionsAsync();
+      if (permission.status === 'granted') {
+        await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+        setIsRecordingInterview(true);
+        setVoiceFeedback(null);
+        await audioRecorder.prepareToRecordAsync();
+        audioRecorder.record();
+      } else {
+        showToast('Microphone permission is required.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const stopInterviewRecording = async () => {
+    try {
+      setIsRecordingInterview(false);
+      await audioRecorder.stop();
+      if (audioRecorder.uri) {
+        setIsEvaluating(true);
+        try {
+          const currentQuestion = activeCards[voiceQuestionIndex].question;
+          const feedback = await evaluateInterviewAnswer(currentQuestion, audioRecorder.uri);
+          setVoiceFeedback(feedback);
+        } catch (e: any) {
+          console.error("Evaluation Error:", e);
+          showToast(e.message || 'Failed to evaluate answer.', 'error');
+        } finally {
+          setIsEvaluating(false);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleNextVoiceQuestion = () => {
+    setVoiceFeedback(null);
+    if (voiceQuestionIndex < activeCards.length - 1) {
+      setVoiceQuestionIndex(voiceQuestionIndex + 1);
+    } else {
+      setVoiceQuestionIndex(0);
+    }
+  };
 
   React.useEffect(() => {
     const showSub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setKeyboardVisible(true));
@@ -517,6 +618,232 @@ export default function PrepScreen() {
     );
   }
 
+  if (mode === 'voice' && currentCard) {
+    const voiceCard = activeCards[voiceQuestionIndex];
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={[newStyles.flashcardHeader, { paddingTop: Math.max(insets.top + 10, 50) }]}>
+          <TouchableOpacity onPress={() => setMode('home')} style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+            <ArrowLeft size={20} color={colors.textPrimary} />
+          </TouchableOpacity>
+          <View style={[newStyles.pillHeader, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+            <Headphones size={14} color={colors.warning} />
+            <Text style={[newStyles.pillText, { color: colors.textPrimary }]}>Voice Interview</Text>
+          </View>
+          <View style={{ width: 44 }} />
+        </View>
+
+        <View style={{ flex: 1, padding: 20, alignItems: 'center' }}>
+          <Text style={[newStyles.title, { color: colors.textPrimary, fontSize: 24, marginBottom: 40 }]}>
+            {voiceCard.question}
+          </Text>
+
+          {voiceFeedback ? (
+            <View style={[styles.card, { backgroundColor: colors.surface, width: '100%', borderColor: colors.border, padding: 20 }]}>
+              <Text style={{ color: colors.primary, fontSize: 48, fontWeight: '800', textAlign: 'center' }}>
+                {voiceFeedback.score}/100
+              </Text>
+              <Text style={{ color: colors.textPrimary, fontSize: 16, marginTop: 20, lineHeight: 24, textAlign: 'center' }}>
+                {voiceFeedback.feedback}
+              </Text>
+              <Button title="Next Question" onPress={handleNextVoiceQuestion} style={{ marginTop: 30 }} />
+            </View>
+          ) : (
+            <TouchableOpacity 
+              style={{
+                width: 120, 
+                height: 120, 
+                borderRadius: 60, 
+                backgroundColor: isRecordingInterview ? `${colors.error}20` : `${colors.primary}20`,
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderWidth: 2,
+                borderColor: isRecordingInterview ? colors.error : colors.primary
+              }}
+              onPress={isRecordingInterview ? stopInterviewRecording : startInterviewRecording}
+              disabled={isEvaluating}
+            >
+              <Mic size={40} color={isRecordingInterview ? colors.error : colors.primary} />
+            </TouchableOpacity>
+          )}
+
+          {isEvaluating && (
+            <Text style={{ color: colors.textSecondary, marginTop: 20 }}>
+              AI is evaluating your answer...
+            </Text>
+          )}
+          {isRecordingInterview && !isEvaluating && (
+            <Text style={{ color: colors.error, marginTop: 20, fontWeight: 'bold' }}>
+              Recording... Tap to stop
+            </Text>
+          )}
+          {!isRecordingInterview && !isEvaluating && !voiceFeedback && (
+            <Text style={{ color: colors.textSecondary, marginTop: 20 }}>
+              Tap the microphone to start answering
+            </Text>
+          )}
+        </View>
+      </View>
+    );
+  }
+
+  if (mode === 'chat') {
+    return (
+      <KeyboardAvoidingView 
+        style={[styles.container, { backgroundColor: colors.background }]} 
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={[newStyles.flashcardHeader, { paddingTop: Math.max(insets.top + 10, 50) }]}>
+          <TouchableOpacity onPress={() => setMode('home')} style={[newStyles.iconButton, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+            <ArrowLeft size={20} color={colors.textPrimary} />
+          </TouchableOpacity>
+          <View style={[newStyles.pillHeader, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+            <MessageSquare size={14} color={colors.success} />
+            <Text style={[newStyles.pillText, { color: colors.textPrimary }]}>Text Chat</Text>
+          </View>
+          <View style={{ width: 44 }} />
+        </View>
+
+        <ScrollView 
+          ref={chatScrollRef}
+          style={{ flex: 1, padding: 20 }}
+          onContentSizeChange={() => chatScrollRef.current?.scrollToEnd({ animated: true })}
+        >
+          {chatMessages.length === 0 ? (
+            <View style={{ alignItems: 'center', marginTop: 40 }}>
+              <View style={{ backgroundColor: `${colors.primary}15`, padding: 20, borderRadius: 30, marginBottom: 16 }}>
+                <Bot size={48} color={colors.primary} />
+              </View>
+              <Text style={{ color: colors.textPrimary, fontSize: 20, fontWeight: '700', marginBottom: 8 }}>
+                AI Interview Buddy
+              </Text>
+              <Text style={{ color: colors.textSecondary, textAlign: 'center', fontSize: 16, lineHeight: 24, paddingHorizontal: 20 }}>
+                Ask me anything about your trade, career advice, or specific technical questions!
+              </Text>
+            </View>
+          ) : (
+            chatMessages.map((msg, i) => (
+              <Animated.View 
+                key={i}
+                entering={FadeInUp.delay(i === chatMessages.length - 1 ? 100 : 0).springify()}
+                layout={Layout.springify()}
+                style={{
+                  alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                  backgroundColor: msg.role === 'user' ? colors.primary : colors.surface,
+                  padding: 16,
+                  borderRadius: 20,
+                  borderBottomRightRadius: msg.role === 'user' ? 4 : 20,
+                  borderBottomLeftRadius: msg.role === 'user' ? 20 : 4,
+                  marginBottom: 16,
+                  maxWidth: '85%',
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 8,
+                  elevation: 2,
+                  flexDirection: 'row',
+                  alignItems: 'flex-start'
+                }}
+              >
+                {msg.role === 'ai' && (
+                  <View style={{ backgroundColor: `${colors.primary}15`, padding: 8, borderRadius: 12, marginRight: 12, marginTop: -2 }}>
+                    <Bot size={20} color={colors.primary} />
+                  </View>
+                )}
+                <Text style={{ 
+                  color: msg.role === 'user' ? '#FFF' : colors.textPrimary,
+                  fontSize: 16,
+                  lineHeight: 24,
+                  flexShrink: 1
+                }}>
+                  {msg.text}
+                </Text>
+              </Animated.View>
+            ))
+          )}
+          {isChatLoading && (
+            <Animated.View 
+              entering={FadeInUp.springify()} 
+              style={{ 
+                alignSelf: 'flex-start', 
+                backgroundColor: colors.surface, 
+                padding: 16, 
+                borderRadius: 20, 
+                borderBottomLeftRadius: 4, 
+                marginBottom: 16, 
+                flexDirection: 'row', 
+                alignItems: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 8,
+                elevation: 2,
+              }}
+            >
+              <View style={{ backgroundColor: `${colors.primary}15`, padding: 8, borderRadius: 12, marginRight: 12 }}>
+                <Bot size={20} color={colors.primary} />
+              </View>
+              <Text style={{ color: colors.textSecondary, fontSize: 16, fontWeight: '500' }}>Typing...</Text>
+            </Animated.View>
+          )}
+          <View style={{ height: 20 }} />
+        </ScrollView>
+
+        <View style={{ 
+          backgroundColor: isDark ? colors.surface : '#FFFFFF',
+          borderTopColor: isDark ? colors.border : '#E5E7EB',
+          borderTopWidth: 1,
+          paddingBottom: Math.max(insets.bottom + 10, 20),
+          paddingHorizontal: 20,
+          paddingTop: 12,
+          width: '100%',
+        }}>
+          <View style={[newStyles.inputWrapper, {
+            backgroundColor: isDark ? colors.background : '#F3F4F6',
+            borderRadius: 24,
+            paddingHorizontal: 16,
+            paddingVertical: Platform.OS === 'ios' ? 12 : 8,
+            flexDirection: 'row',
+            alignItems: 'center'
+          }]}>
+            <TextInput
+              style={[newStyles.textInput, { 
+                color: colors.textPrimary, 
+                flex: 1, 
+                minHeight: 24, 
+                maxHeight: 100, 
+                fontSize: 16,
+                paddingTop: 0,
+                paddingBottom: 0
+              }]}
+              placeholder="Ask your interview buddy..."
+              placeholderTextColor={colors.textSecondary}
+              value={questionText}
+              onChangeText={setQuestionText}
+              multiline
+            />
+            <TouchableOpacity 
+              style={{
+                backgroundColor: questionText.trim() ? colors.primary : (isDark ? colors.surface : '#E5E7EB'),
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginLeft: 12,
+                opacity: questionText.trim() ? 1 : 0.6
+              }}
+              disabled={!questionText.trim()}
+              onPress={handleSendChat}
+            >
+              <Send size={16} color={questionText.trim() ? "#FFF" : colors.textSecondary} style={{ marginLeft: -2, marginTop: 1 }} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    );
+  }
+
   // Home / AI Agent Mode
   return (
     <KeyboardAvoidingView 
@@ -567,22 +894,12 @@ export default function PrepScreen() {
               <Text style={[newStyles.compactDesc, { color: colors.textSecondary }]}>Review</Text>
             </View>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[newStyles.compactCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : colors.success }]}
-            onPress={() => setMode('chat')}
-            activeOpacity={0.7}
-          >
-            <View style={[newStyles.compactIconWrapper, { backgroundColor: `${colors.success}12` }]}>
-              <MessageSquare size={18} color={colors.success} />
-            </View>
-            <View style={newStyles.compactTextContainer}>
-              <Text style={[newStyles.compactTitle, { color: colors.textPrimary }]}>Text Chat</Text>
-              <Text style={[newStyles.compactDesc, { color: colors.textSecondary }]}>Q&A</Text>
-            </View>
-          </TouchableOpacity>
 
-          <TouchableOpacity style={[newStyles.compactCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : colors.warning }]} activeOpacity={0.7}>
+          <TouchableOpacity 
+            style={[newStyles.compactCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : colors.warning }]} 
+            activeOpacity={0.7}
+            onPress={() => setMode('voice')}
+          >
             <View style={[newStyles.compactIconWrapper, { backgroundColor: `${colors.warning}12` }]}>
               <Headphones size={18} color={colors.warning} />
             </View>
@@ -592,15 +909,7 @@ export default function PrepScreen() {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[newStyles.compactCard, { backgroundColor: isDark ? colors.surface : '#FFFFFF', shadowColor: isDark ? '#000' : '#8B5CF6' }]} activeOpacity={0.7}>
-            <View style={[newStyles.compactIconWrapper, { backgroundColor: `#8B5CF612` }]}>
-              <BookOpen size={18} color="#8B5CF6" />
-            </View>
-            <View style={newStyles.compactTextContainer}>
-              <Text style={[newStyles.compactTitle, { color: colors.textPrimary }]}>Trade Data</Text>
-              <Text style={[newStyles.compactDesc, { color: colors.textSecondary }]}>Code & Safety</Text>
-            </View>
-          </TouchableOpacity>
+
         </View>
       </View>
 
@@ -645,7 +954,7 @@ export default function PrepScreen() {
                 { backgroundColor: questionText.trim() ? colors.primary : `${colors.primary}50` }
               ]}
               disabled={!questionText.trim()}
-              onPress={() => setMode('chat')}
+              onPress={handleSendChat}
             >
               <Send size={16} color="#FFF" style={{ marginLeft: 2 }} />
             </TouchableOpacity>
